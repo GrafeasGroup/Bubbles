@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "bubbles-v2"
+version = "0.1.0"
+description = "A very chatty chatbot."
+authors = ["Joe Kaufeld <joe@grafeas.org>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+slackclient = "^2.7.3"
+matplotlib = "^3.3.0"
+requests = "^2.24.0"
+python-dotenv = "^0.14.0"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
