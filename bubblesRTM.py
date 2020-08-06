@@ -20,11 +20,10 @@ def say_hello(**payload):
 def message_received(**payload):
     try:
         message_callback(rtm_client, client, users_list, **payload)
-    except Exception as e:  # make better with traceback
-        traceback.print_exc()
+    except Exception:
         client.chat_postMessage(
             channel=payload['data']['channel'],
-            text=f"Computer says noooo: {e}",
+            text=f"Computer says noooo: \n```\n{traceback.format_exc()}```",
             as_user=True
         )
 
