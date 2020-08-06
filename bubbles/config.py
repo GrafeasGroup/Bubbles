@@ -27,4 +27,4 @@ for user in users['members']:
 
 
 # Import PluginManager from here
-PluginManager = PM()
+PluginManager = PM(COMMAND_PREFIXES)

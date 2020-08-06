@@ -1,10 +1,6 @@
 from bubbles.config import PluginManager, USERNAME, COMMAND_PREFIXES
 
 
-def message_is_for_us(message: str) -> bool:
-    return any([prefix in message for prefix in COMMAND_PREFIXES])
-
-
 def message_callback(rtmclient, client, usersList, **payload):
     print("Message received!")
     data = payload["data"]
@@ -20,14 +16,18 @@ def message_callback(rtmclient, client, usersList, **payload):
         return
     print(f"I received: {message} from {userWhoSentMessage}")
 
-    if message_is_for_us(message):
-        # search all the loaded plugins to see if any of the regex's match
-        plugin = PluginManager.get_plugin(message)
-        if plugin:
-            plugin(rtmclient, client, usersList, data)
-        else:
+    # search all the loaded plugins to see if any of the regex's match
+    plugin = PluginManager.get_plugin(message)
+    if plugin:
+        plugin(rtmclient, client, usersList, data)
+        return
+    else:
+        # we don't know what they were trying to do, so we fall through to here
+        if PluginManager.message_is_for_us(message):
             client.chat_postMessage(
                channel=channel,
                text=f"Unknown command: `{message}`",
                as_user=True
             )
+
+    PluginManager.process_plugin_callbacks(data)
