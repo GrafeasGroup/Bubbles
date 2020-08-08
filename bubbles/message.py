@@ -30,4 +30,7 @@ def message_callback(rtmclient, client, usersList, **payload):
                as_user=True
             )
 
+    # If a command needs to be able to see all traffic for historical reasons,
+    # register a separate callback function in a class for the command. See
+    # bubbles.commands.yell for an example implementation.
     PluginManager.process_plugin_callbacks(data)

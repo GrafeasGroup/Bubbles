@@ -4,7 +4,6 @@ from bubbles.config import PluginManager
 import requests
 
 
-
 cat_api = "http://thecatapi.com/api/images/get?format=json&results_per_page={}"
 pug_api = "http://pugme.herokuapp.com/bomb?count={}"
 fox_api = "https://randomfox.ca/floof/"
