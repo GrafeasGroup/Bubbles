@@ -1,11 +1,17 @@
-# from bubbles.config import USERNAME, DEFAULT_CHANNEL
+from bubbles.config import USERNAME, DEFAULT_CHANNEL, users_list
 
-def reaction_added_callback(rtmclient, client, usersList, **payload):
+
+def reaction_added_callback(**payload):
     data = payload["data"]
-    userWhoReacted = usersList[data['user']]
-    userWhoseMessageHasBeenReacted = usersList[data["item_user"]]
+    userWhoReacted = users_list[data["user"]]
+    userWhoseMessageHasBeenReacted = users_list[data["item_user"]]
     reaction = data["reaction"]
-    print(userWhoReacted+" has replied to one of "+userWhoseMessageHasBeenReacted+"'s messages with a :"+reaction+":.")
+    print(
+        f"{userWhoReacted} has replied to one of {userWhoseMessageHasBeenReacted}'s"
+        f" messages with a :{reaction}:."
+    )
+
+
 #    if userWhoseMessageHasBeenReacted == USERNAME:
 #        response = client.chat_postMessage(
 #                    channel=DEFAULT_CHANNEL,

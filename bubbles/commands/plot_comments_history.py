@@ -1,39 +1,52 @@
-from bubbles.config import client, rtm_client, PluginManager, DEFAULT_CHANNEL, USERNAME, COMMAND_PREFIXES, users_list, rooms_list
+from bubbles.config import (
+    client,
+    rtm_client,
+    PluginManager,
+    DEFAULT_CHANNEL,
+    USERNAME,
+    COMMAND_PREFIXES,
+    users_list,
+    rooms_list,
+)
 import datetime
 from typing import Dict
 import matplotlib.pyplot as plt
 import matplotlib
 from numpy import flip
 
+
 def plot_comments_history_command(message_data: Dict) -> None:
-    
+
     # Syntax: !history [number of posts]
-    
-    lastDatetime = ''
+
+    lastDatetime = ""
     countDays = {}
-    args = message_data.get('text').split()
+    args = message_data.get("text").split()
     print(args)
     number_posts = 100
     if len(args) == 2:
-        if args[1] in ['-h', '--help', '-H', 'help']:
+        if args[1] in ["-h", "--help", "-H", "help"]:
             response = client.chat_postMessage(
-               channel=message_data.get("channel"),
-               text="`!history [number of posts]` shows the number of new comments in #new-volunteers in function of their day. `number of posts` must be an integer between 1 and 1000 inclusive.",
-               as_user=True)
+                channel=message_data.get("channel"),
+                text="`!history [number of posts]` shows the number of new comments in #new-volunteers in function of their day. `number of posts` must be an integer between 1 and 1000 inclusive.",
+                as_user=True,
+            )
             return
         else:
             number_posts = max(1, min(int(args[1]), 1000))
     elif len(args) > 3:
         response = client.chat_postMessage(
-           channel=message_data.get("channel"),
-           text="ERROR! Too many arguments given as inputs! Syntax: `!history [number of posts]`",
-           as_user=True)
+            channel=message_data.get("channel"),
+            text="ERROR! Too many arguments given as inputs! Syntax: `!history [number of posts]`",
+            as_user=True,
+        )
         return
-    
-    response = client.conversations_history(channel=rooms_list['new_volunteers'],
-                                            limit=number_posts)
-    
-    for message in response['messages']:
+
+    response = client.conversations_history(
+        channel=rooms_list["new_volunteers"], limit=number_posts
+    )
+
+    for message in response["messages"]:
 
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():
@@ -51,7 +64,7 @@ def plot_comments_history_command(message_data: Dict) -> None:
     client.chat_postMessage(
         channel=message_data.get("channel"),
         text=f"{str(len(response['messages']))} messages retrieved since {str(lastDatetime)}",
-        as_user=True
+        as_user=True,
     )
     numberPosts = []
     dates = []
@@ -67,10 +80,12 @@ def plot_comments_history_command(message_data: Dict) -> None:
     plt.grid(True, which="both")
     plt.savefig("plotHour.png")
     response = client.files_upload(
-           channels=message_data.get("channel"),
-           file="plotHour.png",
-           title="Just vibing.",
-           as_user=True)
+        channels=message_data.get("channel"),
+        file="plotHour.png",
+        title="Just vibing.",
+        as_user=True,
+    )
     plt.close()
+
 
 PluginManager.register_plugin(plot_comments_history_command, r"history")

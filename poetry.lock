@@ -244,6 +244,14 @@ aiohttp = ">3.5.2,<4.0.0"
 optional = ["aiodns (>1.0)"]
 
 [[package]]
+category = "main"
+description = "An elegant way to run period tasks."
+name = "timeloop"
+optional = false
+python-versions = "*"
+version = "1.0.2"
+
+[[package]]
 category = "dev"
 description = "Python Library for Tom's Obvious, Minimal Language"
 name = "toml"
@@ -285,7 +293,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "027ebd52bd73b0d4c4d7c6a92f79dfc2613badec4a8beea9e1e5bf0cb4fe8055"
+content-hash = "52f8e0a049aef687e733fd15a254cbc205b7fc4b85f0dd5895e8aa7f715633c9"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -508,6 +516,10 @@ six = [
 slackclient = [
     {file = "slackclient-2.7.3-py2.py3-none-any.whl", hash = "sha256:766e10d1b78b9660d644a4e70b4cd386c372ae69711b0f53c756171007fa3ae6"},
     {file = "slackclient-2.7.3.tar.gz", hash = "sha256:cb29c0b3cddad67f8369df82aadb5e031e7457ec3c45c0c86cec10c31209f4b6"},
+]
+timeloop = [
+    {file = "timeloop-1.0.2-py2-none-any.whl", hash = "sha256:70cb69eeef39968ea0e6dd68a3a3a51257d5f4aa27b177ab1b19ca86ff525946"},
+    {file = "timeloop-1.0.2.tar.gz", hash = "sha256:4e716c67fe6bcadcee7ddb91e2520792426818a70f27e630cfbbbd9becc48a13"},
 ]
 toml = [
     {file = "toml-0.10.1-py2.py3-none-any.whl", hash = "sha256:bda89d5935c2eac546d648028b9901107a595863cb36bae0c73ac804a9b4ce88"},

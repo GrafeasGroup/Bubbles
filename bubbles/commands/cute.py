@@ -18,36 +18,36 @@ def get_pic(func, extra_args=None):
             return func()
     except:
         return (
-            f"Something went horribly wrong and I don't know what!"
-            f"\n\n{error_img}"
+            f"Something went horribly wrong and I don't know what!" f"\n\n{error_img}"
         )
 
 
 def get_cat():
     # TODO: add picture bomb functionality
-    return requests.get(cat_api.format(1)).json()[0]['url']
+    return requests.get(cat_api.format(1)).json()[0]["url"]
 
 
 def get_pug():
-    return requests.get(pug_api.format(1)).json()['pugs'][0]
+    return requests.get(pug_api.format(1)).json()["pugs"][0]
 
 
 def get_fox():
-    return requests.get(fox_api).json().get('image')
+    return requests.get(fox_api).json().get("image")
+
 
 def cute(data):
     """
     !cute {fox, cat, pug}, or just !cute to get a random picture
     """
-    args = data.get('text').split()
+    args = data.get("text").split()
     animal = None
 
     if len(args) > 1:
-        if args[1] == 'cat':
+        if args[1] == "cat":
             animal = get_cat
-        elif args[1] == 'pug':
+        elif args[1] == "pug":
             animal = get_pug
-        elif args[1] == 'fox':
+        elif args[1] == "fox":
             animal = get_fox
 
     if not animal:
@@ -56,9 +56,7 @@ def cute(data):
         options = [get_cat, get_pug, get_fox]
         animal = random.choice(options)
     client.chat_postMessage(
-        channel=data.get('channel'),
-        text=get_pic(animal),
-        as_user=True
+        channel=data.get("channel"), text=get_pic(animal), as_user=True
     )
 
 

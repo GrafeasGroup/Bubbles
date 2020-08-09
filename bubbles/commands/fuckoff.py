@@ -5,6 +5,7 @@ from bubbles.config import PluginManager, client, USERNAME
 
 pattern = r"""f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{}""".format(USERNAME)
 
+
 def fuck_off(data):
     responses = [
         "https://i.pinimg.com/564x/7f/de/1a/7fde1a18fd553ec5a1b7c7c3cdeeeda8.jpg",
@@ -17,9 +18,8 @@ def fuck_off(data):
     ]
 
     client.chat_postMessage(
-        channel=data.get('channel'),
-        text=random.choice(responses),
-        as_user=True
+        channel=data.get("channel"), text=random.choice(responses), as_user=True
     )
+
 
 PluginManager.register_plugin(fuck_off, pattern, flags=re.IGNORECASE)
