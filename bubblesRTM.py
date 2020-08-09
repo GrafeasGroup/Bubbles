@@ -38,7 +38,7 @@ def func(**payload):
     
 @tl.job(interval=datetime.timedelta(seconds=3000))  
 def periodic_ping():
-    periodic_ping_callback(rtm_client, client, users_list, mods_array)
+    periodic_ping_callback(rtm_client, client, users_list)
     
 tl.start()
 try:
