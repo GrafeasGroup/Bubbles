@@ -2,7 +2,7 @@ from bubbles.config import client, rtm_client, PluginManager, DEFAULT_CHANNEL, u
 from typing import Dict
 import datetime
 
-def periodic_ping_callback(a, b, c) -> None:
+def periodic_ping_callback() -> None:
     timestampNeededEnd = datetime.datetime.now() - datetime.timedelta(days=7)
     timestampNeededStart = datetime.datetime.now() - datetime.timedelta(hours=4)
     response = client.conversations_history(channel=rooms_list["new_volunteers"],

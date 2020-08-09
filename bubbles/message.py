@@ -19,7 +19,7 @@ def message_callback(rtmclient, client, usersList, **payload):
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
-        plugin(rtmclient, client, usersList, data)
+        plugin(data)
         return
     else:
         # we don't know what they were trying to do, so we fall through to here

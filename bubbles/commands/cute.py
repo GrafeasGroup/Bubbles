@@ -1,6 +1,6 @@
 import random
 
-from bubbles.config import PluginManager
+from bubbles.config import PluginManager, client
 import requests
 
 
@@ -35,7 +35,7 @@ def get_pug():
 def get_fox():
     return requests.get(fox_api).json().get('image')
 
-def cute(rtmclient, client, user_list, data):
+def cute(data):
     """
     !cute {fox, cat, pug}, or just !cute to get a random picture
     """

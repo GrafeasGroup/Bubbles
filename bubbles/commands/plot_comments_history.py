@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 from numpy import flip
 
-def plot_comments_history_command(a, b, c, message_data: Dict) -> None:
+def plot_comments_history_command(message_data: Dict) -> None:
     
     # Syntax: !history [number of posts]
     

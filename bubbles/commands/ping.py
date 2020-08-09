@@ -1,7 +1,7 @@
-from bubbles.config import PluginManager
+from bubbles.config import PluginManager, client
 
 
-def ping_command(rtmclient, client, user_list, data):
+def ping_command(data):
     client.chat_postMessage(channel=data.get("channel"), text="PONG!", as_user=True)
 
 

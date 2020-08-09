@@ -1,6 +1,6 @@
 import re
 
-from bubbles.config import PluginManager
+from bubbles.config import PluginManager, client
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
@@ -25,7 +25,7 @@ idk = (
 
 
 class Yell:
-    def yell(self, rtmclient, client, user_list, data):
+    def yell(self, data):
         """Everyone's a little bit hard of hearing sometimes."""
         if not hasattr(self, 'previous_message_dict'):
             response = idk

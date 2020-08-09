@@ -9,7 +9,7 @@ class PluginManager:
         self.command_prefixes = command_prefixes
 
     def message_is_for_us(self, message: str) -> bool:
-        return any([prefix in message for prefix in self.command_prefixes])
+        return any([prefix.lower() in message.lower() for prefix in self.command_prefixes])
 
     def get_plugin(self, message):
         for plugin, regex, ignore_prefix in self.plugins:

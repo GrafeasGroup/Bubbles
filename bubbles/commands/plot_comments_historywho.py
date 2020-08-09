@@ -4,7 +4,7 @@ import datetime
 from numpy import zeros, shape, flip, cumsum
 import matplotlib.pyplot as plt
 
-def plot_comments_historywho_command(a, b, c, message_data: Dict) -> None:
+def plot_comments_historywho_command(message_data: Dict) -> None:
     #lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
     lastDatetime = datetime.datetime.now().timestamp()
     countReactionsAll = {}
