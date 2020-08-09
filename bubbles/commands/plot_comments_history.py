@@ -19,8 +19,7 @@ def plot_comments_history_command(message_data: Dict) -> None:
 
     # Syntax: !history [number of posts]
 
-    lastDatetime = ""
-    countDays = {}
+    count_days = {}
     args = message_data.get("text").split()
     print(args)
     number_posts = 100
@@ -53,28 +52,28 @@ def plot_comments_history_command(message_data: Dict) -> None:
         #     userWhoSentMessage = usersList[message["user"]]
         #
         # textMessage = message["text"]
-        timeSend = datetime.datetime.fromtimestamp(float(message["ts"]))
-        differenceDays = datetime.datetime.now() - timeSend
-        differenceDaysNum = differenceDays.days
-        if differenceDaysNum not in countDays.keys():
-            countDays[differenceDaysNum] = 0
-        countDays[differenceDaysNum] = countDays[differenceDaysNum] + 1
+        time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
+        difference_days = datetime.datetime.now() - time_send
+        difference_days_num = difference_days.days
+        if difference_days_num not in count_days.keys():
+            count_days[difference_days_num] = 0
+        count_days[difference_days_num] = count_days[difference_days_num] + 1
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
-        lastDatetime = timeSend
+        last_datetime = time_send
     client.chat_postMessage(
         channel=message_data.get("channel"),
-        text=f"{str(len(response['messages']))} messages retrieved since {str(lastDatetime)}",
+        text=f"{str(len(response['messages']))} messages retrieved since {str(last_datetime)}",
         as_user=True,
     )
-    numberPosts = []
+    number_posts = []
     dates = []
-    for i in range(0, max(countDays.keys())):
-        if i not in countDays.keys():
-            numberPosts.append(0)
+    for i in range(0, max(count_days.keys())):
+        if i not in count_days.keys():
+            number_posts.append(0)
         else:
-            numberPosts.append(countDays[i])
+            number_posts.append(count_days[i])
         dates.append(datetime.datetime.now() - datetime.timedelta(days=i))
-    plt.plot(flip(dates), flip(numberPosts))
+    plt.plot(flip(dates), flip(number_posts))
     plt.xlabel("Data")
     plt.ylabel("Number of messages")
     plt.grid(True, which="both")

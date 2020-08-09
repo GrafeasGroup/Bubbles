@@ -9,7 +9,7 @@ load_dotenv()
 
 USERNAME = os.environ.get("username", "bubbles")
 API_KEY = os.environ.get("api_key")
-DEFAULT_CHANNEL = os.environ.get("default_channel", "bottest")
+DEFAULT_CHANNEL = os.environ.get("default_channel", "new_volunteers_meta")
 PAYMENT_KEY = os.environ.get("payment_key", None)
 PAYMENT_VALUE = os.environ.get("payment_value", None)
 
