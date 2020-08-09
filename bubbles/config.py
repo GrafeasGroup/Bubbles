@@ -25,8 +25,9 @@ users_list = {}
 users = client.users_list()
 for user in users['members']:
     if not user['deleted']:
-        users_list[user['id']] = user['name']
-        users_list[user['name']] = user['id']
+        if "real_name" in user.keys():
+            users_list[user['id']] = user['real_name']
+            users_list[user['real_name']] = user['id']
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}
