@@ -2,20 +2,26 @@ import traceback
 
 from slack import RTMClient
 
-from bubbles.config import USERNAME, DEFAULT_CHANNEL, client, rtm_client, users_list
+from bubbles.config import USERNAME, DEFAULT_CHANNEL, client, rtm_client, users_list, rooms_list, mods_array
 from bubbles.message import message_callback
 
+from bubbles.hello import hello_callback
+from bubbles.reaction_added import reaction_added_callback
+from bubbles.periodic_ping import periodic_ping_callback
+
+import datetime
+import matplotlib as mpl
+import timeloop
+
+tl = timeloop.Timeloop()
+    
+mpl.rcParams["figure.figsize"] = [20, 10]
 
 @RTMClient.run_on(event="hello")
 def say_hello(**payload):
     # fires when the bot is first started
-    client.chat_postMessage(
-        channel=DEFAULT_CHANNEL,
-        text="Hello world! Hon hon hon.",
-        as_user=True
-    )
-
-
+    hello_callback(rtm_client, client, **payload)
+    
 @RTMClient.run_on(event="message")
 def message_received(**payload):
     try:
@@ -26,40 +32,18 @@ def message_received(**payload):
             text=f"Computer says noooo: \n```\n{traceback.format_exc()}```",
             as_user=True
         )
-
-
 @RTMClient.run_on(event="reaction_added")
 def func(**payload):
-    data = payload["data"]
-    user_who_reacted = users_list[data['user']]
-    # the author of the message the user reacted to
-    original_message_author = users_list[data["item_user"]]
-    print(original_message_author)
-    reaction = data["reaction"]
-    print(reaction)
-    print(
-        f"{user_who_reacted} has replied to one of {original_message_author}'s"
-        f" messages with a :{reaction}:."
-    )
-    if original_message_author == USERNAME:
-        print("My message")
-        client.chat_postMessage(
-            channel=data.get('channel'),
-            text=(
-                f"{user_who_reacted} has replied to one of my messages with a"
-                f" :{reaction}:. Youpie!"
-            ),
-            as_user=True)
-    else:
-        print("Other message")
-        client.chat_postMessage(
-            channel=data.get('channel'),
-            text=(
-                f"{user_who_reacted} has replied to one of {original_message_author}'s"
-                f" messages with a :{reaction}:. Notice me, senpai."
-            ),
-            as_user=True
-        )
-
-
-rtm_client.start()  # Leave at the end, the program will stay here!
+    reaction_added_callback(rtm_client, client, users_list, **payload)
+    
+@tl.job(interval=datetime.timedelta(seconds=3000))  
+def periodic_ping():
+    periodic_ping_callback(rtm_client, client, users_list, mods_array)
+    
+tl.start()
+try:
+    rtm_client.start() 
+except KeyboardInterrupt:
+    print("Goodbye!")
+    rtm_client.stop()
+tl.stop()

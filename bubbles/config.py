@@ -20,13 +20,25 @@ ME = client.auth_test().data['user_id']
 
 COMMAND_PREFIXES = ("!", USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
 
-# Define the list of users
+# Define the list of users (conversion ID <-> name)
 users_list = {}
 users = client.users_list()
 for user in users['members']:
     if not user['deleted']:
         users_list[user['id']] = user['name']
+        users_list[user['name']] = user['id']
 
+# Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
+rooms_list = {}
+rooms = client.conversations_list()
+for room in rooms['channels']:
+    rooms_list[room['id']] = room['name']
+    rooms_list[room['name']] = room['id']
+    
+# Define the mod to ping for periodic_callback (leave to None if no mod has to be pinged)
+mods_array = []
+for i in range(0, 24):
+    mods_array.append(None)
 
 # Import PluginManager from here
 PluginManager = PM(COMMAND_PREFIXES)
