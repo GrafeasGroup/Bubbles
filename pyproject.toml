@@ -12,6 +12,7 @@ matplotlib = "^3.3.0"
 requests = "^2.24.0"
 python-dotenv = "^0.14.0"
 timeloop = "^1.0.2"
+praw = "^7.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
