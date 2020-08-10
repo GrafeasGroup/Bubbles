@@ -199,4 +199,4 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
     )
 
 
-PluginManager.register_plugin(plot_comments_historywho_command, r"historywho")
+PluginManager.register_plugin(plot_comments_historywho_command, r"historywho [ \"a-zA-Z]+")
