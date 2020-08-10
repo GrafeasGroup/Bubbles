@@ -10,6 +10,10 @@ def process_message(**payload):
         # sometimes we'll get an object without text; just discard it.
         print("Unprocessable message. Ignoring.")
         return
+    if "has joined the channel" in message:
+        # if we join a new channel, this will cause a hilarious amount of spam.
+        # Just throw away the message.
+        return
     user_who_sent_message = users_list[data["user"]]
     if user_who_sent_message == USERNAME:
         # That's us! Just ignore it.
