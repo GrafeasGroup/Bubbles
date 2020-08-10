@@ -48,6 +48,7 @@ def periodic_ping():
 def check_for_saferbot():
     saferbot_check_callback()
 
+
 try:
     tl.start()
     rtm_client.start()

@@ -5,7 +5,7 @@ from typing import List, Tuple, Callable
 class PluginManager:
     # don't import this directly -- import from bubbles.config
     def __init__(self, command_prefixes, beginning_command_prefixes) -> None:
-        self.plugins: List[Tuple[Callable, str]] = list()
+        self.plugins: List[Tuple[Callable, str, bool]] = list()
         self.callbacks = list()
         self.command_prefixes = command_prefixes
         self.beginning_command_prefixes = beginning_command_prefixes

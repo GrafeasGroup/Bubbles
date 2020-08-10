@@ -1,4 +1,9 @@
-from bubbles.config import PluginManager, USERNAME, client, users_list
+from bubbles.config import client, PluginManager, users_list, USERNAME, ME
+
+
+def _is_from_us(username):
+    username = username.lower()
+    return username == USERNAME.lower() or username == ME.lower()
 
 
 def process_message(**payload):
@@ -6,18 +11,17 @@ def process_message(**payload):
     data = payload["data"]
     channel = data.get("channel")
     message = data.get("text")
+
     if not message:
         # sometimes we'll get an object without text; just discard it.
         print("Unprocessable message. Ignoring.")
         return
-    if "has joined the channel" in message:
-        # if we join a new channel, this will cause a hilarious amount of spam.
-        # Just throw away the message.
-        return
+
     user_who_sent_message = users_list[data["user"]]
-    if user_who_sent_message == USERNAME:
-        # That's us! Just ignore it.
+
+    if _is_from_us(user_who_sent_message):
         return
+
     print(f"I received: {message} from {user_who_sent_message}")
 
     # search all the loaded plugins to see if any of the regex's match
