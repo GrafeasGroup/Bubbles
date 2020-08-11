@@ -17,7 +17,11 @@ def process_message(**payload):
         print("Unprocessable message. Ignoring.")
         return
 
-    user_who_sent_message = users_list[data["user"]]
+    try:
+        user_who_sent_message = users_list[data["user"]]
+    except KeyError:
+        # This will trigger if an app posts, like the RSS feeds.
+        return
 
     if _is_from_us(user_who_sent_message):
         return
