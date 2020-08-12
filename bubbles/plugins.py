@@ -10,21 +10,27 @@ class PluginManager:
         self.command_prefixes = command_prefixes
         self.beginning_command_prefixes = beginning_command_prefixes
 
+    def has_beginning_command_prefix(self, message: str) -> bool:
+        return any(
+            [
+                message.lower().startswith(prefix)
+                for prefix in self.beginning_command_prefixes
+            ]
+        )
+
+    def has_command_prefix(self, message: str) -> bool:
+        return any(
+            [
+                prefix.lower() in message.lower()
+                for prefix in self.command_prefixes
+            ]
+        )
+
     def message_is_for_us(self, message: str) -> bool:
         return any(
             [
-                any(
-                    [
-                        prefix.lower() in message.lower()
-                        for prefix in self.command_prefixes
-                    ]
-                ),
-                any(
-                    [
-                        message.lower().startswith(prefix)
-                        for prefix in self.beginning_command_prefixes
-                    ]
-                ),
+                self.has_beginning_command_prefix(message),
+                self.has_command_prefix(message)
             ]
         )
 
@@ -40,12 +46,12 @@ class PluginManager:
             func(message)
 
     def register_plugin(
-        self,
-        plugin: Callable,
-        regex: str,
-        flags=None,
-        callback: Callable = None,
-        ignore_prefix: bool = False,
+            self,
+            plugin: Callable,
+            regex: str,
+            flags=None,
+            callback: Callable = None,
+            ignore_prefix: bool = False,
     ):
         regex = re.compile(regex, flags if flags else 0)
         self.plugins.append((plugin, regex, ignore_prefix))

@@ -33,8 +33,11 @@ def process_message(**payload):
     if plugin:
         plugin(data)
     else:
-        # we don't know what they were trying to do, so we fall through to here
-        if PluginManager.message_is_for_us(message):
+        # we don't know what they were trying to do, so we fall through to here.
+        # Let's only limit responses to things that look like they're trying
+        # to use regular command syntax, though.
+        # For example, trigger on "!hello" but not for "isn't bubbles great".
+        if PluginManager.has_beginning_command_prefix(message):
             client.chat_postMessage(
                 channel=channel, text=f"Unknown command: `{message}`", as_user=True
             )
