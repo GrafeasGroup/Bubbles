@@ -82,4 +82,4 @@ def plot_comments_history_command(message_data: Dict) -> None:
     plt.close()
 
 
-PluginManager.register_plugin(plot_comments_history_command, r"history")
+PluginManager.register_plugin(plot_comments_history_command, r"(?!.*who)history")
