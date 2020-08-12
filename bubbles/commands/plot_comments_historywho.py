@@ -1,15 +1,15 @@
+import datetime
+from typing import Dict
+
+import matplotlib.pyplot as plt
+from numpy import zeros, flip, cumsum
+
 from bubbles.config import (
     client,
-    rtm_client,
     PluginManager,
-    DEFAULT_CHANNEL,
     users_list,
     rooms_list,
 )
-from typing import Dict
-import datetime
-from numpy import zeros, shape, flip, cumsum
-import matplotlib.pyplot as plt
 
 
 def plot_comments_historywho_command(message_data: Dict) -> None:
@@ -20,8 +20,8 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
     datetime_now = datetime.datetime.now()
 
     if (
-        '"' not in message_data.get("text")
-        and message_data.get("text") != "!historywho -h"
+            '"' not in message_data.get("text")
+            and message_data.get("text") != "!historywho -h"
     ):
         response = client.chat_postMessage(
             channel=message_data.get("channel"),
@@ -75,7 +75,7 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
             if difference_days not in count_reactions_people["Nobody"].keys():
                 count_reactions_people["Nobody"][difference_days] = 0
             count_reactions_people["Nobody"][difference_days] = (
-                count_reactions_people["Nobody"][difference_days] + 1
+                    count_reactions_people["Nobody"][difference_days] + 1
             )
         else:
             no_valable_reaction = True
@@ -85,18 +85,18 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
                     pass
                 else:
                     if (
-                        reaction["count"] > 1
+                            reaction["count"] > 1
                     ):  # Several people have reacted to the same message
                         if "Conflict" not in count_reactions_people.keys():
                             count_reactions_people["Conflict"] = {}
                         if (
-                            difference_days
-                            not in count_reactions_people["Conflict"].keys()
+                                difference_days
+                                not in count_reactions_people["Conflict"].keys()
                         ):
                             count_reactions_people["Conflict"][difference_days] = 0
                         no_valable_reaction = False
                         count_reactions_people["Conflict"][difference_days] = (
-                            count_reactions_people["Conflict"][difference_days] + 1
+                                count_reactions_people["Conflict"][difference_days] + 1
                         )
                     else:  # only one person has reacted to the message
                         user_who_has_reacted = reaction["users"][0]
@@ -107,26 +107,26 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
                             if "Other" not in count_reactions_people.keys():
                                 count_reactions_people["Other"] = {}
                             if (
-                                difference_days
-                                not in count_reactions_people["Other"].keys()
+                                    difference_days
+                                    not in count_reactions_people["Other"].keys()
                             ):
                                 count_reactions_people["Other"][difference_days] = 0
                                 count_reactions_people["Other"][difference_days] = (
-                                    count_reactions_people["Other"][difference_days] + 1
+                                        count_reactions_people["Other"][difference_days] + 1
                                 )
                         else:
                             if name_person_to_search not in count_reactions_people.keys():
                                 count_reactions_people[name_person_to_search] = {}
                             if (
-                                difference_days
-                                not in count_reactions_people[name_person_to_search].keys()
+                                    difference_days
+                                    not in count_reactions_people[name_person_to_search].keys()
                             ):
                                 count_reactions_people[name_person_to_search][
                                     difference_days
                                 ] = 0
                             count_reactions_people[name_person_to_search][difference_days] = (
-                                count_reactions_people[name_person_to_search][difference_days]
-                                + 1
+                                    count_reactions_people[name_person_to_search][difference_days]
+                                    + 1
                             )
                         no_valable_reaction = False
 
@@ -136,7 +136,7 @@ def plot_comments_historywho_command(message_data: Dict) -> None:
                 if difference_days not in count_reactions_people["Nobody"].keys():
                     count_reactions_people["Nobody"][difference_days] = 0
                 count_reactions_people["Nobody"][difference_days] = (
-                    count_reactions_people["Nobody"][difference_days] + 1
+                        count_reactions_people["Nobody"][difference_days] + 1
                 )
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
