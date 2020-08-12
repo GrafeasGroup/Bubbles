@@ -1,22 +1,17 @@
-from bubbles.config import (
-    client,
-    rtm_client,
-    PluginManager,
-    DEFAULT_CHANNEL,
-    USERNAME,
-    COMMAND_PREFIXES,
-    users_list,
-    rooms_list,
-)
 import datetime
 from typing import Dict
+
 import matplotlib.pyplot as plt
-import matplotlib
 from numpy import flip
+
+from bubbles.config import (
+    client,
+    PluginManager,
+    rooms_list,
+)
 
 
 def plot_comments_history_command(message_data: Dict) -> None:
-
     # Syntax: !history [number of posts]
 
     count_days = {}

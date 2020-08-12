@@ -1,8 +1,10 @@
 import os
+from datetime import datetime
 
+import matplotlib as mpl
 from dotenv import load_dotenv
-from slack import WebClient, RTMClient
 from praw import Reddit
+from slack import WebClient, RTMClient
 
 from bubbles.plugins import PluginManager as PM
 
@@ -59,3 +61,7 @@ for i in range(0, 24):
 
 # Import PluginManager from here
 PluginManager = PM(COMMAND_PREFIXES, BEGINNING_COMMAND_PREFIXES)
+
+mpl.rcParams["figure.figsize"] = [20, 10]
+
+TIME_STARTED = datetime.now()

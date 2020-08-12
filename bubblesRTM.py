@@ -1,7 +1,6 @@
 import datetime
 import traceback
 
-import matplotlib as mpl
 import timeloop
 from slack import RTMClient
 
@@ -12,9 +11,6 @@ from bubbles.periodic_commands import periodic_ping_callback, saferbot_check_cal
 from bubbles.reaction_added import reaction_added_callback
 
 tl = timeloop.Timeloop()
-
-mpl.rcParams["figure.figsize"] = [20, 10]
-
 
 @RTMClient.run_on(event="hello")
 def say_hello(**payload):
