@@ -9,4 +9,4 @@ def hello_callback():
         # event. This ends up posting again, but we really only use this to verify
         # that bubbles started without issue, so we only want it to fire the first
         # time.
-        client.chat_postMessage(channel=DEFAULT_CHANNEL, text=":tada:", as_user=True)
+        client.chat_postMessage(channel=DEFAULT_CHANNEL, text=":wave:", as_user=True)
