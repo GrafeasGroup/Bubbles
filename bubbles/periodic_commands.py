@@ -62,6 +62,8 @@ def periodic_ping_callback() -> None:
                 text="List of unwelcomed users: " + str(list_users_to_welcome),
                 as_user=True,
             )
+
+
 #    else:
 #        response = client.chat_postMessage(
 #            channel=DEFAULT_CHANNEL,
@@ -72,12 +74,16 @@ def periodic_ping_callback() -> None:
 
 
 def saferbot_check_callback() -> None:
-    subreddits = reddit.subreddit("TranscribersOfReddit").wiki["subreddits"].content_md.splitlines()
+    subreddits = (
+        reddit.subreddit("TranscribersOfReddit")
+        .wiki["subreddits"]
+        .content_md.splitlines()
+    )
     saferbot_list = list()
     for sub in subreddits:
         try:
             mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
-            if 'saferbot' in mods:
+            if "saferbot" in mods:
                 saferbot_list.append(sub)
         except:
             print(f"saferbot_check: FAILED TO GET {sub}")

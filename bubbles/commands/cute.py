@@ -60,4 +60,11 @@ def cute(data):
     )
 
 
-PluginManager.register_plugin(cute, r"cute")
+PluginManager.register_plugin(
+    cute,
+    r"cute",
+    help=(
+        "!cute [fox, cat, pug] - Specify an animal for a cute picture! Or just"
+        " !cute for a random one."
+    ),
+)

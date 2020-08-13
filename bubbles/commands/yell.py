@@ -41,7 +41,7 @@ class Yell:
         )
 
     def yell_callback(self, message):
-        if message['user'] == ME:
+        if message["user"] == ME:
             return
         # back up the last message sent that doesn't match the patterns.
         # Keep a running dict based on the channel it came from.
@@ -59,4 +59,5 @@ PluginManager.register_plugin(
     flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     callback=instance.yell_callback,
     ignore_prefix=True,
+    help="WHAT?!",
 )

@@ -11,7 +11,7 @@ from bubbles.config import (
 )
 
 
-def plot_comments_history_command(message_data: Dict) -> None:
+def plot_comments_history(message_data: Dict) -> None:
     # Syntax: !history [number of posts]
 
     count_days = {}
@@ -73,7 +73,7 @@ def plot_comments_history_command(message_data: Dict) -> None:
     plt.ylabel("Number of messages")
     plt.grid(True, which="both")
     plt.savefig("plotHour.png")
-    response = client.files_upload(
+    client.files_upload(
         channels=message_data.get("channel"),
         file="plotHour.png",
         title="Just vibing.",
@@ -82,4 +82,12 @@ def plot_comments_history_command(message_data: Dict) -> None:
     plt.close()
 
 
-PluginManager.register_plugin(plot_comments_history_command, r"(?!.*who)history")
+PluginManager.register_plugin(
+    plot_comments_history,
+    r"(?!.*who)history([0-9 ]+)?",
+    help=(
+        "!history [number of posts] - shows the number of new comments in"
+        " #new-volunteers in function of their day. `number of posts` must"
+        " be an integer between 1 and 1000 inclusive."
+    ),
+)

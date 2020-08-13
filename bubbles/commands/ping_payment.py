@@ -17,4 +17,8 @@ def ping_payment(data):
         )
 
 
-PluginManager.register_plugin(ping_payment, r"ping payment")
+PluginManager.register_plugin(
+    ping_payment,
+    r"ping payment",
+    help="!ping payment - make sure that Gringotts is still accepting coin.",
+)

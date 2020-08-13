@@ -22,7 +22,7 @@ REDDIT_USER_AGENT = os.environ.get("reddit_user_agent", None)
 reddit = Reddit(
     client_id=REDDIT_CLIENT_ID,
     client_secret=REDDIT_SECRET,
-    user_agent=REDDIT_USER_AGENT
+    user_agent=REDDIT_USER_AGENT,
 )
 
 client = WebClient(token=API_KEY)
