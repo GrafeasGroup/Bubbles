@@ -17,7 +17,14 @@ def help(data):
         if plugin["help"] is not None:
             # grab the name of the command and the help string.
             plugin_split = str(plugin["callable"]).split()
-            plugin_name = plugin_split[1] if len(plugin_split) == 4 else plugin_split[2]
+            if len(plugin_split) == 4:
+                # we're looking at a function.
+                # <function myfunc at 0x7f28aa33e8b0>
+                plugin_name = plugin_split[1]
+            else:
+                # we're looking at a class.
+                # <bound method MyPlugin.myfunc of <__main__.MyPlugin object at 0x7f28aa408070>>
+                plugin_name = plugin_split[2].split(".")[1]
             plugins_with_help[plugin_name] = plugin["help"]
     client.chat_postMessage(
         channel=data.get("channel"), text=format_text(plugins_with_help), as_user=True,
