@@ -13,6 +13,11 @@ def update(data) -> None:
         ),
         as_user=True,
     )
-    subprocess.Popen([os.path.join(os.getcwd(), ".venv", "bin", "python"), "update.py"])
+    subprocess.Popen(
+        [
+            os.path.join(os.getcwd(), ".venv", "bin", "python"),
+            os.path.join(os.getcwd(), "update.py")
+        ]
+    )
 
 PluginManager.register_plugin(update, r"update$", help="!update - pull changes from github and restart!")
