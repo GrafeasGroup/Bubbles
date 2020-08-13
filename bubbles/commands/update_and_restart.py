@@ -9,7 +9,7 @@ def update(data) -> None:
 
     @fire_and_forget
     def trigger_update():
-        subprocess.run(os.path.join(os.getcwd(), "update.py"), shell=True)
+        subprocess.call([os.path.join(os.getcwd(), "python"), "update.py"])
 
     print(os.getcwd())
     trigger_update()
