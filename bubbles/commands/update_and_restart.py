@@ -7,7 +7,7 @@ from bubbles.helpers import fire_and_forget
 
 def update(data) -> None:
     def trigger_update():
-        subprocess.run(os.path.join(os.getcwd(), "update_and_restart.py"))
+        subprocess.run(os.path.join(os.getcwd(), "update.py"))
 
     print(os.getcwd())
     fire_and_forget(trigger_update)
