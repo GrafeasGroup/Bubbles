@@ -4,13 +4,14 @@ import traceback
 import timeloop
 from slack import RTMClient
 
-from bubbles.config import client, rtm_client, users_list
+from bubbles.config import client, rtm_client
 from bubbles.hello import hello_callback
 from bubbles.message import process_message
 from bubbles.periodic_commands import periodic_ping_callback, saferbot_check_callback
 from bubbles.reaction_added import reaction_added_callback
 
 tl = timeloop.Timeloop()
+
 
 @RTMClient.run_on(event="hello")
 def say_hello(**payload):
