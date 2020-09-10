@@ -100,12 +100,12 @@ def banbot_check_callback() -> None:
     if len(saferbot_list) > 0:
         client.chat_postMessage(
             channel=rooms_list["general"],
-            text=message.format("SaferBot", ', '.join(saferbot_list)),
+            text=message.format("SaferBot", ", ".join(saferbot_list)),
             as_user=True,
         )
     if len(misandrybot_list) > 0:
         client.chat_postMessage(
             channel=rooms_list["general"],
-            text=message.format("MisandryBot", ', '.join(misandrybot_list)),
+            text=message.format("MisandryBot", ", ".join(misandrybot_list)),
             as_user=True,
         )

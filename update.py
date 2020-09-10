@@ -6,9 +6,9 @@ import traceback
 
 from bubbles.config import client, DEFAULT_CHANNEL, USERNAME
 
-git_response = subprocess.check_output(
-    ["git", "pull", "origin", "master"]
-).decode().strip()
+git_response = (
+    subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
+)
 
 client.chat_postMessage(
     channel=DEFAULT_CHANNEL, text=git_response, as_user=True,
@@ -18,7 +18,9 @@ client.chat_postMessage(
 )
 
 try:
-    systemctl_response = subprocess.check_output(["sudo", "systemctl", "restart", USERNAME])
+    systemctl_response = subprocess.check_output(
+        ["sudo", "systemctl", "restart", USERNAME]
+    )
 except subprocess.CalledProcessError as e:
     client.chat_postMessage(
         channel=DEFAULT_CHANNEL,

@@ -27,7 +27,9 @@ def help(data):
                 plugin_name = plugin_split[2].split(".")[1]
             plugins_with_help[plugin_name] = plugin["help"]
             # sort that sucker alphabetically
-            plugins_with_help = {key: value for key, value in sorted(plugins_with_help.items())}
+            plugins_with_help = {
+                key: value for key, value in sorted(plugins_with_help.items())
+            }
     client.chat_postMessage(
         channel=data.get("channel"), text=format_text(plugins_with_help), as_user=True,
     )
