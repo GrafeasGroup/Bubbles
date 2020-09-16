@@ -4,19 +4,19 @@ from bubbles.config import client, users_list, rooms_list, mods_array, reddit
 
 
 def periodic_ping_callback() -> None:
-    timestamp_needed_end = datetime.datetime.now() - datetime.timedelta(days=7)
-    timestamp_needed_start = datetime.datetime.now() - datetime.timedelta(hours=4)
+    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
+    timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
     timestamp_needed_end_watchping = datetime.datetime.now() - datetime.timedelta(days=14)
     timestamp_needed_start_watchping = datetime.datetime.now() - datetime.timedelta(hours=24)
     response = client.conversations_history(
         channel=rooms_list["new_volunteers"],
-        oldest=timestamp_needed_end_watchping.timestamp(),
-        latest=timestamp_needed_start_watchping.timestamp(),
+        oldest=timestamp_needed_end_cry.timestamp(),
+        latest=timestamp_needed_start_cry.timestamp(),
     )  # ID for #bottest
     response_watchping = client.conversations_history(
         channel=rooms_list["new_volunteers"],
-        oldest=timestamp_needed_end.timestamp(),
-        latest=timestamp_needed_start.timestamp(),
+        oldest=timestamp_needed_end_watchping.timestamp(),
+        latest=timestamp_needed_start_watchping.timestamp(),
     )  # ID for #bottest
     cry = False
     watchping = False
