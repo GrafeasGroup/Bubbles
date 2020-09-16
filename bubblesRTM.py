@@ -36,9 +36,9 @@ def func(**payload):
     reaction_added_callback(**payload)
 
 
-@tl.job(interval=datetime.timedelta(seconds=3000))
-def periodic_ping():
-    periodic_ping_callback()
+# @tl.job(interval=datetime.timedelta(seconds=3000))
+# def periodic_ping():
+#     periodic_ping_callback()
 
 
 @tl.job(interval=datetime.timedelta(hours=12))
