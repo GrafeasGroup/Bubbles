@@ -46,7 +46,7 @@ def periodic_ping_callback() -> None:
             only_watch = False
             pass # No reactions -> already handeled by cry
         for reaction in message["reactions"]:
-            if reaction["name"]  != "heavy_check_mark":
+            if reaction["name"]  != "watch":
                 only_watch = False
             else:
                 pass
