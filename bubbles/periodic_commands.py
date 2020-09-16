@@ -25,7 +25,7 @@ def periodic_ping_callback() -> None:
     for message in response["messages"]:
         # print(message["text"])
         if "reactions" not in message.keys():
-            cry = True
+            no_valable_reactions = True
         else:
             no_valable_reactions = True
             for reaction in message["reactions"]:
@@ -33,12 +33,12 @@ def periodic_ping_callback() -> None:
                     no_valable_reactions = False
                 else:
                     pass
-            if no_valable_reactions:
-                cry = True
-                name_user_to_welcome = message["text"].split(" ")[0]
-                name_user_to_welcome = name_user_to_welcome.split("|")[1]
-                name_user_to_welcome = name_user_to_welcome[:-1]
-                list_users_to_welcome.append(name_user_to_welcome)
+        if no_valable_reactions:
+            cry = True
+            name_user_to_welcome = message["text"].split(" ")[0]
+            name_user_to_welcome = name_user_to_welcome.split("|")[1]
+            name_user_to_welcome = name_user_to_welcome[:-1]
+            list_users_to_welcome.append(name_user_to_welcome)
     for message in response_watchping["messages"]:
         # print(message["text"])
         only_watch = True
