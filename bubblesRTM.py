@@ -7,7 +7,7 @@ from slack import RTMClient
 from bubbles.config import client, rtm_client
 from bubbles.hello import hello_callback
 from bubbles.message import process_message
-from bubbles.periodic_commands import periodic_ping_callback, banbot_check_callback
+from bubbles.periodic_commands import periodic_ping_callback, periodic_ping_in_progress_callback, banbot_check_callback
 from bubbles.reaction_added import reaction_added_callback
 
 tl = timeloop.Timeloop()
@@ -35,16 +35,17 @@ def message_received(**payload):
 def func(**payload):
     reaction_added_callback(**payload)
 
-
-# @tl.job(interval=datetime.timedelta(seconds=3000))
-# def periodic_ping():
-#     periodic_ping_callback()
-
+@tl.job(interval=datetime.timedelta(hours=4))
+def periodic_ping():
+    periodic_ping_callback()
+    
+@tl.job(interval=datetime.timedelta(days=1))
+def periodic_ping_in_progress():
+    periodic_ping_in_progress_callback()
 
 @tl.job(interval=datetime.timedelta(hours=12))
 def check_for_saferbot():
     banbot_check_callback()
-
 
 try:
     tl.start()
