@@ -103,13 +103,13 @@ def periodic_ping_in_progress_callback() -> None:
             person_to_ping = mods_array[hour]
             if person_to_ping is None:
                 client.chat_postMessage(
-                    channel=rooms_list["new_volunteers_ping_in_progress"],
+                    channel=rooms_list["new_volunteers_pings_in_progress"],
                     link_names=1,
                     text="There are users claimed with a :watch: even after 24 hours. Please check them out.",
                     as_user=True,
                 )
                 client.chat_postMessage(
-                    channel=rooms_list["new_volunteers_ping_in_progress"],
+                    channel=rooms_list["new_volunteers_pings_in_progress"],
                     link_names=1,
                     text="List of users to check out: " + str(list_users_to_check_out),
                     as_user=True,
@@ -117,7 +117,7 @@ def periodic_ping_in_progress_callback() -> None:
             else:
                 id_mod_to_ping = users_list[person_to_ping]
                 client.chat_postMessage(
-                    channel=rooms_list["new_volunteers_ping_in_progress"],
+                    channel=rooms_list["new_volunteers_pings_in_progress"],
                     link_names=1,
                     text="<@"
                     + id_mod_to_ping
@@ -125,7 +125,7 @@ def periodic_ping_in_progress_callback() -> None:
                     as_user=True,
                 )
                 client.chat_postMessage(
-                    channel=rooms_list["new_volunteers_ping_in_progress"],
+                    channel=rooms_list["new_volunteers_pings_in_progress"],
                     link_names=1,
                     text="List of users to check out: " + str(list_users_to_check_out),
                     as_user=True,
