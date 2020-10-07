@@ -6,6 +6,8 @@ from slack import RTMClient
 
 from bubbles.config import client, DEFAULT_CHANNEL, users_list
 
+FILENAME = "presence_log.json"
+
 
 def configure_presence_change_event(rtm_client: RTMClient) -> None:
     """
@@ -24,13 +26,13 @@ def configure_presence_change_event(rtm_client: RTMClient) -> None:
 
 
 def presence_update_callback(*args, **kwargs):
-    filename = "presence_log.json"
-    mode = "r+" if os.path.exists(filename) else "w+"
+    # allow creating the file if it doesn't exist
+    mode = "r+" if os.path.exists(FILENAME) else "w+"
 
     user_id = kwargs['data']['user']
     status = kwargs['data']['presence']
 
-    with open(filename, mode) as file:
+    with open(FILENAME, mode) as file:
         data = json.loads(file.read())
         if status == "active":
             data[user_id] = datetime.datetime.now().timestamp()
@@ -42,6 +44,8 @@ def presence_update_callback(*args, **kwargs):
 
 
 def check_in_with_people():
+    with open(FILENAME, "r+"):
+
     # datetime.datetime.utcfromtimestamp(something)
     # username = users_list[kwargs['data']['user']]
     # status = kwargs['data']['presence']
