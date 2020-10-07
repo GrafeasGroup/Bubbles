@@ -90,15 +90,12 @@ def periodic_ping_in_progress_callback() -> None:
     list_users_to_check_out = []
     for message in response_watchping["messages"]:
         # print(message["text"])
-        only_watch = True
+        only_watch = False
         if "reactions" not in message.keys():
-            only_watch = False
             pass # No reactions -> already handeled by cry
         for reaction in message["reactions"]:
-            if reaction["name"]  != "watch":
-                only_watch = False
-            else:
-                pass
+            if reaction["name"] in ["watch", "email"]:
+                only_watch = True
         if only_watch:
                 watchping = True
                 name_user_to_check_out = message["text"].split(" ")[0]
