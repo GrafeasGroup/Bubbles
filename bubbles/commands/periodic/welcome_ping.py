@@ -81,12 +81,12 @@ def periodic_ping_in_progress_callback() -> None:
         latest=timestamp_needed_start_watchping.timestamp(),
     )  # ID for #bottest
     watchping = False
-    client.chat_postMessage(
-        channel=rooms_list["new_volunteers_pings_in_progress"],
-        link_names=1,
-        text="Heartbeat message.",
-        as_user=True,
-    )
+#    client.chat_postMessage(
+#        channel=rooms_list["new_volunteers_pings_in_progress"],
+#        link_names=1,
+#        text="Heartbeat message.",
+#        as_user=True,
+#    )
     list_users_to_check_out = []
     for message in response_watchping["messages"]:
         # print(message["text"])

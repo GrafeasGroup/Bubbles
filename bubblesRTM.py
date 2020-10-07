@@ -45,7 +45,7 @@ def welcome_ping():
     welcome_ping_callback()
 
 
-@tl.job(interval=datetime.timedelta(minutes=5))
+@tl.job(interval=datetime.timedelta(days=1))
 def periodic_ping_in_progress():
     periodic_ping_in_progress_callback()
 
