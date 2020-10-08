@@ -4,8 +4,8 @@ from bubbles.config import client, rooms_list, reddit
 def banbot_check_callback() -> None:
     subreddits = (
         reddit.subreddit("TranscribersOfReddit")
-            .wiki["subreddits"]
-            .content_md.splitlines()
+        .wiki["subreddits"]
+        .content_md.splitlines()
     )
     saferbot_list = list()
     misandrybot_list = list()

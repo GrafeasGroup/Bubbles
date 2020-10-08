@@ -110,3 +110,4 @@ venv.bak/
 *.gif
 *.jpeg
 *.tiff
+presence_log.json
