@@ -12,6 +12,13 @@ from bubbles.config import (
 )
 
 
+HELP_MESSAGE = (
+    '!historywho [number of posts] "person" - shows the number of new'
+    " volunteers welcomed by `person` in function of their day, comparing"
+    " it to the other folks and non-welcomed volunteers. `number of posts`"
+    " (optional) must be an integer between 1 and 1000 inclusive."
+)
+
 def plot_comments_historywho(message_data: Dict) -> None:
     # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
     last_datetime = datetime.datetime.now().timestamp()
@@ -25,7 +32,10 @@ def plot_comments_historywho(message_data: Dict) -> None:
     ):
         response = client.chat_postMessage(
             channel=message_data.get("channel"),
-            text='`historywho` requires that you surround the name of the person between `" "`!',
+            text=(
+                '`historywho` must specify a person, and the name must be inside double'
+                ' quotes. Example: `"!historywho "Bubbles"`'
+            ),
             as_user=True,
         )
         return
@@ -46,7 +56,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
         if args[1] in ["-h", "--help", "-H", "help"]:
             response = client.chat_postMessage(
                 channel=message_data.get("channel"),
-                text='`!historywho [number of posts] "[person]"` shows the number of new volunteers welcomed by `person` in function of their day, comparing it to the other folks and non-welcomed volunteers. `number of posts` must be an integer between 1 and 1000 inclusive.',
+                text=HELP_MESSAGE,
                 as_user=True,
             )
             return
@@ -55,7 +65,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
     elif len(args) > 3:
         response = client.chat_postMessage(
             channel=message_data.get("channel"),
-            text='ERROR! Too many arguments given as inputs! Syntax: `!history [number of posts] "[person]`',
+            text=f'Too many arguments given as inputs! Syntax: {HELP_MESSAGE}',
             as_user=True,
         )
         return
@@ -215,11 +225,6 @@ def plot_comments_historywho(message_data: Dict) -> None:
 
 PluginManager.register_plugin(
     plot_comments_historywho,
-    r"historywho [ \"a-zA-Z]+",
-    help=(
-        '!historywho [number of posts] "[person]" - shows the number of new'
-        " volunteers welcomed by `person` in function of their day, comparing"
-        " it to the other folks and non-welcomed volunteers. `number of posts`"
-        " must be an integer between 1 and 1000 inclusive."
-    ),
+    r'historywho([ \"a-zA-Z]+)?',
+    help=HELP_MESSAGE,
 )
