@@ -100,8 +100,11 @@ def periodic_ping_in_progress_callback() -> None:
         if "reactions" not in message.keys():
             pass  # No reactions -> already handeled by cry
         for reaction in message["reactions"]:
-            if reaction["name"] in ["watch", "email"]:
+            if reaction["name"] in ["watch", "email", "exclamation"]:
                 only_watch = True
+            if reaction["name"] in ["banhammer"]:
+                only_watch = False
+                break
         if only_watch:
             watchping = True
             name_user_to_check_out = message["text"].split(" ")[0]
@@ -116,7 +119,7 @@ def periodic_ping_in_progress_callback() -> None:
             client.chat_postMessage(
                 channel=rooms_list["new_volunteers_pings_in_progress"],
                 link_names=1,
-                text="There are users claimed with a :watch: even after 24 hours. Please check them out.",
+                text="There are users claimed with a :watch:, a :email: or a :exclamation:. Please check them out when their time has come.",
                 as_user=True,
             )
             client.chat_postMessage(
@@ -132,7 +135,7 @@ def periodic_ping_in_progress_callback() -> None:
                 link_names=1,
                 text="<@"
                 + id_mod_to_ping
-                + "> there are users claimed with a :watch: even after 24 hours. Please check them out.",
+                + "> there are users claimed with a :watch:, a :email: or a :exclamation:. Please check them out when their time has come.",
                 as_user=True,
             )
             client.chat_postMessage(
