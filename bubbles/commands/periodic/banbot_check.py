@@ -7,16 +7,18 @@ def banbot_check_callback() -> None:
         .wiki["subreddits"]
         .content_md.splitlines()
     )
-    saferbot_list = list()
-    misandrybot_list = list()
+
+    # make sure to add names in lowercase
+    known_banbots = ["saferbot", "misandrybot", "safestbot"]
+
+    sublists = {key: [] for key in known_banbots}
 
     for sub in subreddits:
         try:
             mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
-            if "saferbot" in mods:
-                saferbot_list.append(sub)
-            if "misandrybot" in mods:
-                misandrybot_list.append(sub)
+            for banbot in known_banbots:
+                if banbot in mods:
+                    sublists[banbot].append(sub)
         except:
             print(f"banbot_check: FAILED TO GET {sub}")
 
@@ -25,15 +27,10 @@ def banbot_check_callback() -> None:
         " detected in the following subreddits: {1} :rotating_light:"
     )
 
-    if len(saferbot_list) > 0:
-        client.chat_postMessage(
-            channel=rooms_list["general"],
-            text=message.format("SaferBot", ", ".join(saferbot_list)),
-            as_user=True,
-        )
-    if len(misandrybot_list) > 0:
-        client.chat_postMessage(
-            channel=rooms_list["general"],
-            text=message.format("MisandryBot", ", ".join(misandrybot_list)),
-            as_user=True,
-        )
+    for banbot in sublists:
+        if len(sublists[banbot]) > 0:
+            client.chat_postMessage(
+                channel=rooms_list["general"],
+                text=message.format(banbot, ", ".join(sublists[banbot])),
+                as_user=True,
+            )
