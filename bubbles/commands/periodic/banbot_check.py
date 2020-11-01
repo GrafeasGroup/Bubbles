@@ -10,6 +10,9 @@ def banbot_check_callback() -> None:
 
     # make sure to add names in lowercase
     known_banbots = ["saferbot", "misandrybot", "safestbot"]
+    
+    # List of subreddits with safestbot that have been "authorized" after discussion with their mod team
+    exception_subreddits = []
 
     sublists = {key: [] for key in known_banbots}
 
@@ -17,7 +20,11 @@ def banbot_check_callback() -> None:
         try:
             mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
             for banbot in known_banbots:
-                if banbot in mods:
+                ignore_subreddit = False
+                if banbot == "safestbot":
+                    if sub in exception_subreddits:
+                        ignore_subreddit = True
+                if banbot in mods and not ignore_subreddit:
                     sublists[banbot].append(sub)
         except:
             print(f"banbot_check: FAILED TO GET {sub}")
