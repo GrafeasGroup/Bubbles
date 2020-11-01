@@ -50,9 +50,7 @@ def plot_comments_history(message_data: Dict) -> None:
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
         difference_days = datetime.datetime.now() - time_send
         difference_days_num = difference_days.days
-        if difference_days_num not in count_days.keys():
-            count_days[difference_days_num] = 0
-        count_days[difference_days_num] = count_days[difference_days_num] + 1
+        count_days[difference_days_num] = count_days.get(difference_days_num, 0) + 1
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         last_datetime = time_send
     client.chat_postMessage(
@@ -80,7 +78,6 @@ def plot_comments_history(message_data: Dict) -> None:
         as_user=True,
     )
     plt.close()
-
 
 PluginManager.register_plugin(
     plot_comments_history,

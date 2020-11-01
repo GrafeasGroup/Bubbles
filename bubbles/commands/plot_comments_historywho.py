@@ -82,11 +82,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
         if "reactions" not in message.keys():
             if "Nobody" not in count_reactions_people.keys():
                 count_reactions_people["Nobody"] = {}
-            if difference_days not in count_reactions_people["Nobody"].keys():
-                count_reactions_people["Nobody"][difference_days] = 0
-            count_reactions_people["Nobody"][difference_days] = (
-                count_reactions_people["Nobody"][difference_days] + 1
-            )
+            count_reactions_people["Nobody"][difference_days] = count_reactions_people["Nobody"].get(difference_days, 0) + 1
         else:
             no_valable_reaction = True
             for reaction in message["reactions"]:
@@ -99,15 +95,8 @@ def plot_comments_historywho(message_data: Dict) -> None:
                     ):  # Several people have reacted to the same message
                         if "Conflict" not in count_reactions_people.keys():
                             count_reactions_people["Conflict"] = {}
-                        if (
-                            difference_days
-                            not in count_reactions_people["Conflict"].keys()
-                        ):
-                            count_reactions_people["Conflict"][difference_days] = 0
                         no_valable_reaction = False
-                        count_reactions_people["Conflict"][difference_days] = (
-                            count_reactions_people["Conflict"][difference_days] + 1
-                        )
+                        count_reactions_people["Conflict"][difference_days] = count_reactions_people["Conflict"].get(difference_days, 0) + 1
                     else:  # only one person has reacted to the message
                         user_who_has_reacted = reaction["users"][0]
                         # print(reaction["users"])
@@ -116,54 +105,25 @@ def plot_comments_historywho(message_data: Dict) -> None:
                         if name_user_who_has_reacted != name_person_to_search:
                             if "Other" not in count_reactions_people.keys():
                                 count_reactions_people["Other"] = {}
-                            if (
-                                difference_days
-                                not in count_reactions_people["Other"].keys()
-                            ):
-                                count_reactions_people["Other"][difference_days] = 0
-                                count_reactions_people["Other"][difference_days] = (
-                                    count_reactions_people["Other"][difference_days] + 1
-                                )
+                            count_reactions_people["Other"][difference_days] = count_reactions_people["Other"].get(difference_days, 0) + 1
                         else:
                             if (
                                 name_person_to_search
                                 not in count_reactions_people.keys()
                             ):
                                 count_reactions_people[name_person_to_search] = {}
-                            if (
-                                difference_days
-                                not in count_reactions_people[
-                                    name_person_to_search
-                                ].keys()
-                            ):
-                                count_reactions_people[name_person_to_search][
-                                    difference_days
-                                ] = 0
-                            count_reactions_people[name_person_to_search][
-                                difference_days
-                            ] = (
-                                count_reactions_people[name_person_to_search][
-                                    difference_days
-                                ]
-                                + 1
-                            )
+                            count_reactions_people[name_person_to_search][difference_days] = count_reactions_people[name_person_to_search].get(difference_days, 0) + 1
                         no_valable_reaction = False
 
             if no_valable_reaction:
                 if "Nobody" not in count_reactions_people.keys():
                     count_reactions_people["Nobody"] = {}
-                if difference_days not in count_reactions_people["Nobody"].keys():
-                    count_reactions_people["Nobody"][difference_days] = 0
-                count_reactions_people["Nobody"][difference_days] = (
-                    count_reactions_people["Nobody"][difference_days] + 1
-                )
+                count_reactions_people["Nobody"][difference_days] = count_reactions_people["Nobody"].get(difference_days, 0) + 1
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
         difference_datetime = datetime_now - time_send
         difference_days = difference_datetime.days
-        if difference_days not in count_reactions_all.keys():
-            count_reactions_all[difference_days] = 0
-        count_reactions_all[difference_days] = count_reactions_all[difference_days] + 1
+        count_reactions_all[difference_days] = count_reactions_all.get(difference_days, 0) + 1
         # print(str(time_send)+"| "+userWhoSentMessage+" sent: "+textMessage)
         last_datetime = time_send.timestamp()
         # print(str(lastDatetime))
@@ -221,7 +181,6 @@ def plot_comments_historywho(message_data: Dict) -> None:
         title="Just vibing.",
         as_user=True,
     )
-
 
 PluginManager.register_plugin(
     plot_comments_historywho,
