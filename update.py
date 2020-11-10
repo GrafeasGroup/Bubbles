@@ -18,6 +18,7 @@ client.chat_postMessage(
 )
 
 try:
+    # if this command succeeds, the process dies here
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
     )
@@ -28,5 +29,3 @@ except subprocess.CalledProcessError as e:
         as_user=True,
     )
     sys.exit(1)
-
-client.chat_postMessage(channel=DEFAULT_CHANNEL, text="Success!", as_user=True)
