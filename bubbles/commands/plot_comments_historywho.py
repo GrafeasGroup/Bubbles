@@ -87,7 +87,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
             no_valable_reaction = True
             for reaction in message["reactions"]:
                 # Ignore all reactions unrelated to welcoming people
-                if reaction["name"] not in ["heavy_check_mark", "watch"]:
+                if reaction["name"] not in ["heavy_check_mark", "watch", "email", "x"]:
                     pass
                 else:
                     if (

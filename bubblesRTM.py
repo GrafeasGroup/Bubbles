@@ -22,7 +22,6 @@ from bubbles.reaction_added import reaction_added_callback
 
 tl = timeloop.Timeloop()
 
-
 @RTMClient.run_on(event="hello")
 def say_hello(**payload):
     # fires when the bot is first started
@@ -76,7 +75,6 @@ def check_in_as_needed():
 @tl.job(interval=datetime.timedelta(days=3))
 def update_presence_information():
     force_presence_update(rtm_client)
-
 
 try:
     tl.start()

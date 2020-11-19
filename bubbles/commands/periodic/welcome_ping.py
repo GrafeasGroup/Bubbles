@@ -21,7 +21,7 @@ def welcome_ping_callback() -> None:
         else:
             no_valable_reactions = True
             for reaction in message["reactions"]:
-                if reaction["name"] in ["heavy_check_mark", "watch", "x"]:
+                if reaction["name"] in ["heavy_check_mark", "watch", "email", "x"]:
                     no_valable_reactions = False
                 else:
                     pass
