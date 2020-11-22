@@ -32,6 +32,8 @@ def say_hello(**payload):
 @RTMClient.run_on(event="manual_presence_change")
 @RTMClient.run_on(event="presence_change")
 def update_presence(**payload) -> None:
+    # This receives the responses triggered by `presence_update_callback` and
+    # `force_presence_update`, as they don't return any data on their own.
     presence_update_callback(**payload)
 
 

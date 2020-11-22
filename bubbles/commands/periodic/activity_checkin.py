@@ -38,6 +38,9 @@ def configure_presence_change_event(rtm_client: RTMClient) -> None:
     https://api.slack.com/events/presence_query
     This request only lasts for the life of the websocket, so it must
     be reconfigured every time we lose connection or restart the bot.
+
+    This function is only responsible for triggering the request; the
+    result is returned via a RTM event captured in bubblesRTM.py.
     """
     rtm_client.send_over_websocket(
         payload={"type": "presence_sub", "ids": USER_IDS,}
@@ -83,6 +86,8 @@ def force_presence_update(rtm_client: RTMClient):
     # Instead of forcing a refresh when we check (which would require some dancing
     # with slack to get the timing right) we just schedule the force update as its
     # own thing and carry on.
+    # This function is only responsible for triggering the request; the result is
+    # returned via a RTM event captured in bubblesRTM.py.
     rtm_client.send_over_websocket(
         payload={"type": "presence_query", "ids": USER_IDS,}
     )
