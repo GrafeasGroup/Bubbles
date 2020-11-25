@@ -100,7 +100,7 @@ def periodic_ping_in_progress_callback() -> None:
         if "reactions" not in message.keys():
             pass  # No reactions -> already handeled by cry
         for reaction in message["reactions"]:
-            if reaction["name"] in ["watch", "email", "exclamation"]:
+            if reaction["name"] in ["watch", "email", "exclamation", "heavy_exclamation_mark"]:
                 only_watch = True
             if reaction["name"] in ["banhammer"]:
                 only_watch = False
