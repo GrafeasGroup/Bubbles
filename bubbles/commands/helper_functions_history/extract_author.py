@@ -50,6 +50,6 @@ def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
     # Extraction of the author of the good reaction used
     for reaction in message_data["reactions"]:
         if reaction["name"] != reaction_used:
-            pass
+            continue
         result = reaction["users"][0]
     return users_list[result]

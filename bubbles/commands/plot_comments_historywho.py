@@ -75,7 +75,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
         channel=rooms_list["new_volunteers"], latest=last_datetime, limit=number_posts
     )  # ID for #bottest
     # countReactions['Nobody'] = 0
-    GOOD_REACTIONS = [":watch:", "heavy_check_mark:", "email", "exclamation_point"]
+    GOOD_REACTIONS = ["watch", "heavy_check_mark", "email", "exclamation_point"]
     for message in response["messages"]:
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
