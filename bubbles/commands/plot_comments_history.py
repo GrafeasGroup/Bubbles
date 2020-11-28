@@ -15,6 +15,7 @@ def plot_comments_history(message_data: Dict) -> None:
     # Syntax: !history [number of posts]
 
     count_days = {}
+    count_hours = [0] * 24
     args = message_data.get("text").split()
     print(args)
     number_posts = 100
@@ -48,11 +49,13 @@ def plot_comments_history(message_data: Dict) -> None:
         #
         # textMessage = message["text"]
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
+        hour_message = time_send.hour
         difference_days = datetime.datetime.now() - time_send
         difference_days_num = difference_days.days
         count_days[difference_days_num] = count_days.get(difference_days_num, 0) + 1
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         last_datetime = time_send
+        count_hours[hour_message] = count_hours[hour_message] + 1
     client.chat_postMessage(
         channel=message_data.get("channel"),
         text=f"{str(len(response['messages']))} messages retrieved since {str(last_datetime)}",
@@ -74,6 +77,20 @@ def plot_comments_history(message_data: Dict) -> None:
     client.files_upload(
         channels=message_data.get("channel"),
         file="plotHour.png",
+        title="Just vibing.",
+        as_user=True,
+    )
+    plt.close()
+    plt.bar(range(0, 24), count_hours, 1, align="edge")
+    plt.xlabel("Hour")
+    plt.ylabel("Number of messages")
+    plt.xticks(range(0, 24, 2))
+    plt.yticks(range(0, max(count_hours)))
+    plt.grid(True, which="both")
+    plt.savefig("plotHours.png")
+    client.files_upload(
+        channels=message_data.get("channel"),
+        file="plotHours.png",
         title="Just vibing.",
         as_user=True,
     )
