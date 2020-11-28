@@ -59,10 +59,11 @@ def plot_comments_historylist(message_data: Dict) -> None:
         text=f"{str(len(response['messages']))} messages retrieved. Numerical data: {count_reactions_people}",
         as_user=True,
     )
-    for key, value in list_volunteers_per_person.items():
+    keys_dict = list(sorted(list_volunteers_per_person.keys()))
+    for key in keys_dict:
         client.chat_postMessage(
         channel=message_data.get("channel"),
-        text=f"Volunteers welcomed by {key}: {value}",
+        text=f"Volunteers welcomed by {key}: {list_volunteers_per_person[key]}",
         as_user=True,
     )
     
