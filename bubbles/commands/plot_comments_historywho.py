@@ -10,6 +10,7 @@ from bubbles.config import (
     users_list,
     rooms_list,
 )
+from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 
 HELP_MESSAGE = (
@@ -74,51 +75,20 @@ def plot_comments_historywho(message_data: Dict) -> None:
         channel=rooms_list["new_volunteers"], latest=last_datetime, limit=number_posts
     )  # ID for #bottest
     # countReactions['Nobody'] = 0
+    GOOD_REACTIONS = [":watch:", "heavy_check_mark:", "email", "exclamation_point"]
     for message in response["messages"]:
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
         difference_datetime = datetime_now - time_send
         difference_days = difference_datetime.days
-        if "reactions" not in message.keys():
-            if "Nobody" not in count_reactions_people.keys():
-                count_reactions_people["Nobody"] = {}
-            count_reactions_people["Nobody"][difference_days] = count_reactions_people["Nobody"].get(difference_days, 0) + 1
-        else:
-            no_valable_reaction = True
-            for reaction in message["reactions"]:
-                # Ignore all reactions unrelated to welcoming people
-                if reaction["name"] not in ["heavy_check_mark", "watch", "email", "x"]:
-                    pass
-                else:
-                    if (
-                        reaction["count"] > 1
-                    ):  # Several people have reacted to the same message
-                        if "Conflict" not in count_reactions_people.keys():
-                            count_reactions_people["Conflict"] = {}
-                        no_valable_reaction = False
-                        count_reactions_people["Conflict"][difference_days] = count_reactions_people["Conflict"].get(difference_days, 0) + 1
-                    else:  # only one person has reacted to the message
-                        user_who_has_reacted = reaction["users"][0]
-                        # print(reaction["users"])
-                        name_user_who_has_reacted = users_list[user_who_has_reacted]
-                        # print(nameuser_who_has_reacted)
-                        if name_user_who_has_reacted != name_person_to_search:
-                            if "Other" not in count_reactions_people.keys():
-                                count_reactions_people["Other"] = {}
-                            count_reactions_people["Other"][difference_days] = count_reactions_people["Other"].get(difference_days, 0) + 1
-                        else:
-                            if (
-                                name_person_to_search
-                                not in count_reactions_people.keys()
-                            ):
-                                count_reactions_people[name_person_to_search] = {}
-                            count_reactions_people[name_person_to_search][difference_days] = count_reactions_people[name_person_to_search].get(difference_days, 0) + 1
-                        no_valable_reaction = False
-
-            if no_valable_reaction:
-                if "Nobody" not in count_reactions_people.keys():
-                    count_reactions_people["Nobody"] = {}
-                count_reactions_people["Nobody"][difference_days] = count_reactions_people["Nobody"].get(difference_days, 0) + 1
+        author = extract_author(message, GOOD_REACTIONS)
+        if author not in ["Nobody", "Abandoned", "Banned", "Conflict"]:
+            if author != name_person_to_search:
+                author = "Other"
+        print(author)
+        if author not in count_reactions_people.keys():
+            count_reactions_people[author] = {}
+        count_reactions_people[author][difference_days] = count_reactions_people[author].get(difference_days, 0) + 1
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
         difference_datetime = datetime_now - time_send
@@ -143,8 +113,8 @@ def plot_comments_historywho(message_data: Dict) -> None:
         legends.append(name)
     posts_hist = zeros((maxDay + 1, len(count_reactions_people.keys())))
     indice_user = 0
-    colours = ["#00FF00", "#FF0000", "#0000FF", "#808080"]
-    for name in [name_person_to_search, "Other", "Nobody", "Conflict"]:
+    colours = ["#00FF00", "#FF0000", "#0000FF", "#808080", "#404000", "#000000"]
+    for name in [name_person_to_search, "Other", "Nobody", "Conflict", "Abandoned", "Banned"]:
         if name in count_reactions_people.keys():
             number_posts[name] = []
             # dates[name] = []
@@ -162,7 +132,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
         new_date = datetime_now - difference_days
         dates.append(new_date)
     i = 0
-    for name in [name_person_to_search, "Other", "Nobody", "Conflict"]:
+    for name in [name_person_to_search, "Other", "Nobody", "Conflict", "Abandoned", "Banned"]:
         if name in count_reactions_people.keys():
             plt.plot(
                 dates, cumsum(flip(posts_hist[:, i])), label=name, color=colours[i]
