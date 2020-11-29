@@ -1,6 +1,7 @@
 import datetime
 
 from bubbles.config import client, users_list, rooms_list, mods_array
+from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 VOLUNTEER_CHANNEL = "new_volunteers"
 META_CHANNEL = "new_volunteers_meta"
@@ -26,18 +27,11 @@ def welcome_ping_callback() -> None:
     )  # ID for #bottest
     cry = False
     users_to_welcome = {}
+    GOOD_REACTIONS = ["watch", "heavy_check_mark", "email", "exclamation", "heavy_exclamation_mark"]
     for message in response["messages"]:
+        author = extract_author(message, GOOD_REACTIONS)
         # print(message["text"])
-        if "reactions" not in message.keys():
-            no_valable_reactions = True
-        else:
-            no_valable_reactions = True
-            for reaction in message["reactions"]:
-                if reaction["name"] in ["heavy_check_mark", "watch", "email", "x"]:
-                    no_valable_reactions = False
-                else:
-                    pass
-        if no_valable_reactions:
+        if author == "Nobody":
             cry = True
             try:
                 username, permalink = get_username_and_permalink(message)

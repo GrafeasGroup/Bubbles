@@ -40,6 +40,8 @@ def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
         stored_results[reaction["name"]] = reaction["count"]
     if sum(stored_results.values())>1:
         return "Conflict"
+    elif sum(stored_results.values()) == 0:
+        return "Nobody"
     
     # Extraction of the good reaction used
     reaction_used = ""
