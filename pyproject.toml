@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.7"
 wheel = "^0.36.2"
+blossom-wrapper = { git = "https://github.com/GrafeasGroup/blossom-wrapper.git", branch = "master" }
 slackclient = "^2.7.3"
 matplotlib = "^3.3.0"
 requests = "^2.24.0"

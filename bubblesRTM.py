@@ -1,5 +1,7 @@
 import datetime
+from functools import wraps
 import traceback
+from typing import Callable
 
 import timeloop
 from slack import RTMClient
@@ -58,8 +60,9 @@ def message_received(**payload):
 
 
 @RTMClient.run_on(event="reaction_added")
-def func(**payload):
+def reaction_added(**payload):
     reaction_added_callback(**payload)
+
 
 print("TRIGGER TIMES (hopefully in the future)")
 print(f"welcome_ping: {TRIGGER_4_HOURS_AGO}")
@@ -67,6 +70,8 @@ print(f"check_for_saferbot: {TRIGGER_12_HOURS_AGO}")
 print(f"periodic_ping_in_progress: {TRIGGER_YESTERDAY}")
 print(f"check_in_as_needed: {TRIGGER_LAST_WEEK}")
 print(f"update_presence_information: {NEXT_TRIGGER_DAY}")
+
+
 # print(days_since_epoch)
 # @tl.job(interval=datetime.timedelta(seconds=4))
 # def poke():
@@ -76,7 +81,20 @@ print(f"update_presence_information: {NEXT_TRIGGER_DAY}")
 #           th.interval = datetime.timedelta(seconds=1)
 # tl.jobs[-1].name="Test"
 
+def name_tl_job(name=None) -> Callable:
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            return result
 
+        tl.jobs[-1].name = name
+        return wrapper
+
+    return decorator
+
+
+@name_tl_job("welcome_ping")
 @tl.job(interval=TRIGGER_4_HOURS_AGO - datetime.datetime.now())
 def welcome_ping():
     welcome_ping_callback()
@@ -85,9 +103,7 @@ def welcome_ping():
             th.interval = datetime.timedelta(hours=4)
 
 
-tl.jobs[-1].name = "welcome_ping"
-
-
+@name_tl_job("check_for_saferbot")
 @tl.job(interval=TRIGGER_12_HOURS_AGO - datetime.datetime.now())
 def check_for_saferbot():
     banbot_check_callback()
@@ -96,9 +112,7 @@ def check_for_saferbot():
             th.interval = datetime.timedelta(hours=12)
 
 
-tl.jobs[-1].name = "check_for_saferbot"
-
-
+@name_tl_job("periodic_ping_in_progress")
 @tl.job(interval=TRIGGER_YESTERDAY - datetime.datetime.now())
 def periodic_ping_in_progress():
     periodic_ping_in_progress_callback()
@@ -107,9 +121,7 @@ def periodic_ping_in_progress():
             th.interval = datetime.timedelta(days=1)
 
 
-tl.jobs[-1].name = "periodic_ping_in_progress"
-
-
+@name_tl_job("check_in_as_needed")
 @tl.job(interval=TRIGGER_LAST_WEEK - datetime.datetime.now())
 def check_in_as_needed():
     check_in_with_people()
@@ -118,9 +130,7 @@ def check_in_as_needed():
             th.interval = datetime.timedelta(days=7)
 
 
-tl.jobs[-1].name = "check_in_as_needed"
-
-
+@name_tl_job("update_presence_information")
 @tl.job(interval=NEXT_TRIGGER_DAY - datetime.datetime.now())
 def update_presence_information():
     force_presence_update(rtm_client)
@@ -128,8 +138,6 @@ def update_presence_information():
         if th.name == "update_presence_information":
             th.interval = datetime.timedelta(days=3)
 
-
-tl.jobs[-1].name = "update_presence_information"
 
 print(tl.jobs)
 
