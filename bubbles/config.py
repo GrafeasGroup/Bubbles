@@ -24,9 +24,11 @@ REDDIT_USER_AGENT = os.environ.get("reddit_user_agent", None)
 ENABLE_BLOSSOM = os.environ.get("enable_blossom", False)
 
 reddit = Reddit(
-    client_id=REDDIT_CLIENT_ID,
-    client_secret=REDDIT_SECRET,
-    user_agent=REDDIT_USER_AGENT,
+    username=os.environ.get("reddit_username"),
+    password=os.environ.get("reddit_password"),
+    client_id=os.environ.get("reddit_client_id"),
+    client_secret=os.environ.get("reddit_secret"),
+    user_agent=os.environ.get("reddit_user_agent")
 )
 
 client = WebClient(token=API_KEY)
