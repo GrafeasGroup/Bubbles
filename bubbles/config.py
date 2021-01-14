@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
+from unittest import mock
 
+from blossom_wrapper import BlossomAPI
 import matplotlib as mpl
 from dotenv import load_dotenv
 from praw import Reddit
@@ -19,6 +21,8 @@ REDDIT_SECRET = os.environ.get("reddit_secret", None)
 REDDIT_CLIENT_ID = os.environ.get("reddit_client_id", None)
 REDDIT_USER_AGENT = os.environ.get("reddit_user_agent", None)
 
+ENABLE_BLOSSOM = os.environ.get("enable_blossom", False)
+
 reddit = Reddit(
     client_id=REDDIT_CLIENT_ID,
     client_secret=REDDIT_SECRET,
@@ -27,6 +31,19 @@ reddit = Reddit(
 
 client = WebClient(token=API_KEY)
 rtm_client = RTMClient(token=API_KEY)
+
+if ENABLE_BLOSSOM:
+    # Feature flag means that we can lock away blossom functionality until
+    # blossom is actually ready to roll.
+    blossom = BlossomAPI(
+        email=os.getenv('blossom_email'),
+        password=os.getenv('blossom_password'),
+        api_key=os.getenv('blossom_api_key'),
+        api_base_url=os.getenv('blossom_api_url'),
+    )
+    print("blossom loaded!")
+else:
+    blossom = mock.MagicMock()
 
 ME = client.auth_test().data["user_id"]
 

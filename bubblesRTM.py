@@ -17,6 +17,7 @@ from bubbles.commands.periodic.welcome_ping import (
     welcome_ping_callback,
     periodic_ping_in_progress_callback,
 )
+from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
 from bubbles.config import client, rtm_client
 from bubbles.hello import hello_callback
 from bubbles.message import process_message
@@ -100,6 +101,15 @@ def welcome_ping():
     welcome_ping_callback()
     for th in tl.jobs:
         if th.name == "welcome_ping":
+            th.interval = datetime.timedelta(hours=4)
+
+
+@name_tl_job("get_in_progress_posts")
+@tl.job(interval=TRIGGER_4_HOURS_AGO - datetime.datetime.now())
+def get_in_progress_posts():
+    get_in_progress_callback()
+    for th in tl.jobs:
+        if th.name == "get_in_progress_posts":
             th.interval = datetime.timedelta(hours=4)
 
 
