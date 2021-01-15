@@ -18,11 +18,11 @@ class TLJob:
 
         for attr in ['start_interval', 'regular_interval']:
             if not hasattr(self.Meta, attr):
-                raise TLConfigException(f"Missing {str(attr)} for {self.name}!")
+                raise TLConfigException(f"Missing {attr} for {self.name}!")
 
             if not isinstance(getattr(self.Meta, attr), timedelta):
                 raise TLConfigException(
-                    f"{self.name} - {str(attr)} must be a timedelta object!"
+                    f"{self.name} - {attr} must be a timedelta object!"
                 )
 
         tl.job(interval=self.Meta.start_interval)(self._job_wrapper)
