@@ -1,6 +1,5 @@
 from bubbles.config import client, rooms_list, reddit
 
-
 def banbot_check_callback() -> None:
     subreddits = (
         reddit.subreddit("TranscribersOfReddit")
@@ -20,14 +19,10 @@ def banbot_check_callback() -> None:
     sublists = {key: [] for key in known_banbots}
 
     for sub in subreddits:
-        try:
-            mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
-            for banbot in known_banbots:
-                if banbot in mods and not banbot in subreddit_exceptions[sub]:
-                    sublists[banbot].append(sub)
-
-        except:
-            print(f"banbot_check: FAILED TO GET {sub}")
+        mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
+        for banbot in known_banbots:
+            if banbot in mods and not banbot in subreddit_exceptions.get(sub, []):
+                sublists[banbot].append(sub)
 
     message = (
         ":rotating_light: :radioactive_sign:{0}:radioactive_sign:"
