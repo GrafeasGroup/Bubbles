@@ -14,6 +14,9 @@ def banbot_check_callback() -> None:
     subreddit_exceptions = {
         "Feminism": ["safestbot"],
         "traaaaaaannnnnnnnnns": ["safestbot"],
+        "insaneparents": ["safestbot"],
+        "ShitLiberalsSay": ["safestbot"],
+        "BAME_UK": ["safestbot"],
     }
 
     sublists = {key: [] for key in known_banbots}
