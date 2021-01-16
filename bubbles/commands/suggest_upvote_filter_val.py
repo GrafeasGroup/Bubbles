@@ -103,11 +103,11 @@ def guess_filter_value(data) -> None:
         f"\n"
         f"* karma distribution: {lowest_karma} | {highest_karma}\n"
         f"* time spread: {hours}h {round(minutes % 60)}m\n"
-        f"* number of submissions in the last 24h: {len(submissions_last_24h)}\n"
         f"\n"
+        f"Number of submissions in the last 24h: {len(submissions_last_24h)}\n"
         f"Average new submissions per day: {avg_new_submissions_per_day}\n"
         f"\n"
-        f"Suggested threshold based on all posts in window: {s_val_window}\n"
+        f"Suggested threshold based on the window: {s_val_window}\n"
         f"Suggested threshold from last 1k posts: {s_val}\n"
     )
     client.chat_postMessage(channel=data.get("channel"), text=msg, as_user=True)
