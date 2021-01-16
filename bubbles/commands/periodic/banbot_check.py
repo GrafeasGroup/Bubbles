@@ -12,11 +12,11 @@ def banbot_check_callback() -> None:
 
     # List of subreddits with banbots that have been "authorized" after discussion with their mod team
     subreddit_exceptions = {
+        "BAME_UK": ["safestbot"],
         "Feminism": ["safestbot"],
-        "traaaaaaannnnnnnnnns": ["safestbot"],
         "insaneparents": ["safestbot"],
         "ShitLiberalsSay": ["safestbot"],
-        "BAME_UK": ["safestbot"],
+        "traaaaaaannnnnnnnnns": ["safestbot"],
     }
 
     sublists = {key: [] for key in known_banbots}
