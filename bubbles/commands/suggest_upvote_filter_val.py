@@ -2,7 +2,7 @@ import re
 import statistics
 import time
 from datetime import datetime, timedelta
-from typing import List
+from typing import Generator, List
 
 from bubbles.config import PluginManager, client, reddit
 
@@ -34,52 +34,69 @@ def reject_outliers(upvote_list: List) -> List:
     if len(upvote_list) < 2:
         return upvote_list
 
-    multiplier = 0.5
+    # Make the multiplier smaller to increase the sensitivity and reject more.
+    # Make it larger to have it be more lenient.
+    multiplier = 0.7
     avg = sum(upvote_list) / len(upvote_list)
     s_dev = statistics.stdev(upvote_list)
     return [
-        n for n in upvote_list if (
-                avg - multiplier * s_dev < n < avg + multiplier * s_dev
-        )
+        n
+        for n in upvote_list
+        if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)
     ]
 
 
-def guess_filter_value(data) -> None:
-    sub = re.search(SUGGEST_FILTER_RE, data['text']).groups()[1]
+def get_new_posts_from_sub(subreddit: str) -> [List, List]:
+    """Return two generators from praw -- the 10 post window and 1k from new."""
+    return [
+        list(reddit.subreddit(subreddit).new(limit=10)),
+        list(reddit.subreddit(subreddit).new(limit=1000)),
+    ]
+
+
+def get_upvotes_from_list(post_list: List) -> List:
+    return [post.ups for post in post_list]
+
+
+def get_min_max_karma(post_list: List) -> [int, int]:
+    """Return the smallest and largest karma seen in a list of Reddit posts."""
+    upvote_list = get_upvotes_from_list(post_list)
+    return min(upvote_list), max(upvote_list)
+
+
+def get_time_diffs(post_list: List) -> [int, int]:
+    """
+    Return time differences in post time from now from a list of Reddit posts.
+
+    Starting from now, what is the time difference between the soonest post and
+    the latest post?
+    """
+    current_time = time.time()
+    time_diffs = [current_time - post.created_utc for post in post_list]
+
+    return min(time_diffs), max(time_diffs)
+
+
+def calculate_hours_and_minutes_timedelta_from_diffs(
+    start_diff: int, end_diff: int
+) -> [int, int]:
+    """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
 
-    client.chat_postMessage(
-        channel=data.get("channel"),
-        text=f"Processing data for r/{sub}. This may take a moment...",
-        as_user=True
-    )
-
-    upvote_window = []
-    time_diffs = []
-    for post in reddit.subreddit(sub).new(limit=10):
-        upvote_window.append(post.ups)
-        time_diffs.append(current_time - post.created_utc)
-
-    lowest_karma = min(upvote_window)
-    highest_karma = max(upvote_window)
-
-    earliest_time_diff = min(time_diffs)
-    latest_time_diff = max(time_diffs)
-
-    earliest_post = datetime.fromtimestamp(current_time - earliest_time_diff)
-    latest_post = datetime.fromtimestamp(current_time - latest_time_diff)
+    earliest_post = datetime.fromtimestamp(current_time - start_diff)
+    latest_post = datetime.fromtimestamp(current_time - end_diff)
     minutes = (earliest_post - latest_post).total_seconds() / 60
     hours = int(minutes / 60)
+    formatted_minutes = round(minutes % 60)
 
-    upvote_window_all = []
+    return hours, formatted_minutes
+
+
+def get_total_count_of_posts_per_day(post_list: List) -> int:
+    """Take all available submissions, sort them per day, then average the days."""
     submissions_per_day = {}
-    submissions_last_24h = []
-    for post in reddit.subreddit(sub).new(limit=1000):
-        upvote_window_all.append(post.ups)
 
-        if timedelta(seconds=current_time - post.created_utc) < timedelta(days=1):
-            submissions_last_24h.append(post)
-
+    for post in post_list:
         # count how many submissions we have per day
         post_time = datetime.fromtimestamp(post.created_utc)
         post_time_key = "{}-{}".format(post_time.month, post_time.day)
@@ -89,32 +106,85 @@ def guess_filter_value(data) -> None:
             submissions_per_day[post_time_key] += 1
 
     # just grab the raw per-day counts and average them
-    avg_new_submissions_per_day = round(
-        avg([v for k, v in submissions_per_day.items()]), 2
-    )
-    queue_mod = balance_queue_modifier(avg_new_submissions_per_day)
+    return round(avg([v for k, v in submissions_per_day.items()]), 2)
 
-    # where does 0.2 come from? Pulled from thin air.
-    s_val = round((avg(reject_outliers(upvote_window_all)) * 0.2) / queue_mod)
-    s_val_window = round((avg(reject_outliers(upvote_window)) * 0.2) / queue_mod)
+
+def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
+    submissions_last_24h = []
+    current_time = time.time()
+
+    for post in post_list:
+
+        if timedelta(seconds=current_time - post.created_utc) < timedelta(days=1):
+            submissions_last_24h.append(post)
+
+    return len(submissions_last_24h)
+
+
+def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
+    """
+    Create a guess of a filter value based on the votes and a modifier.
+
+    We start with a list of votes from a given window of any size, then cut out
+    the outliers. After that, the list is averaged and a preliminary guess is
+    determined; we apply a modifier based on how active the subreddit is to
+    inversely change the value. More posts coming from that sub? We need the value
+    to be higher. Fewer posts? We can relax the filter.
+
+    Warning: includes a magic number that has no basis in reality, it just seems
+    to work. ¯\_(ツ)_/¯
+    """
+    return round(
+        (avg(reject_outliers(vote_list)) * 0.2)
+        / balance_queue_modifier(number_of_posts_per_day)
+    )
+
+
+def suggest_filter(data) -> None:
+    sub = re.search(SUGGEST_FILTER_RE, data["text"]).groups()[1]
+
+    client.chat_postMessage(
+        channel=data.get("channel"),
+        text=f"Processing data for r/{sub}. This may take a moment...",
+        as_user=True,
+    )
+
+    ten_post_window, all_posts = get_new_posts_from_sub(sub)
+    upvote_list_window = get_upvotes_from_list(ten_post_window)
+    upvote_list_all_posts = get_upvotes_from_list(all_posts)
+
+    min_karma, max_karma = get_min_max_karma(ten_post_window)
+    hours, minutes = calculate_hours_and_minutes_timedelta_from_diffs(
+        *get_time_diffs(ten_post_window)
+    )
+
+    posts_per_day_count = get_total_count_of_posts_per_day(all_posts)
+    posts_per_last_24h_count = get_total_count_of_posts_in_24_hours(all_posts)
+
+    suggested_value_window = estimate_filter_value(
+        upvote_list_window, posts_per_day_count
+    )
+    suggested_value_all = estimate_filter_value(
+        upvote_list_all_posts, posts_per_day_count
+    )
 
     msg = (
         f"Stats for r/{sub} over the last 10 submissions:\n"
         f"\n"
-        f"* karma distribution: {lowest_karma} | {highest_karma}\n"
-        f"* time spread: {hours}h {round(minutes % 60)}m\n"
+        f"* karma distribution: {min_karma} | {max_karma}\n"
+        f"* time spread: {hours}h {minutes}m\n"
         f"\n"
-        f"Number of submissions in the last 24h: {len(submissions_last_24h)}\n"
-        f"Average new submissions per day: {avg_new_submissions_per_day}\n"
+        f"Number of submissions in the last 24h: {posts_per_last_24h_count}\n"
+        f"Average new submissions per day: {posts_per_day_count}\n"
         f"\n"
-        f"Suggested threshold based on the window: {s_val_window}\n"
-        f"Suggested threshold from last 1k posts: {s_val}\n"
+        f"Suggested threshold based on the window: {suggested_value_window}\n"
+        f"Suggested threshold from last 1k posts: {suggested_value_all}\n"
     )
     client.chat_postMessage(channel=data.get("channel"), text=msg, as_user=True)
 
 
 PluginManager.register_plugin(
-    guess_filter_value,
+    suggest_filter,
     SUGGEST_FILTER_RE,
     help=(
         "!suggest filter {subreddit} - have me guess at an appropriate filter value"
