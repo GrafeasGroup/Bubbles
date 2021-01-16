@@ -135,7 +135,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     to work. ¯\_(ツ)_/¯
     """
     return round(
-        (avg(reject_outliers(vote_list)) * 0.2)
+        (avg(reject_outliers(vote_list)) * 0.3)
         / balance_queue_modifier(number_of_posts_per_day)
     )
 
