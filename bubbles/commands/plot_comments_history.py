@@ -1,14 +1,19 @@
 import datetime
 from typing import Dict
 
+import warnings
+
 import matplotlib.pyplot as plt
 from numpy import flip
 
 from bubbles.config import (
-    client,
+    app,
     PluginManager,
     rooms_list,
 )
+
+# get rid of matplotlib's complaining
+warnings.filterwarnings("ignore")
 
 
 def plot_comments_history(message_data: Dict) -> None:
@@ -21,7 +26,7 @@ def plot_comments_history(message_data: Dict) -> None:
     number_posts = 100
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            response = client.chat_postMessage(
+            response = app.client.chat_postMessage(
                 channel=message_data.get("channel"),
                 text="`!history [number of posts]` shows the number of new comments in #new-volunteers in function of their day. `number of posts` must be an integer between 1 and 1000 inclusive.",
                 as_user=True,
@@ -30,14 +35,14 @@ def plot_comments_history(message_data: Dict) -> None:
         else:
             number_posts = max(1, min(int(args[1]), 1000))
     elif len(args) > 3:
-        response = client.chat_postMessage(
+        response = app.client.chat_postMessage(
             channel=message_data.get("channel"),
             text="ERROR! Too many arguments given as inputs! Syntax: `!history [number of posts]`",
             as_user=True,
         )
         return
 
-    response = client.conversations_history(
+    response = app.client.conversations_history(
         channel=rooms_list["new_volunteers"], limit=number_posts
     )
 
@@ -56,7 +61,7 @@ def plot_comments_history(message_data: Dict) -> None:
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         last_datetime = time_send
         count_hours[hour_message] = count_hours[hour_message] + 1
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         channel=message_data.get("channel"),
         text=f"{str(len(response['messages']))} messages retrieved since {str(last_datetime)}",
         as_user=True,
@@ -74,7 +79,7 @@ def plot_comments_history(message_data: Dict) -> None:
     plt.ylabel("Number of messages")
     plt.grid(True, which="both")
     plt.savefig("plotHour.png")
-    client.files_upload(
+    app.client.files_upload(
         channels=message_data.get("channel"),
         file="plotHour.png",
         title="Just vibing.",
@@ -88,13 +93,14 @@ def plot_comments_history(message_data: Dict) -> None:
     plt.yticks(range(0, max(count_hours)))
     plt.grid(True, which="both")
     plt.savefig("plotHours.png")
-    client.files_upload(
+    app.client.files_upload(
         channels=message_data.get("channel"),
         file="plotHours.png",
         title="Just vibing.",
         as_user=True,
     )
     plt.close()
+
 
 PluginManager.register_plugin(
     plot_comments_history,

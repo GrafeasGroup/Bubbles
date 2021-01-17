@@ -1,4 +1,5 @@
-from bubbles.config import client, rooms_list, reddit
+from bubbles.config import app, rooms_list, reddit
+
 
 def banbot_check_callback() -> None:
     subreddits = (
@@ -34,7 +35,7 @@ def banbot_check_callback() -> None:
 
     for banbot in sublists:
         if len(sublists[banbot]) > 0:
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=rooms_list["general"],
                 text=message.format(banbot, ", ".join(sublists[banbot])),
                 as_user=True,

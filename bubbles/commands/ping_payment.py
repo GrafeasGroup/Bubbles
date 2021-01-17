@@ -1,6 +1,6 @@
 import requests
 
-from bubbles.config import PluginManager, PAYMENT_KEY, PAYMENT_VALUE, client
+from bubbles.config import PluginManager, PAYMENT_KEY, PAYMENT_VALUE, app
 
 
 def ping_payment(data):
@@ -10,7 +10,7 @@ def ping_payment(data):
     try:
         result.raise_for_status()
     except:
-        client.chat_postMessage(
+        app.client.chat_postMessage(
             channel=data.get("channel"),
             text="I... I don't see anything out there...",
             as_user=True,

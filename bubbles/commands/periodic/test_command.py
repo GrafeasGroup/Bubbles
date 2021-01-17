@@ -1,9 +1,9 @@
 # Test command specifically for ensuring that periodic commands are functioning appropriately.
-from bubbles.config import client, DEFAULT_CHANNEL
+from bubbles.config import app, DEFAULT_CHANNEL
 
 
 def test_periodic_callback():
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         text="Ay, it's a test command!",
         channel=DEFAULT_CHANNEL,
         as_user=True,
