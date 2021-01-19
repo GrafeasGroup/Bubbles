@@ -34,8 +34,7 @@ class WelcomePing(TLJob):
         welcome_ping_callback()
 
     class Meta:
-        # start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
-        start_interval = timedelta(seconds=30)
+        start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
         regular_interval = timedelta(hours=4)
 
 
@@ -44,8 +43,7 @@ class GetInProgressPosts(TLJob):
         get_in_progress_callback()
 
     class Meta:
-        # start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
-        start_interval = timedelta(seconds=30)
+        start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
         regular_interval = timedelta(hours=4)
 
 
@@ -54,8 +52,7 @@ class CheckForBanbots(TLJob):
         banbot_check_callback()
 
     class Meta:
-        # start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
-        start_interval = timedelta(seconds=30)
+        start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
         regular_interval = timedelta(hours=12)
 
 
@@ -64,8 +61,7 @@ class WelcomeVolunteersInProgress(TLJob):
         periodic_ping_in_progress_callback()
 
     class Meta:
-        # start_interval = TRIGGER_YESTERDAY - datetime.now()
-        start_interval = timedelta(seconds=30)
+        start_interval = TRIGGER_YESTERDAY - datetime.now()
         regular_interval = timedelta(days=1)
 
 
