@@ -35,8 +35,6 @@ app = App(
     signing_secret=os.environ.get("slack_signing_secret"),
     token=os.environ.get("slack_oauth_token"),
 )
-# client = WebClient(token=API_KEY)
-# rtm_client = RTMClient(token=API_KEY)
 
 if ENABLE_BLOSSOM:
     # Feature flag means that we can lock away blossom functionality until

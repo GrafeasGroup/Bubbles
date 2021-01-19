@@ -81,7 +81,6 @@ def message_received(ack, payload):
     try:
         process_message(payload)
     except:
-        print("AAAACK")
         app.client.chat_postMessage(
             channel=payload["channel"],
             text=f"Computer says noooo: \n```\n{traceback.format_exc()}```",
