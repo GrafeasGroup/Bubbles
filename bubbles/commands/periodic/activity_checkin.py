@@ -71,6 +71,7 @@ def presence_update_callback(*args, **kwargs):
         file.write(json.dumps(data, indent=2))
 
 
+# TODO: refactor to deal with events-based architecture
 # def force_presence_update(rtm_client: RTMClient):
 #     # It is entirely possible that a status doesn't change over seven days because
 #     # they've manually set it active... so before we check in with anyone, we need
