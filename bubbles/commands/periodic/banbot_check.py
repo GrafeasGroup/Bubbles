@@ -17,6 +17,7 @@ def banbot_check_callback() -> None:
         "insaneparents": ["safestbot"],
         "ShitLiberalsSay": ["safestbot"],
         "traaaaaaannnnnnnnnns": ["safestbot"],
+        "GreenAndPleasant": ["safestbot"]
     }
 
     sublists = {key: [] for key in known_banbots}
