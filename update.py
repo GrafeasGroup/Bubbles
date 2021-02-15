@@ -6,10 +6,12 @@ import traceback
 
 from bubbles.config import app, DEFAULT_CHANNEL, USERNAME
 
+
 def msg(message):
     app.client.chat_postMessage(
         channel=DEFAULT_CHANNEL, text=message, as_user=True,
     )
+
 
 git_response = (
     subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
@@ -43,8 +45,11 @@ try:
     )
 except subprocess.CalledProcessError as e:
     msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
-    git_response = subprocess.check_output(["git", "reset", "--hard"]).decode().strip()
-
+    git_response = (
+        subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
+        .decode()
+        .strip()
+    )
     msg(f"Rolling back to previous state:\n```\n{git_response}```")
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
