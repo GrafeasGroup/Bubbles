@@ -10,8 +10,15 @@ git_response = (
     subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
 )
 
+poetry_response = (
+    subprocess.check_output(["poetry", "install"]).decode().strip()
+)
+
 app.client.chat_postMessage(
     channel=DEFAULT_CHANNEL, text=git_response, as_user=True,
+)
+app.client.chat_postMessage(
+    channel=DEFAULT_CHANNEL, text=poetry_response, as_user=True,
 )
 app.client.chat_postMessage(
     channel=DEFAULT_CHANNEL, text="Restarting service!", as_user=True,
