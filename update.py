@@ -30,7 +30,8 @@ try:
     subprocess.check_call(
         [
             os.path.join(os.getcwd(), ".venv", "bin", "python"),
-            os.path.join(os.getcwd(), "bubblesRTM.py") + " --startup-check",
+            os.path.join(os.getcwd(), "bubblesRTM.py"),
+            "--startup-check",
         ]
     )
 
