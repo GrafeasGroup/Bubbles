@@ -14,7 +14,7 @@ def msg(message):
 git_response = (
     subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
 )
-msg(f"Git:\n```\n{git_response}")
+msg(f"Git:\n```\n{git_response}```")
 
 msg("Installing dependencies...")
 poetry_response = (
