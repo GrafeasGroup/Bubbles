@@ -27,7 +27,7 @@ poetry_response = (
 msg(f"Poetry:\n```\n{poetry_response}```")
 
 try:
-    msg("Validating update. This may take a minute...")
+    msg("Validating update -- this may take a minute...")
     subprocess.check_call(
         [
             os.path.join(os.getcwd(), ".venv", "bin", "python"),
