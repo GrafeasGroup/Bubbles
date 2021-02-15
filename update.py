@@ -6,14 +6,17 @@ import traceback
 
 from bubbles.config import app, DEFAULT_CHANNEL, USERNAME
 
+def msg(message):
+    app.client.chat_postMessage(
+        channel=DEFAULT_CHANNEL, text=message, as_user=True,
+    )
+
 git_response = (
     subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
 )
+msg(f"Git:\n```\n{git_response}")
 
-app.client.chat_postMessage(
-    channel=DEFAULT_CHANNEL, text=git_response, as_user=True,
-)
-
+msg("Installing dependencies...")
 poetry_response = (
     subprocess.check_output(
         ["/usr/local/bin/python3.7", "/data/poetry/bin/poetry", "install"]
@@ -21,17 +24,10 @@ poetry_response = (
     .decode()
     .strip()
 )
-
-app.client.chat_postMessage(
-    channel=DEFAULT_CHANNEL, text=poetry_response, as_user=True,
-)
+msg(f"Poetry:\n```\n{poetry_response}```")
 
 try:
-    app.client.chat_postMessage(
-        channel=DEFAULT_CHANNEL,
-        text="Validating update. This may take a minute.",
-        as_user=True,
-    )
+    msg("Validating update. This may take a minute...")
     subprocess.check_call(
         [
             os.path.join(os.getcwd(), ".venv", "bin", "python"),
@@ -39,27 +35,17 @@ try:
             "--startup-check",
         ]
     )
-    app.client.chat_postMessage(
-        channel=DEFAULT_CHANNEL,
-        text="Validation successful -- restarting service!",
-        as_user=True,
-    )
+    msg("Validation successful -- restarting service!")
+
     # if this command succeeds, the process dies here
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
     )
 except subprocess.CalledProcessError as e:
-    app.client.chat_postMessage(
-        channel=DEFAULT_CHANNEL,
-        text=f"Update failed, could not restart: \n```\n{traceback.format_exc()}```",
-        as_user=True,
-    )
+    msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
     git_response = subprocess.check_output(["git", "reset", "--hard"]).decode().strip()
-    app.client.chat_postMessage(
-        channel=DEFAULT_CHANNEL,
-        text=f"Rolling back to previous state:\n```\n{git_response}```",
-        as_user=True,
-    )
+
+    msg(f"Rolling back to previous state:\n```\n{git_response}```")
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
     )
