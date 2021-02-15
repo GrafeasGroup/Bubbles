@@ -15,18 +15,23 @@ app.client.chat_postMessage(
 )
 
 poetry_response = (
-    subprocess.check_output(["/usr/local/bin/python3.7", "/data/poetry/bin/poetry", "install"]).decode().strip()
+    subprocess.check_output(
+        ["/usr/local/bin/python3.7", "/data/poetry/bin/poetry", "install"]
+    )
+    .decode()
+    .strip()
 )
 
 app.client.chat_postMessage(
     channel=DEFAULT_CHANNEL, text=poetry_response, as_user=True,
 )
 
-app.client.chat_postMessage(
-    channel=DEFAULT_CHANNEL, text="Restarting service!", as_user=True,
-)
-
 try:
+    app.client.chat_postMessage(
+        channel=DEFAULT_CHANNEL,
+        text="Validating update. This may take a minute.",
+        as_user=True,
+    )
     subprocess.check_call(
         [
             os.path.join(os.getcwd(), ".venv", "bin", "python"),
@@ -34,7 +39,11 @@ try:
             "--startup-check",
         ]
     )
-
+    app.client.chat_postMessage(
+        channel=DEFAULT_CHANNEL,
+        text="Validation successful -- restarting service!",
+        as_user=True,
+    )
     # if this command succeeds, the process dies here
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
