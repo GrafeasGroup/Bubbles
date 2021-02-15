@@ -101,7 +101,7 @@ print(f"check_in_as_needed: {TRIGGER_LAST_WEEK}")
 print(f"update_presence_information: {NEXT_TRIGGER_DAY}")
 
 if __name__ == "__main__":
-    # raise Exception("BOOM!")
+    raise Exception("BOOM!")
     enable_tl_jobs()
     tl.start()
     if not CHECK_MODE:
