@@ -10,13 +10,12 @@ class TLConfigException(Exception):
 
 
 class TLJob:
-
     def __init__(self):
         self.first_run = True
         # assumes one-word class name
         self.name = [z.strip(" <") for z in self.__str__().split(" ")][0].split(".")[-1]
 
-        for attr in ['start_interval', 'regular_interval']:
+        for attr in ["start_interval", "regular_interval"]:
             if not hasattr(self.Meta, attr):
                 raise TLConfigException(f"Missing {attr} for {self.name}!")
 

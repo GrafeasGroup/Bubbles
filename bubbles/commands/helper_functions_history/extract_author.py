@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from bubbles.config import users_list
 
+
 def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
     """
     Function that determines the user that has reacted to a new user message. The
@@ -25,11 +26,11 @@ def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
     """
     if "reactions" not in message_data.keys():
         return "Nobody"
-    
+
     stored_results = {}
     for reaction in good_reactions:
         stored_results[reaction] = 0
-    
+
     for reaction in message_data["reactions"]:
         if reaction["name"] == "x":
             return "Abandoned"
@@ -38,17 +39,17 @@ def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
         if reaction["name"] not in good_reactions:
             continue
         stored_results[reaction["name"]] = reaction["count"]
-    if sum(stored_results.values())>1:
+    if sum(stored_results.values()) > 1:
         return "Conflict"
     elif sum(stored_results.values()) == 0:
         return "Nobody"
-    
+
     # Extraction of the good reaction used
     reaction_used = ""
     for name_reaction, number in stored_results.items():
         if number:
             reaction_used = name_reaction
-    
+
     # Extraction of the author of the good reaction used
     for reaction in message_data["reactions"]:
         if reaction["name"] != reaction_used:

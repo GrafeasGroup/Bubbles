@@ -2,9 +2,9 @@ import re
 import statistics
 import time
 from datetime import datetime, timedelta
-from typing import Generator, List
+from typing import List
 
-from bubbles.config import PluginManager, client, reddit
+from bubbles.config import PluginManager, app, reddit
 
 SUGGEST_FILTER_RE = r"suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
@@ -143,7 +143,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 def suggest_filter(data) -> None:
     sub = re.search(SUGGEST_FILTER_RE, data["text"]).groups()[1]
 
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         channel=data.get("channel"),
         text=f"Processing data for r/{sub}. This may take a moment...",
         as_user=True,
@@ -180,7 +180,7 @@ def suggest_filter(data) -> None:
         f"Suggested threshold based on the window: {suggested_value_window}\n"
         f"Suggested threshold from last 1k posts: {suggested_value_all}\n"
     )
-    client.chat_postMessage(channel=data.get("channel"), text=msg, as_user=True)
+    app.client.chat_postMessage(channel=data.get("channel"), text=msg, as_user=True)
 
 
 PluginManager.register_plugin(

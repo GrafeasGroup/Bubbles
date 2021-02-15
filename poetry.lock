@@ -281,18 +281,32 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
-name = "slackclient"
-version = "2.9.3"
-description = "Slack API clients for Web API and RTM API"
+name = "slack-bolt"
+version = "1.2.1"
+description = "The Bolt Framework for Python"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+slack-sdk = ">=3.2.0,<3.3"
+
+[package.extras]
+adapter = ["boto3 (<=2)", "moto (<=2)", "bottle (>=0.12,<1)", "boddle (>=0.2,<0.3)", "chalice (>=1,<2)", "click (>=7,<8)", "CherryPy (>=18,<19)", "Django (>=3,<4)", "falcon (>=2,<3)", "fastapi (<1)", "Flask (>=1,<2)", "pyramid (>=1,<2)", "sanic (>=20,<21)", "starlette (>=0.13,<1)", "requests (>=2,<3)", "tornado (>=6,<7)", "uvicorn (<1)", "gunicorn (>=20,<21)"]
+async = ["aiohttp (>=3,<4)"]
+testing = ["pytest (>=5,<6)", "pytest-cov (>=2,<3)", "pytest-asyncio (<1)", "aiohttp (>=3,<4)", "Flask-Sockets (>=0.2,<1)", "black (20.8b1)"]
+
+[[package]]
+name = "slack-sdk"
+version = "3.2.0"
+description = "The Slack API Platform SDK for Python"
 category = "main"
 optional = false
 python-versions = ">=3.6.0"
 
-[package.dependencies]
-aiohttp = ">3.5.2,<4.0.0"
-
 [package.extras]
-optional = ["aiodns (>1.0)"]
+optional = ["aiodns (>1.0)", "aiohttp (>=3.7.3,<4)", "boto3 (<=2)", "SQLAlchemy (>=1,<2)", "websockets (>=8,<9)", "websocket-client (>=0.57)"]
+testing = ["pytest (>=5.4,<6)", "pytest-asyncio (<1)", "Flask-Sockets (>=0.2,<1)", "pytest-cov (>=2,<3)", "codecov (>=2,<3)", "flake8 (>=3,<4)", "black (19.10b0)", "psutil (>=5,<6)", "databases (>=0.3)"]
 
 [[package]]
 name = "timeloop"
@@ -382,7 +396,7 @@ typing-extensions = {version = ">=3.7.4", markers = "python_version < \"3.8\""}
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "1ebb2d7fbdf0f515e2a71cf22cc6b7b3fa1d259376b955c13f2e93833ae3d4d0"
+content-hash = "1ff5d4b7a8525def5350aad1c7b1c0bb0c4be93ed342b8df68daf1b27c62404a"
 
 [metadata.files]
 aiohttp = [
@@ -706,9 +720,13 @@ six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
     {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
 ]
-slackclient = [
-    {file = "slackclient-2.9.3-py2.py3-none-any.whl", hash = "sha256:2d68d668c02f4038299897e5c4723ab85dd40a3548354924b24f333a435856f8"},
-    {file = "slackclient-2.9.3.tar.gz", hash = "sha256:07ec8fa76f6aa64852210ae235ff9e637ba78124e06c0b07a7eeea4abb955965"},
+slack-bolt = [
+    {file = "slack_bolt-1.2.1-py2.py3-none-any.whl", hash = "sha256:f4f11df1d7d6fee49159f5b3e1429a673b925b0a2636ebc5919545ced37591c7"},
+    {file = "slack_bolt-1.2.1.tar.gz", hash = "sha256:cca8772e2beab27025eae243a1ad41f4112688cc5685fa2a499e80c3950f3b20"},
+]
+slack-sdk = [
+    {file = "slack_sdk-3.2.0-py2.py3-none-any.whl", hash = "sha256:259eb7236248841fa0246bcf517761d5e23469904ed682c7c4abc09ca721cf31"},
+    {file = "slack_sdk-3.2.0.tar.gz", hash = "sha256:a65b71b784a0632a7096c66ba4c9d8b012f4c8166fb1510c7e0fe42524afe2d8"},
 ]
 timeloop = [
     {file = "timeloop-1.0.2-py2-none-any.whl", hash = "sha256:70cb69eeef39968ea0e6dd68a3a3a51257d5f4aa27b177ab1b19ca86ff525946"},

@@ -1,6 +1,6 @@
 import random
 
-from bubbles.config import PluginManager, client
+from bubbles.config import PluginManager, app
 import requests
 
 
@@ -55,7 +55,7 @@ def cute(data):
         # right args. Just pick an animal at random.
         options = [get_cat, get_pug, get_fox]
         animal = random.choice(options)
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         channel=data.get("channel"), text=get_pic(animal), as_user=True
     )
 

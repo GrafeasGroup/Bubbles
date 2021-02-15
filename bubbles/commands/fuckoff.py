@@ -1,7 +1,7 @@
 import random
 import re
 
-from bubbles.config import PluginManager, client, USERNAME
+from bubbles.config import PluginManager, app, USERNAME
 
 pattern = r"""f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{}""".format(USERNAME)
 
@@ -17,7 +17,7 @@ def fuck_off(data):
         "https://media2.giphy.com/media/j9COtyaa3nnAQ/200w.gif",
     ]
 
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         channel=data.get("channel"), text=random.choice(responses), as_user=True
     )
 

@@ -1,6 +1,6 @@
 import datetime
 
-from bubbles.config import client, users_list, rooms_list, mods_array
+from bubbles.config import app, users_list, rooms_list, mods_array
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 VOLUNTEER_CHANNEL = "new_volunteers"
@@ -10,9 +10,9 @@ IN_PROGRESS_CHANNEL = "new_volunteers_pings_in_progress"
 
 def get_username_and_permalink(message):
     username = message["text"].split(" ")[0].split("|")[1][:-1]
-    permalink = client.chat_getPermalink(
-        channel=rooms_list[VOLUNTEER_CHANNEL], message_ts=message['ts']
-    ).data.get('permalink')
+    permalink = app.client.chat_getPermalink(
+        channel=rooms_list[VOLUNTEER_CHANNEL], message_ts=message["ts"]
+    ).data.get("permalink")
     return username, permalink
 
 
@@ -20,14 +20,20 @@ def welcome_ping_callback() -> None:
     timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
     timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
 
-    response = client.conversations_history(
+    response = app.client.conversations_history(
         channel=rooms_list[VOLUNTEER_CHANNEL],
         oldest=timestamp_needed_end_cry.timestamp(),
         latest=timestamp_needed_start_cry.timestamp(),
     )  # ID for #bottest
     cry = False
     users_to_welcome = {}
-    GOOD_REACTIONS = ["watch", "heavy_check_mark", "email", "exclamation", "heavy_exclamation_mark"]
+    GOOD_REACTIONS = [
+        "watch",
+        "heavy_check_mark",
+        "email",
+        "exclamation",
+        "heavy_exclamation_mark",
+    ]
     for message in response["messages"]:
         author = extract_author(message, GOOD_REACTIONS)
         # print(message["text"])
@@ -47,7 +53,7 @@ def welcome_ping_callback() -> None:
         # First figure out who we're going to ping, then follow up with the list of
         # users.4
         if person_to_ping is None:
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=rooms_list[META_CHANNEL],
                 link_names=1,
                 text=(
@@ -58,7 +64,7 @@ def welcome_ping_callback() -> None:
             )
         else:
             id_mod_to_ping = users_list[person_to_ping]
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=rooms_list[META_CHANNEL],
                 link_names=1,
                 text=(
@@ -69,10 +75,11 @@ def welcome_ping_callback() -> None:
             )
 
         # <{url}|u/{username}>
-        client.chat_postMessage(
+        app.client.chat_postMessage(
             channel=rooms_list[META_CHANNEL],
             link_names=1,
-            text="List of unwelcomed users: " + ", ".join(
+            text="List of unwelcomed users: "
+            + ", ".join(
                 [
                     f"<{users_to_welcome[username]}|{username}>"
                     for username in users_to_welcome
@@ -100,7 +107,7 @@ def periodic_ping_in_progress_callback() -> None:
     timestamp_needed_start_watchping = datetime.datetime.now() - datetime.timedelta(
         hours=24
     )
-    response_watchping = client.conversations_history(
+    response_watchping = app.client.conversations_history(
         channel=rooms_list[VOLUNTEER_CHANNEL],
         oldest=timestamp_needed_end_watchping.timestamp(),
         latest=timestamp_needed_start_watchping.timestamp(),
@@ -120,7 +127,10 @@ def periodic_ping_in_progress_callback() -> None:
             continue  # No reactions -> already handled by cry
         for reaction in message["reactions"]:
             if reaction["name"] in [
-                "watch", "email", "exclamation", "heavy_exclamation_mark"
+                "watch",
+                "email",
+                "exclamation",
+                "heavy_exclamation_mark",
             ]:
                 only_watch = True
             if reaction["name"] in ["banhammer"]:
@@ -134,7 +144,7 @@ def periodic_ping_in_progress_callback() -> None:
         hour = datetime.datetime.now().hour
         person_to_ping = mods_array[hour]
         if person_to_ping is None:
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=rooms_list[IN_PROGRESS_CHANNEL],
                 link_names=1,
                 text=(
@@ -145,7 +155,7 @@ def periodic_ping_in_progress_callback() -> None:
             )
         else:
             id_mod_to_ping = users_list[person_to_ping]
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=rooms_list[IN_PROGRESS_CHANNEL],
                 link_names=1,
                 text=(
@@ -156,10 +166,11 @@ def periodic_ping_in_progress_callback() -> None:
                 as_user=True,
             )
 
-        client.chat_postMessage(
+        app.client.chat_postMessage(
             channel=rooms_list[IN_PROGRESS_CHANNEL],
             link_names=1,
-            text="List of users to check out: " + ", ".join(
+            text="List of users to check out: "
+            + ", ".join(
                 [
                     f"<{users_to_check[username]}|{username}>"
                     for username in users_to_check
@@ -169,6 +180,7 @@ def periodic_ping_in_progress_callback() -> None:
             unfurl_media=False,
             as_user=True,
         )
+
 
 #    else:
 #        response = client.chat_postMessage(

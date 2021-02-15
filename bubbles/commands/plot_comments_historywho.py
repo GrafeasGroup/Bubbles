@@ -1,16 +1,21 @@
 import datetime
 from typing import Dict
 
+import warnings
+
 import matplotlib.pyplot as plt
 from numpy import zeros, flip, cumsum
 
 from bubbles.config import (
-    client,
+    app,
     PluginManager,
     users_list,
     rooms_list,
 )
 from bubbles.commands.helper_functions_history.extract_author import extract_author
+
+# get rid of matplotlib's complaining
+warnings.filterwarnings("ignore")
 
 
 HELP_MESSAGE = (
@@ -19,6 +24,7 @@ HELP_MESSAGE = (
     " it to the other folks and non-welcomed volunteers. `number of posts`"
     " (optional) must be an integer between 1 and 1000 inclusive."
 )
+
 
 def plot_comments_historywho(message_data: Dict) -> None:
     # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
@@ -31,10 +37,10 @@ def plot_comments_historywho(message_data: Dict) -> None:
         '"' not in message_data.get("text")
         and message_data.get("text") != "!historywho -h"
     ):
-        response = client.chat_postMessage(
+        response = app.client.chat_postMessage(
             channel=message_data.get("channel"),
             text=(
-                '`historywho` must specify a person, and the name must be inside double'
+                "`historywho` must specify a person, and the name must be inside double"
                 ' quotes. Example: `"!historywho "Bubbles"`'
             ),
             as_user=True,
@@ -43,7 +49,7 @@ def plot_comments_historywho(message_data: Dict) -> None:
 
     name_person_to_search = message_data.get("text").split('"')[1]
     if name_person_to_search not in users_list.keys():
-        response = client.chat_postMessage(
+        response = app.client.chat_postMessage(
             channel=message_data.get("channel"),
             text=f"ERROR! {name_person_to_search} is not on the list of users.",
             as_user=True,
@@ -55,23 +61,21 @@ def plot_comments_historywho(message_data: Dict) -> None:
     number_posts = 100
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            response = client.chat_postMessage(
-                channel=message_data.get("channel"),
-                text=HELP_MESSAGE,
-                as_user=True,
+            response = app.client.chat_postMessage(
+                channel=message_data.get("channel"), text=HELP_MESSAGE, as_user=True,
             )
             return
         else:
             number_posts = max(1, min(int(args[1]), 1000))
     elif len(args) > 3:
-        response = client.chat_postMessage(
+        response = app.client.chat_postMessage(
             channel=message_data.get("channel"),
-            text=f'Too many arguments given as inputs! Syntax: {HELP_MESSAGE}',
+            text=f"Too many arguments given as inputs! Syntax: {HELP_MESSAGE}",
             as_user=True,
         )
         return
 
-    response = client.conversations_history(
+    response = app.client.conversations_history(
         channel=rooms_list["new_volunteers"], latest=last_datetime, limit=number_posts
     )  # ID for #bottest
     # countReactions['Nobody'] = 0
@@ -85,20 +89,24 @@ def plot_comments_historywho(message_data: Dict) -> None:
         if author not in ["Nobody", "Abandoned", "Banned", "Conflict"]:
             if author != name_person_to_search:
                 author = "Other"
-        print(author)
+        # print(author)
         if author not in count_reactions_people.keys():
             count_reactions_people[author] = {}
-        count_reactions_people[author][difference_days] = count_reactions_people[author].get(difference_days, 0) + 1
+        count_reactions_people[author][difference_days] = (
+            count_reactions_people[author].get(difference_days, 0) + 1
+        )
 
         time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
         difference_datetime = datetime_now - time_send
         difference_days = difference_datetime.days
-        count_reactions_all[difference_days] = count_reactions_all.get(difference_days, 0) + 1
+        count_reactions_all[difference_days] = (
+            count_reactions_all.get(difference_days, 0) + 1
+        )
         # print(str(time_send)+"| "+userWhoSentMessage+" sent: "+textMessage)
         last_datetime = time_send.timestamp()
         # print(str(lastDatetime))
         # print(time_send)
-    response = client.chat_postMessage(
+    response = app.client.chat_postMessage(
         channel=message_data.get("channel"),
         text=f"{str(len(response['messages']))} messages retrieved since {str(time_send)}",
         as_user=True,
@@ -114,7 +122,14 @@ def plot_comments_historywho(message_data: Dict) -> None:
     posts_hist = zeros((maxDay + 1, len(count_reactions_people.keys())))
     indice_user = 0
     colours = ["#00FF00", "#FF0000", "#0000FF", "#808080", "#404000", "#000000"]
-    for name in [name_person_to_search, "Other", "Nobody", "Conflict", "Abandoned", "Banned"]:
+    for name in [
+        name_person_to_search,
+        "Other",
+        "Nobody",
+        "Conflict",
+        "Abandoned",
+        "Banned",
+    ]:
         if name in count_reactions_people.keys():
             number_posts[name] = []
             # dates[name] = []
@@ -132,7 +147,14 @@ def plot_comments_historywho(message_data: Dict) -> None:
         new_date = datetime_now - difference_days
         dates.append(new_date)
     i = 0
-    for name in [name_person_to_search, "Other", "Nobody", "Conflict", "Abandoned", "Banned"]:
+    for name in [
+        name_person_to_search,
+        "Other",
+        "Nobody",
+        "Conflict",
+        "Abandoned",
+        "Banned",
+    ]:
         if name in count_reactions_people.keys():
             plt.plot(
                 dates, cumsum(flip(posts_hist[:, i])), label=name, color=colours[i]
@@ -145,15 +167,14 @@ def plot_comments_historywho(message_data: Dict) -> None:
     plt.legend()
     plt.savefig("plotHourMods.png")
     plt.close()
-    client.files_upload(
+    app.client.files_upload(
         channels=message_data.get("channel"),
         file="plotHourMods.png",
         title="Just vibing.",
         as_user=True,
     )
 
+
 PluginManager.register_plugin(
-    plot_comments_historywho,
-    r'historywho([ \"a-zA-Z]+)?',
-    help=HELP_MESSAGE,
+    plot_comments_historywho, r"historywho([ \"a-zA-Z]+)?", help=HELP_MESSAGE,
 )

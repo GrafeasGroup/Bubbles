@@ -1,4 +1,6 @@
-from bubbles.config import client, PluginManager, users_list, USERNAME, ME
+import traceback
+
+from bubbles.config import app, PluginManager, users_list, USERNAME, ME
 
 
 def _is_from_us(username):
@@ -6,11 +8,13 @@ def _is_from_us(username):
     return username == USERNAME.lower() or username == ME.lower()
 
 
-def process_message(**payload):
+def process_message(payload):
     print("Message received!")
-    data = payload["data"]
-    channel = data.get("channel")
-    message = data.get("text")
+    if len(payload) == 0:
+        print("Unprocessable message. Ignoring.")
+        return
+    channel = payload.get("channel")
+    message = payload.get("text")
 
     if not message:
         # sometimes we'll get an object without text; just discard it.
@@ -18,7 +22,7 @@ def process_message(**payload):
         return
 
     try:
-        user_who_sent_message = users_list[data["user"]]
+        user_who_sent_message = users_list[payload["user"]]
     except KeyError:
         # This will trigger if an app posts, like the RSS feeds.
         return
@@ -31,18 +35,19 @@ def process_message(**payload):
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
-        plugin(data)
+        plugin(payload)
+
     else:
         # we don't know what they were trying to do, so we fall through to here.
         # Let's only limit responses to things that look like they're trying
         # to use regular command syntax, though.
         # For example, trigger on "!hello" but not for "isn't bubbles great".
         if PluginManager.has_beginning_command_prefix(message):
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 channel=channel, text=f"Unknown command: `{message}`", as_user=True
             )
 
     # If a command needs to be able to see all traffic for historical reasons,
     # register a separate callback function in a class for the command. See
     # bubbles.commands.yell for an example implementation.
-    PluginManager.process_plugin_callbacks(data)
+    PluginManager.process_plugin_callbacks(payload)

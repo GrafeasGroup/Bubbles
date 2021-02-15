@@ -3,9 +3,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from slack import RTMClient
-
-from bubbles.config import client, users_list
+from bubbles.config import app, users_list
 
 FILENAME = "presence_log.json"
 
@@ -30,21 +28,15 @@ MESSAGE = (
     ":heart:"
 )
 
-
-def configure_presence_change_event(rtm_client: RTMClient) -> None:
-    """
-    Set up the presence subscription.
-
-    https://api.slack.com/events/presence_query
-    This request only lasts for the life of the websocket, so it must
-    be reconfigured every time we lose connection or restart the bot.
-
-    This function is only responsible for triggering the request; the
-    result is returned via a RTM event captured in bubblesRTM.py.
-    """
-    rtm_client.send_over_websocket(
-        payload={"type": "presence_sub", "ids": USER_IDS,}
-    )
+# TODO: convert to a constant annoying Slack for the presence of each individual member
+# TODO: https://api.slack.com/methods/users.getPresence
+# def configure_presence_change_event() -> None:
+#     """
+#     Set up the presence subscription.
+#     """
+#     app.client.send_over_websocket(
+#         payload={"type": "presence_sub", "ids": USER_IDS,}
+#     )
 
 
 def _get_base_user_data():
@@ -79,18 +71,19 @@ def presence_update_callback(*args, **kwargs):
         file.write(json.dumps(data, indent=2))
 
 
-def force_presence_update(rtm_client: RTMClient):
-    # It is entirely possible that a status doesn't change over seven days because
-    # they've manually set it active... so before we check in with anyone, we need
-    # to force a refresh of everyone and make sure that they're actually offline.
-    # Instead of forcing a refresh when we check (which would require some dancing
-    # with slack to get the timing right) we just schedule the force update as its
-    # own thing and carry on.
-    # This function is only responsible for triggering the request; the result is
-    # returned via a RTM event captured in bubblesRTM.py.
-    rtm_client.send_over_websocket(
-        payload={"type": "presence_query", "ids": USER_IDS,}
-    )
+# TODO: refactor to deal with events-based architecture
+# def force_presence_update(rtm_client: RTMClient):
+#     # It is entirely possible that a status doesn't change over seven days because
+#     # they've manually set it active... so before we check in with anyone, we need
+#     # to force a refresh of everyone and make sure that they're actually offline.
+#     # Instead of forcing a refresh when we check (which would require some dancing
+#     # with slack to get the timing right) we just schedule the force update as its
+#     # own thing and carry on.
+#     # This function is only responsible for triggering the request; the result is
+#     # returned via a RTM event captured in bubblesRTM.py.
+#     rtm_client.send_over_websocket(
+#         payload={"type": "presence_query", "ids": USER_IDS,}
+#     )
 
 
 def check_in_with_people():
@@ -107,7 +100,7 @@ def check_in_with_people():
                 continue
 
             # looks like we need to check in!
-            client.chat_postMessage(
+            app.client.chat_postMessage(
                 text=MESSAGE,
                 channel=person_id,
                 as_user=True,

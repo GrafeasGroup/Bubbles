@@ -1,6 +1,6 @@
 import re
 
-from bubbles.config import PluginManager, client, ME
+from bubbles.config import PluginManager, app, ME
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
@@ -36,7 +36,7 @@ class Yell:
         else:
             response = idk
 
-        client.chat_postMessage(
+        app.client.chat_postMessage(
             channel=data.get("channel"), text=response, as_user=True
         )
 

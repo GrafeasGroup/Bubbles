@@ -1,6 +1,6 @@
 from typing import Dict
 
-from bubbles.config import PluginManager, client
+from bubbles.config import PluginManager, app
 
 
 def format_text(data: Dict) -> str:
@@ -28,7 +28,7 @@ def help(data):
             plugins_with_help[plugin_name] = plugin["help"]
     # sort that sucker alphabetically
     plugins_with_help = {key: value for key, value in sorted(plugins_with_help.items())}
-    client.chat_postMessage(
+    app.client.chat_postMessage(
         channel=data.get("channel"), text=format_text(plugins_with_help), as_user=True,
     )
 
