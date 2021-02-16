@@ -1,22 +1,19 @@
 import datetime
-from typing import Dict
-
 import warnings
+from typing import Dict
 
 import matplotlib.pyplot as plt
 from numpy import zeros, flip, cumsum
 
+from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.config import (
-    app,
     PluginManager,
     users_list,
     rooms_list,
 )
-from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
-
 
 HELP_MESSAGE = (
     '!historywho [number of posts] "person" - shows the number of new'
@@ -26,64 +23,55 @@ HELP_MESSAGE = (
 )
 
 
-def plot_comments_historywho(message_data: Dict) -> None:
+def plot_comments_historywho(payload: Dict) -> None:
     # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
     last_datetime = datetime.datetime.now().timestamp()
     count_reactions_all = {}
     count_reactions_people = {}
     datetime_now = datetime.datetime.now()
 
+    say = payload['extras']['say']
+    client = payload['extras']['client']
+
     if (
-        '"' not in message_data.get("text")
-        and message_data.get("text") != "!historywho -h"
+            '"' not in payload.get("text")
+            and payload.get("text") != "!historywho -h"
     ):
-        response = app.client.chat_postMessage(
-            channel=message_data.get("channel"),
-            text=(
-                "`historywho` must specify a person, and the name must be inside double"
-                ' quotes. Example: `"!historywho "Bubbles"`'
-            ),
-            as_user=True,
+        say(
+            "`historywho` must specify a person, and the name must be inside double"
+            ' quotes. Example: `"!historywho "Bubbles"`'
         )
         return
 
-    name_person_to_search = message_data.get("text").split('"')[1]
+    name_person_to_search = payload.get("text").split('"')[1]
     if name_person_to_search not in users_list.keys():
-        response = app.client.chat_postMessage(
-            channel=message_data.get("channel"),
-            text=f"ERROR! {name_person_to_search} is not on the list of users.",
-            as_user=True,
-        )
+        say(f"ERROR! {name_person_to_search} is not on the list of users.")
         return
 
-    other_params = message_data.get("text").split('"')[0]
+    other_params = payload.get("text").split('"')[0]
     args = other_params.split()
     number_posts = 100
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            response = app.client.chat_postMessage(
-                channel=message_data.get("channel"), text=HELP_MESSAGE, as_user=True,
-            )
+            say(HELP_MESSAGE)
             return
         else:
             number_posts = max(1, min(int(args[1]), 1000))
     elif len(args) > 3:
-        response = app.client.chat_postMessage(
-            channel=message_data.get("channel"),
-            text=f"Too many arguments given as inputs! Syntax: {HELP_MESSAGE}",
-            as_user=True,
-        )
+        say(f"Too many arguments given as inputs! Syntax: {HELP_MESSAGE}")
         return
 
-    response = app.client.conversations_history(
+    response = client.conversations_history(
         channel=rooms_list["new_volunteers"], latest=last_datetime, limit=number_posts
     )  # ID for #bottest
     # countReactions['Nobody'] = 0
     GOOD_REACTIONS = ["watch", "heavy_check_mark", "email", "exclamation_point"]
+
+    timestamp = 0  # stop the linter from yelling
     for message in response["messages"]:
 
-        time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
-        difference_datetime = datetime_now - time_send
+        timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
+        difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
         author = extract_author(message, GOOD_REACTIONS)
         if author not in ["Nobody", "Abandoned", "Banned", "Conflict"]:
@@ -93,24 +81,21 @@ def plot_comments_historywho(message_data: Dict) -> None:
         if author not in count_reactions_people.keys():
             count_reactions_people[author] = {}
         count_reactions_people[author][difference_days] = (
-            count_reactions_people[author].get(difference_days, 0) + 1
+                count_reactions_people[author].get(difference_days, 0) + 1
         )
 
-        time_send = datetime.datetime.fromtimestamp(float(message["ts"]))
-        difference_datetime = datetime_now - time_send
+        timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
+        difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
         count_reactions_all[difference_days] = (
-            count_reactions_all.get(difference_days, 0) + 1
+                count_reactions_all.get(difference_days, 0) + 1
         )
         # print(str(time_send)+"| "+userWhoSentMessage+" sent: "+textMessage)
-        last_datetime = time_send.timestamp()
+        last_datetime = timestamp.timestamp()
         # print(str(lastDatetime))
         # print(time_send)
-    response = app.client.chat_postMessage(
-        channel=message_data.get("channel"),
-        text=f"{str(len(response['messages']))} messages retrieved since {str(time_send)}",
-        as_user=True,
-    )
+
+    say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}")
     number_posts = {}
     # print(countReactions.keys())
     dates = []
@@ -167,8 +152,8 @@ def plot_comments_historywho(message_data: Dict) -> None:
     plt.legend()
     plt.savefig("plotHourMods.png")
     plt.close()
-    app.client.files_upload(
-        channels=message_data.get("channel"),
+    client.files_upload(
+        channels=payload.get("channel"),
         file="plotHourMods.png",
         title="Just vibing.",
         as_user=True,

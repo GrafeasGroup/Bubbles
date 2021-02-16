@@ -1,13 +1,11 @@
 import os
 import subprocess
 
-from bubbles.config import PluginManager, app
+from bubbles.config import PluginManager
 
 
-def update(data) -> None:
-    app.client.chat_postMessage(
-        channel=data.get("channel"), text="Preparing update...", as_user=True,
-    )
+def update(payload) -> None:
+    payload['extras']['say']("Preparing update...")
     # print the results so that it shows up in the system logs if something goes wrong
     print(
         subprocess.Popen(

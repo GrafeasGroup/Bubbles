@@ -5,10 +5,7 @@ from typing import Dict
 import matplotlib.pyplot as plt
 from numpy import flip
 
-from bubbles.config import (
-    PluginManager,
-    rooms_list,
-)
+from bubbles.config import PluginManager, rooms_list
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
@@ -22,6 +19,7 @@ def plot_comments_history(payload: Dict) -> None:
     args = payload.get("text").split()
     say = payload['extras']['say']
     client = payload['extras']['client']
+
     print(args)
     number_posts = 100
     if len(args) == 2:
@@ -47,7 +45,6 @@ def plot_comments_history(payload: Dict) -> None:
 
     timestamp = 0  # stop linter from complaining
     for message in response["messages"]:
-
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():
         #     userWhoSentMessage = usersList[message["user"]]

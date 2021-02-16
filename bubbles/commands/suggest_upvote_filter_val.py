@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 from typing import List
 
-from bubbles.config import PluginManager, app, reddit
+from bubbles.config import PluginManager, reddit
 
 SUGGEST_FILTER_RE = r"suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
@@ -78,7 +78,7 @@ def get_time_diffs(post_list: List) -> [int, int]:
 
 
 def calculate_hours_and_minutes_timedelta_from_diffs(
-    start_diff: int, end_diff: int
+        start_diff: int, end_diff: int
 ) -> [int, int]:
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
@@ -140,14 +140,10 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     )
 
 
-def suggest_filter(data) -> None:
-    sub = re.search(SUGGEST_FILTER_RE, data["text"]).groups()[1]
-
-    app.client.chat_postMessage(
-        channel=data.get("channel"),
-        text=f"Processing data for r/{sub}. This may take a moment...",
-        as_user=True,
-    )
+def suggest_filter(payload) -> None:
+    sub = re.search(SUGGEST_FILTER_RE, payload["text"]).groups()[1]
+    say = payload['extras']['say']
+    say(f"Processing data for r/{sub}. This may take a moment...")
 
     ten_post_window, all_posts = get_new_posts_from_sub(sub)
     upvote_list_window = get_upvotes_from_list(ten_post_window)
@@ -168,7 +164,7 @@ def suggest_filter(data) -> None:
         upvote_list_all_posts, posts_per_day_count
     )
 
-    msg = (
+    say(
         f"Stats for r/{sub} over the last 10 submissions:\n"
         f"\n"
         f"* karma distribution: {min_karma} | {max_karma}\n"
@@ -180,7 +176,6 @@ def suggest_filter(data) -> None:
         f"Suggested threshold based on the window: {suggested_value_window}\n"
         f"Suggested threshold from last 1k posts: {suggested_value_all}\n"
     )
-    app.client.chat_postMessage(channel=data.get("channel"), text=msg, as_user=True)
 
 
 PluginManager.register_plugin(

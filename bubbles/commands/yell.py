@@ -1,6 +1,6 @@
 import re
 
-from bubbles.config import PluginManager, app, ME
+from bubbles.config import PluginManager, ME
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
@@ -26,19 +26,17 @@ idk = (
 
 
 class Yell:
-    def yell(self, data):
+    def yell(self, payload):
         """Everyone's a little bit hard of hearing sometimes."""
         if not hasattr(self, "previous_message_dict"):
             response = idk
-        elif data["channel"] in self.previous_message_dict:
-            previous_message = self.previous_message_dict[data["channel"]]
-            response = f"<@{data['user']}>: {previous_message['text'].upper()}"
+        elif payload["channel"] in self.previous_message_dict:
+            previous_message = self.previous_message_dict[payload["channel"]]
+            response = f"<@{payload['user']}>: {previous_message['text'].upper()}"
         else:
             response = idk
 
-        app.client.chat_postMessage(
-            channel=data.get("channel"), text=response, as_user=True
-        )
+        payload['extras']['say'](response)
 
     def yell_callback(self, message):
         if message["user"] == ME:
