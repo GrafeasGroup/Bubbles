@@ -1,8 +1,8 @@
-from bubbles.config import PluginManager, app
+from bubbles.config import PluginManager
 
 
-def ping(data):
-    app.client.chat_postMessage(channel=data.get("channel"), text="PONG!", as_user=True)
+def ping(payload):
+    payload['extras']['say']("PONG!")
 
 
 PluginManager.register_plugin(ping, r"ping$", help="!ping - PONG")

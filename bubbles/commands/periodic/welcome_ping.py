@@ -51,7 +51,7 @@ def welcome_ping_callback() -> None:
         person_to_ping = mods_array[hour]
 
         # First figure out who we're going to ping, then follow up with the list of
-        # users.4
+        # users.
         if person_to_ping is None:
             app.client.chat_postMessage(
                 channel=rooms_list[META_CHANNEL],

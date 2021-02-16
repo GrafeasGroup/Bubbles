@@ -1,20 +1,16 @@
 import requests
 
-from bubbles.config import PluginManager, PAYMENT_KEY, PAYMENT_VALUE, app
+from bubbles.config import PluginManager, PAYMENT_KEY, PAYMENT_VALUE
 
 
-def ping_payment(data):
+def ping_payment(payload):
     result = requests.post(
         "https://payments.grafeas.org/ping", json={PAYMENT_KEY: PAYMENT_VALUE}
     )
     try:
         result.raise_for_status()
     except:
-        app.client.chat_postMessage(
-            channel=data.get("channel"),
-            text="I... I don't see anything out there...",
-            as_user=True,
-        )
+        payload['extras']['say']("I... I don't see anything out there...")
 
 
 PluginManager.register_plugin(

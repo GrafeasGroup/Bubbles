@@ -1,8 +1,8 @@
 import random
 
-from bubbles.config import PluginManager, app
 import requests
 
+from bubbles.config import PluginManager
 
 cat_api = "http://thecatapi.com/api/images/get?format=json&results_per_page={}"
 pug_api = "http://pugme.herokuapp.com/bomb?count={}"
@@ -55,9 +55,8 @@ def cute(data):
         # right args. Just pick an animal at random.
         options = [get_cat, get_pug, get_fox]
         animal = random.choice(options)
-    app.client.chat_postMessage(
-        channel=data.get("channel"), text=get_pic(animal), as_user=True
-    )
+
+    data['extra']['say'](get_pic(animal))
 
 
 PluginManager.register_plugin(
