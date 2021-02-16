@@ -82,11 +82,8 @@ def message_received(ack, payload, client, context, say):
     try:
         process_message(payload)
     except:
-        app.client.chat_postMessage(
-            channel=payload["channel"],
-            text=f"Computer says noooo: \n```\n{traceback.format_exc()}```",
-            as_user=True,
-        )
+        say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
+
 
 @app.event("reaction_added")
 def reaction_added(ack, payload):
