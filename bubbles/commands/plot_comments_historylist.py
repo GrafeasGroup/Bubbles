@@ -12,7 +12,7 @@ def plot_comments_historylist(payload: Dict) -> None:
     # Syntax: !historylist [number of posts]
     args = payload.get("text").split()
     say = payload['extras']['say']
-    client = payload['extras']['say']
+    client = payload['extras']['client']
     print(args)
     number_posts = 100
     if len(args) == 2:
