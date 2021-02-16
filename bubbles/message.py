@@ -1,6 +1,4 @@
-import traceback
-
-from bubbles.config import app, PluginManager, users_list, USERNAME, ME
+from bubbles.config import PluginManager, users_list, USERNAME, ME
 
 
 def _is_from_us(username):
@@ -13,7 +11,6 @@ def process_message(payload):
     if len(payload) == 0:
         print("Unprocessable message. Ignoring.")
         return
-    channel = payload.get("channel")
     message = payload.get("text")
 
     if not message:
@@ -43,9 +40,7 @@ def process_message(payload):
         # to use regular command syntax, though.
         # For example, trigger on "!hello" but not for "isn't bubbles great".
         if PluginManager.has_beginning_command_prefix(message):
-            app.client.chat_postMessage(
-                channel=channel, text=f"Unknown command: `{message}`", as_user=True
-            )
+            payload['extras']['say'](f"Unknown command: `{message}`")
 
     # If a command needs to be able to see all traffic for historical reasons,
     # register a separate callback function in a class for the command. See

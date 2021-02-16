@@ -59,8 +59,8 @@ Full list of available event keys:
 #     # This receives the responses triggered by `presence_update_callback` and
 #     # `force_presence_update`, as they don't return any data on their own.
 #     presence_update_callback(**payload)
-#
-#
+
+
 @app.event("app_mention")
 def handle(ack):
     """
@@ -76,8 +76,9 @@ def handle(ack):
 
 
 @app.event("message")
-def message_received(ack, payload):
+def message_received(ack, payload, client, context, say):
     ack()
+    payload.update({'extras': {'client': client, 'context': context, 'say': say}})
     try:
         process_message(payload)
     except:
