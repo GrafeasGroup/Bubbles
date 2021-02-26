@@ -84,7 +84,7 @@ animals = {
 
 def cute(data):
     """
-    !cute {fox, cat, pug}, or just !cute to get a random picture
+    !cute [animal from the dict above], or just !cute to get a random picture
     """
     args = data.get("text").split()
 
