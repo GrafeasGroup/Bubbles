@@ -56,7 +56,7 @@ def cute(data):
         options = [get_cat, get_pug, get_fox]
         animal = random.choice(options)
 
-    data['extra']['say'](get_pic(animal))
+    data['extras']['say'](get_pic(animal))
 
 
 PluginManager.register_plugin(
