@@ -97,7 +97,7 @@ def cute(data):
     }
 
     if len(args) > 1:
-        animal = animals.get(args[0])
+        animal = animals.get(args[1])
         if not animal:
             unknown = True
 
