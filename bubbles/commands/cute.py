@@ -98,11 +98,12 @@ def cute(data):
 
     if len(args) > 1:
         animal = animals.get(args[0])
+        if not animal:
+            unknown = True
 
     if not animal:
         # if we get here, we either didn't have args or we didn't pass the
         # right args. Just pick an animal at random.
-        unknown = True
         animal = animals.get(random.choice([*animals.keys()]))
 
     animal_name, pic = get_pic(animal)
