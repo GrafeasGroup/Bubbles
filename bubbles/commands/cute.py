@@ -71,14 +71,14 @@ def get_shibe():
 
 
 animals = {
-    "cat": random.choice([get_cat, get_cat_alt]),
-    "dog": get_dog,
-    "bunny": get_bunny,
-    "lizard": get_lizard,
-    "fox": get_fox,
-    "owl": get_owl,
-    "duck": get_duck,
-    "shibe": get_shibe
+    "cat": [get_cat, get_cat_alt],
+    "dog": [get_dog],
+    "bunny": [get_bunny],
+    "lizard": [get_lizard],
+    "fox": [get_fox],
+    "owl": [get_owl],
+    "duck": [get_duck],
+    "shibe": [get_shibe]
 }
 
 
@@ -107,7 +107,7 @@ def cute(data):
         # right args. Just pick an animal at random.
         animal = animals.get(random.choice([*animals.keys()]))
 
-    animal_name, pic = get_pic(animal)
+    animal_name, pic = get_pic(random.choice(animal))
     if unknown:
         say(f"I'm not sure what you asked for, so here's a {animal_name}!")
 
