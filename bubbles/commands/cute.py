@@ -70,6 +70,18 @@ def get_shibe():
     return "shibe", requests.get(shibe_api).json()[0]
 
 
+animals = {
+    "cat": random.choice([get_cat, get_cat_alt]),
+    "dog": get_dog,
+    "bunny": get_bunny,
+    "lizard": get_lizard,
+    "fox": get_fox,
+    "owl": get_owl,
+    "duck": get_duck,
+    "shibe": get_shibe
+}
+
+
 def cute(data):
     """
     !cute {fox, cat, pug}, or just !cute to get a random picture
@@ -84,17 +96,6 @@ def cute(data):
     say = data["extras"]["say"]
     animal = None
     unknown = False
-
-    animals = {
-        "cat": random.choice([get_cat, get_cat_alt]),
-        "dog": get_dog,
-        "bunny": get_bunny,
-        "lizard": get_lizard,
-        "fox": get_fox,
-        "owl": get_owl,
-        "duck": get_duck,
-        "shibe": get_shibe
-    }
 
     if len(args) > 1:
         animal = animals.get(args[1])
@@ -117,7 +118,7 @@ PluginManager.register_plugin(
     cute,
     r"cute",
     help=(
-        "!cute [fox, cat] - Specify an animal for a cute picture! Or just"
-        " !cute for a random one."
+        f"!cute [{', '.join([k for k in animals.keys()])}] - Specify an animal"
+        f" for a cute picture! Or just !cute for a random one."
     ),
 )
