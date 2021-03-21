@@ -7,6 +7,9 @@ from numpy import flip
 
 from bubbles.config import PluginManager, rooms_list
 
+from bubbles.commands.helper_functions_history.extract_date_or_number import extract_date_or_number
+from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
+
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
 
@@ -22,6 +25,7 @@ def plot_comments_history(payload: Dict) -> None:
 
     print(args)
     number_posts = 100
+    input_value = 100
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
             say(
@@ -31,7 +35,7 @@ def plot_comments_history(payload: Dict) -> None:
             )
             return
         else:
-            number_posts = max(1, min(int(args[1]), 1000))
+            input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
         say(
             "ERROR! Too many arguments given as inputs!"
@@ -39,9 +43,7 @@ def plot_comments_history(payload: Dict) -> None:
         )
         return
 
-    response = client.conversations_history(
-        channel=rooms_list["new_volunteers"], limit=number_posts
-    )
+    response = fetch_messages(payload, input_value, "new_volunteers")
 
     timestamp = 0  # stop linter from complaining
     for message in response["messages"]:
@@ -80,11 +82,18 @@ def plot_comments_history(payload: Dict) -> None:
     )
     plt.close()
     plt.bar(range(0, 24), count_hours, 1, align="edge")
-    plt.xlabel("Hour")
+    plt.xlabel("Hour UTC")
     plt.ylabel("Number of messages")
     plt.xticks(range(0, 24, 2))
     plt.yticks(range(0, max(count_hours)))
     plt.grid(True, which="both")
+    plt.axvline(6, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
+    plt.axvline(12, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
+    plt.axvline(18, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
+    plt.text(1, max(count_hours)+0.5, "East Coast/S. America evening")
+    plt.text(8, max(count_hours)+0.5, "West Coast evening")
+    plt.text(13.5, max(count_hours)+0.5, "Far East/Oceania evening")
+    plt.text(19.5, max(count_hours)+0.5, "Europe/Africa/Middle East evening")
     plt.savefig("plotHours.png")
     client.files_upload(
         channels=payload.get("channel"),
