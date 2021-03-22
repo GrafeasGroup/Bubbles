@@ -46,6 +46,7 @@ def plot_comments_history(payload: Dict) -> None:
     response = fetch_messages(payload, input_value, "new_volunteers")
 
     timestamp = 0  # stop linter from complaining
+    timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
     print(len(response["messages"]))
     for message in response["messages"]:
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
@@ -54,13 +55,14 @@ def plot_comments_history(payload: Dict) -> None:
         #
         # textMessage = message["text"]
         timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
+        timestamp_min = min(timestamp_min, timestamp)
         hour_message = timestamp.hour
         difference_days = datetime.datetime.now() - timestamp
         difference_days_num = difference_days.days
         count_days[difference_days_num] = count_days.get(difference_days_num, 0) + 1
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         count_hours[hour_message] = count_hours[hour_message] + 1
-
+    timestamp = timestamp_min
     say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}")
     number_posts = []
     dates = []
@@ -86,7 +88,9 @@ def plot_comments_history(payload: Dict) -> None:
     plt.xlabel("Hour UTC")
     plt.ylabel("Number of messages")
     plt.xticks(range(0, 24, 2))
-    plt.yticks(range(0, max(count_hours)))
+    print("---------------------")
+    print(int(max(count_hours)/25)+1)
+    plt.yticks(range(0, max(count_hours), int(max(count_hours)/25)+1))
     plt.grid(True, which="both")
     plt.axvline(6, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
     plt.axvline(12, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])

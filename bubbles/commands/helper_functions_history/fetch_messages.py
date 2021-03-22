@@ -33,15 +33,15 @@ def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
             # print(len(messages["messages"]))
             # print(len(newMessages["messages"]))
             messages["messages"].extend(newMessages["messages"])
-            print(len(messages["messages"]))
+            # print(len(messages["messages"]))
             is_there_other_data = newMessages["has_more"]
             if is_there_other_data:
                 last_message = newMessages["messages"][0]
-                print(type(last_message))
-                print(last_message["ts"])
-                print(last_message.keys())
+                # print(type(last_message))
+                # print(last_message["ts"])
+                # print(last_message.keys())
                 input_value = last_message["ts"]
-            print("Has this new message more data?" + str(is_there_other_data))
+            # print("Has this new message more data?" + str(is_there_other_data))
     else:
         messages = client.conversations_history(
         channel=channel, limit=input_value
