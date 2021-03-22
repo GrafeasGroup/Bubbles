@@ -46,6 +46,7 @@ def plot_comments_history(payload: Dict) -> None:
     response = fetch_messages(payload, input_value, "new_volunteers")
 
     timestamp = 0  # stop linter from complaining
+    print(len(response["messages"]))
     for message in response["messages"]:
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():

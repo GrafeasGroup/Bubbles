@@ -12,5 +12,5 @@ def extract_date_or_number(arg: str) -> int:
         date_found = datetime.datetime(date_found.year, date_found.month, date_found.day)
         output_value = date_found.timestamp()
     except ValueError:
-        output_value = max(1, min(1000, arg))
+        output_value = max(1, min(1000, int(arg)))
     return output_value
