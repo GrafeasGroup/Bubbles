@@ -55,4 +55,7 @@ def extract_author(message_data: List[Dict], good_reactions: List[str]) -> str:
         if reaction["name"] != reaction_used:
             continue
         result = reaction["users"][0]
-    return users_list[result]
+    try:
+        return users_list[result]
+    except KeyError:
+        return "Unknown User"

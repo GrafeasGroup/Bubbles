@@ -1,11 +1,12 @@
 import datetime
+import re
 import warnings
 from typing import Dict
 
 import matplotlib.pyplot as plt
 from numpy import flip
 
-from bubbles.config import PluginManager, rooms_list
+from bubbles.config import PluginManager
 
 from bubbles.commands.helper_functions_history.extract_date_or_number import extract_date_or_number
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
@@ -49,6 +50,8 @@ def plot_comments_history(payload: Dict) -> None:
     timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
     print(len(response["messages"]))
     for message in response["messages"]:
+        if not re.search(r"^<https://reddit.com/user/", message["text"]): # Remove all messages who are not given by the bot
+            continue
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():
         #     userWhoSentMessage = usersList[message["user"]]
