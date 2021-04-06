@@ -44,7 +44,7 @@ try:
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "restart", USERNAME]
     )
-except subprocess.CalledProcessError as e:
+except subprocess.CalledProcessError:
     msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
     git_response = (
         subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
