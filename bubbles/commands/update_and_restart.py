@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 from bubbles.config import PluginManager
 
@@ -10,7 +11,7 @@ def update(payload) -> None:
     print(
         subprocess.Popen(
             [
-                os.path.join(os.getcwd(), ".venv", "bin", "python"),
+                sys.executable,
                 os.path.join(os.getcwd(), "update.py"),
             ],
             text=True,

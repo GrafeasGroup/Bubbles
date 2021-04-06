@@ -2,6 +2,7 @@
 # Requires setting up sudoers access per https://unix.stackexchange.com/a/497011
 import os
 import subprocess
+import sys
 import traceback
 
 from bubbles.config import app, DEFAULT_CHANNEL, USERNAME
@@ -32,7 +33,7 @@ try:
     msg("Validating update -- this may take a minute...")
     subprocess.check_call(
         [
-            os.path.join(os.getcwd(), ".venv", "bin", "python"),
+            sys.executable,
             os.path.join(os.getcwd(), "bubblesRTM.py"),
             "--startup-check",
         ]
