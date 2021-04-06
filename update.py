@@ -22,7 +22,8 @@ msg(f"Git:\n```\n{git_response}```")
 msg("Installing dependencies...")
 poetry_response = (
     subprocess.check_output(
-        ["/usr/local/bin/python3.7", "/data/poetry/bin/poetry", "install"]
+        ["/data/poetry/bin/poetry", "install"],
+        cwd=os.path.dirname(__file__),
     )
     .decode()
     .strip()
@@ -47,7 +48,10 @@ try:
 except subprocess.CalledProcessError:
     msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
     git_response = (
-        subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
+        subprocess.check_output(
+            ["git", "reset", "--hard", "master@{'30 seconds ago'}"],
+            cwd=os.path.dirname(__file__),
+        )
         .decode()
         .strip()
     )
