@@ -12,7 +12,7 @@ def update(payload) -> None:
         subprocess.Popen(
             [
                 sys.executable,
-                os.path.join(os.getcwd(), "update.py"),
+                os.path.join(os.path.dirname(__file__), '..', '..', "update.py"),
             ],
             text=True,
         )

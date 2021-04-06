@@ -34,7 +34,7 @@ try:
     subprocess.check_call(
         [
             sys.executable,
-            os.path.join(os.getcwd(), "bubblesRTM.py"),
+            os.path.join(os.path.dirname(__file__), "bubblesRTM.py"),
             "--startup-check",
         ]
     )
