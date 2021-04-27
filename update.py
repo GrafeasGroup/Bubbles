@@ -12,45 +12,47 @@ def msg(message):
         channel=DEFAULT_CHANNEL, text=message, as_user=True,
     )
 
-
-git_response = (
-    subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
-)
-msg(f"Git:\n```\n{git_response}```")
-
-msg("Installing dependencies...")
-poetry_response = (
-    subprocess.check_output(
-        ["poetry", "install", "--no-dev"]
-    )
-    .decode()
-    .strip()
-)
-msg(f"Poetry:\n```\n{poetry_response}```")
-
 try:
-    msg("Validating update -- this may take a minute...")
-    subprocess.check_call(
-        [
-            os.path.join(os.getcwd(), ".venv", "bin", "python"),
-            os.path.join(os.getcwd(), "bubblesRTM.py"),
-            "--startup-check",
-        ]
-    )
-    msg("Validation successful -- restarting service!")
-
-    # if this command succeeds, the process dies here
-    systemctl_response = subprocess.check_output(
-        ["sudo", "systemctl", "restart", USERNAME]
-    )
-except subprocess.CalledProcessError as e:
-    msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
     git_response = (
-        subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
+        subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
+    )
+    msg(f"Git:\n```\n{git_response}```")
+
+    msg("Installing dependencies...")
+    poetry_response = (
+        subprocess.check_output(
+            ["poetry", "install", "--no-dev"]
+        )
         .decode()
         .strip()
     )
-    msg(f"Rolling back to previous state:\n```\n{git_response}```")
-    systemctl_response = subprocess.check_output(
-        ["sudo", "systemctl", "restart", USERNAME]
-    )
+    msg(f"Poetry:\n```\n{poetry_response}```")
+
+    try:
+        msg("Validating update -- this may take a minute...")
+        subprocess.check_call(
+            [
+                os.path.join(os.getcwd(), ".venv", "bin", "python"),
+                os.path.join(os.getcwd(), "bubblesRTM.py"),
+                "--startup-check",
+            ]
+        )
+        msg("Validation successful -- restarting service!")
+
+        # if this command succeeds, the process dies here
+        systemctl_response = subprocess.check_output(
+            ["sudo", "systemctl", "restart", USERNAME]
+        )
+    except subprocess.CalledProcessError as e:
+        msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
+        git_response = (
+            subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
+            .decode()
+            .strip()
+        )
+        msg(f"Rolling back to previous state:\n```\n{git_response}```")
+        systemctl_response = subprocess.check_output(
+            ["sudo", "systemctl", "restart", USERNAME]
+        )
+except Exception as e:
+    msg(f"Update failed! {e}")
