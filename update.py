@@ -55,4 +55,4 @@ try:
             ["sudo", "systemctl", "restart", USERNAME]
         )
 except Exception as e:
-    msg(f"Update failed! {e}")
+    msg(f":rotating_light: Update failed! :rotating_light:\n\nException:\n\n```\n{e}\n```")
