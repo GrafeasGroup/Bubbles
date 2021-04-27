@@ -10,6 +10,11 @@ def deploy(payload):
     args = payload.get("text").split()
     say = payload['extras']['say']
 
+
+    say("This command is not fully functional yet -- sorry!")
+    return
+
+
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
