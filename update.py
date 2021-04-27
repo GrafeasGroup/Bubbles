@@ -21,7 +21,7 @@ try:
     msg("Installing dependencies...")
     poetry_response = (
         subprocess.check_output(
-            ["poetry", "install", "--no-dev"]
+            ["./.venv/bin/poetry", "install", "--no-dev"]
         )
         .decode()
         .strip()
