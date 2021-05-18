@@ -51,7 +51,7 @@ class PluginManager:
     def register_plugin(
         self,
         plugin: Callable,
-        regex: Pattern[str],
+        regex: str,
         flags=None,
         callback: Callable = None,
         ignore_prefix: bool = False,
