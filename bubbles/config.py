@@ -1,11 +1,12 @@
 import os
 from datetime import datetime
 from unittest import mock
+from typing import Any, Dict, List
 
-from blossom_wrapper import BlossomAPI
-import matplotlib as mpl
+from blossom_wrapper import BlossomAPI  # type: ignore
+import matplotlib as mpl  # type: ignore
 from dotenv import load_dotenv
-from praw import Reddit
+from praw import Reddit  # type: ignore
 from slack_bolt import App
 
 from bubbles.plugins import PluginManager as PM
@@ -49,7 +50,9 @@ if ENABLE_BLOSSOM:
 else:
     blossom = mock.MagicMock()
 
-ME = app.client.auth_test().data["user_id"]
+# There is an overloaded __get__ in the underlying Bolt app, so this type
+# doesn't resolve cleanly.
+ME: str = app.client.auth_test().data["user_id"]  # type: ignore
 
 # Slack will send the internal ID to represent the user, so we need to
 # dynamically add that ID so we can listen for it. This will change
@@ -60,8 +63,9 @@ COMMAND_PREFIXES = (USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
 BEGINNING_COMMAND_PREFIXES = ("!",)
 
 # Define the list of users (conversion ID <-> name)
-users_list = {}
-users_list["ids_only"] = list()
+# 'Any' here is either a list or a str; mypy can't handle that.
+# See https://stackoverflow.com/a/62862029
+users_list: Dict[str, Any] = {"ids_only": []}
 users = app.client.users_list()
 for user in users["members"]:
     if not user["deleted"]:
@@ -84,7 +88,7 @@ for room in rooms["channels"]:
 DEFAULT_CHANNEL = rooms_list[DEFAULT_CHANNEL]
 
 # Define the mod to ping for periodic_callback (leave to None if no mod has to be pinged)
-mods_array = []
+mods_array: List = []
 for i in range(0, 24):
     mods_array.append(None)
 
