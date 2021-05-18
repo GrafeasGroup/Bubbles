@@ -1,6 +1,6 @@
 import re
 from re import Pattern
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Union, Any
 
 
 class PluginManager:
@@ -8,7 +8,7 @@ class PluginManager:
     def __init__(
         self, command_prefixes: Tuple, beginning_command_prefixes: Tuple
     ) -> None:
-        self.plugins: List[Dict[str:Callable, str:Pattern, str:bool, str:str]] = list()
+        self.plugins: List[Dict[str, Any]] = list()
         self.callbacks: List[Callable] = list()
         self.command_prefixes = command_prefixes
         self.beginning_command_prefixes = beginning_command_prefixes
@@ -34,12 +34,15 @@ class PluginManager:
             ]
         )
 
-    def get_plugin(self, message: str) -> Callable:
+    def get_plugin(self, message: str) -> Union[Callable, None]:
         for plugin in self.plugins:
             if plugin["ignore_prefix"] or self.message_is_for_us(message):
-                result = re.search(plugin["regex"], message)
+                result = re.search(plugin.get("regex", None), message)
                 if result:
                     return plugin["callable"]
+        # the message we received doesn't match anything our plugins are
+        # looking for.
+        return None
 
     def process_plugin_callbacks(self, data: Dict) -> None:
         for func in self.callbacks:
@@ -48,7 +51,7 @@ class PluginManager:
     def register_plugin(
         self,
         plugin: Callable,
-        regex: str,
+        regex: Pattern[str],
         flags=None,
         callback: Callable = None,
         ignore_prefix: bool = False,

@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
-from unittest import mock
 from typing import Any, Dict, List
+from unittest import mock
 
-from blossom_wrapper import BlossomAPI  # type: ignore
 import matplotlib as mpl  # type: ignore
+from blossom_wrapper import BlossomAPI  # type: ignore
 from dotenv import load_dotenv
+from etsy2 import Etsy
+from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
 from slack_bolt import App
 
@@ -96,5 +98,14 @@ for i in range(0, 24):
 PluginManager = PM(COMMAND_PREFIXES, BEGINNING_COMMAND_PREFIXES)
 
 mpl.rcParams["figure.figsize"] = [20, 10]
+
+etsy = Etsy(
+    etsy_oauth_client=EtsyOAuthClient(
+        client_key=os.environ.get('etsy_key'),
+        client_secret=os.environ.get('etsy_secret'),
+        resource_owner_key=os.environ.get('etsy_oauth_token'),
+        resource_owner_secret=os.environ.get('etsy_oauth_token_secret')
+    )
+)
 
 TIME_STARTED = datetime.now()

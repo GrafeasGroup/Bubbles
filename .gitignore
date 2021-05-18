@@ -111,3 +111,6 @@ venv.bak/
 *.jpeg
 *.tiff
 presence_log.json
+
+asdf.py
+test.py

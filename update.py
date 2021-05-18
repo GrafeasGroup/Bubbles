@@ -7,7 +7,7 @@ import traceback
 from bubbles.config import app, DEFAULT_CHANNEL, USERNAME
 
 
-def msg(message):
+def msg(message: str) -> None:
     app.client.chat_postMessage(
         channel=DEFAULT_CHANNEL, text=message, as_user=True,
     )

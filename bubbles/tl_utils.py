@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-import timeloop
+import timeloop  # type: ignore
 
 tl = timeloop.Timeloop()
 
@@ -41,4 +41,4 @@ class TLJob:
         return result
 
     def job(self):
-        raise Exception("No job configured!")
+        raise TLConfigException("No job configured!")

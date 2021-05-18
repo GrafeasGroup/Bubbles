@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 #     force_presence_update,
 # )
 from bubbles.commands.periodic.banbot_check import banbot_check_callback
+from bubbles.commands.periodic.etsy_sale_check import etsy_recent_sale_callback
 from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
 from bubbles.commands.periodic.welcome_ping import (
     welcome_ping_callback,
@@ -27,6 +28,15 @@ from bubbles.tl_utils import TLJob
 #     class Meta:
 #         start_interval = timedelta(seconds=1)
 #         regular_interval = timedelta(seconds=4)
+
+
+class EtsySaleCheck(TLJob):
+    def job(self):
+        etsy_recent_sale_callback()
+
+    class Meta:
+        start_interval = timedelta(seconds=0)  # start now
+        regular_interval = timedelta(seconds=15)
 
 
 class WelcomePing(TLJob):
