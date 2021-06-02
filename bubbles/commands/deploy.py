@@ -1,37 +1,13 @@
+from typing import Callable
 import os
 import subprocess
 
 from bubbles.config import PluginManager, COMMAND_PREFIXES
 
-OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom"]
+OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
 
 
-def deploy(payload):
-    args = payload.get("text").split()
-    say = payload['extras']['say']
-
-
-    say("This command is not fully functional yet -- sorry!")
-    return
-
-
-    if len(args) > 1:
-        if args[0] in COMMAND_PREFIXES:
-            args.pop(0)
-
-    if len(args) == 1:
-        say(
-            "Need a service to deploy to production. Usage: @bubbles deploy [service]"
-            " -- example: `@bubbles deploy tor`"
-        )
-        return
-
-    service = args[1].lower().strip()
-    if service not in OPTIONS:
-        say(f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
-            f"Available options: {', '.join(OPTIONS)}")
-        return
-
+def _deploy_service(service: str, say: Callable) -> None:
     say(f"Deploying {service} to production. This may take a moment...")
     os.chdir(f"/data/{service}")
 
@@ -48,16 +24,7 @@ def deploy(payload):
 
     def install_deps():
         say("Installing dependencies...")
-        saycode(subprocess.check_output(["poetry", "install"]))
-
-    def flush_db():
-        say("Nuking DB...")
-        # there's no return, so there's nothing to say
-        subprocess.check_output([PYTHON, "manage.py", "flush", "--noinput"])
-
-    def bootstrap_types():
-        say("Re-adding default information...")
-        saycode(subprocess.check_output([PYTHON, "manage.py", "bootstrap_types"]))
+        saycode(subprocess.check_output(["poetry", "install", "--no-dev"]))
 
     def bootstrap_site():
         say("Bootstrapping site...")
@@ -84,20 +51,44 @@ def deploy(payload):
 
     PYTHON = f"/data/{service}/.venv/bin/python"
 
-    if service == 'alexandria':
-        say("Running commands specific to Alexandria.\n")
-        flush_db()
+    if service == 'blossom':
+        say("Running commands specific to Blossom.\n")
         migrate()
-        bootstrap_types()
-    else:
-        migrate()
-
-    collect_static()
+        bootstrap_site()
+        collect_static()
 
     restart_service(service)
 
     # reset back to our primary directory
     os.chdir("/data/bubbles")
+
+
+def deploy(payload):
+    args = payload.get("text").split()
+    say = payload['extras']['say']
+
+    if len(args) > 1:
+        if args[0] in COMMAND_PREFIXES:
+            args.pop(0)
+
+    if len(args) == 1:
+        say(
+            "Need a service to deploy to production. Usage: @bubbles deploy [service]"
+            " -- example: `@bubbles deploy tor`"
+        )
+        return
+
+    service = args[1].lower().strip()
+    if service not in OPTIONS:
+        say(f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
+            f"Available options: {', '.join(OPTIONS)}")
+        return
+
+    if service == "all":
+        for system in [_ for _ in OPTIONS if _ != "all"]:
+            _deploy_service(system, say)
+    else:
+        _deploy_service(service, say)
 
 
 PluginManager.register_plugin(
