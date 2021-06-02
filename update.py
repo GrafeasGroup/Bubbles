@@ -40,7 +40,7 @@ try:
         msg("Validation successful -- restarting service!")
 
         # if this command succeeds, the process dies here
-        systemctl_response = subprocess.check_output(
+        subprocess.check_output(
             ["sudo", "systemctl", "restart", USERNAME]
         )
     except subprocess.CalledProcessError as e:
@@ -56,3 +56,4 @@ try:
         )
 except Exception as e:
     msg(f":rotating_light: Update failed! :rotating_light:\n\nException:\n\n```\n{e}\n```")
+    msg(f"```\n{traceback.format_exc()}\n```")
