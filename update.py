@@ -1,6 +1,7 @@
 # This script is supposed to be called automatically by Bubbles.
 # Requires setting up sudoers access per https://unix.stackexchange.com/a/497011
 import os
+import sys
 import subprocess
 import traceback
 
@@ -54,6 +55,10 @@ try:
         systemctl_response = subprocess.check_output(
             ["sudo", "systemctl", "restart", USERNAME]
         )
+
+except KeyboardInterrupt:
+    sys.exit(0)
+
 except Exception as e:
     msg("```\n{}\n```".format(traceback.format_exc()))
     msg(f":rotating_light: Update failed! :rotating_light:\n\nException:\n\n```\n{e}\n```")
