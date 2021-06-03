@@ -1,7 +1,6 @@
 # This script is supposed to be called automatically by Bubbles.
 # Requires setting up sudoers access per https://unix.stackexchange.com/a/497011
 import os
-import sys
 import subprocess
 import traceback
 
@@ -13,6 +12,7 @@ def msg(message: str) -> None:
         channel=DEFAULT_CHANNEL, text=message, as_user=True,
     )
 
+
 try:
     git_response = (
         subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
@@ -21,9 +21,7 @@ try:
 
     msg("Installing dependencies...")
     poetry_response = (
-        subprocess.check_output(
-            ["./.venv/bin/poetry", "install", "--no-dev"]
-        )
+        subprocess.check_output(["./.venv/bin/poetry", "install", "--no-dev"])
         .decode()
         .strip()
     )
@@ -41,13 +39,13 @@ try:
         msg("Validation successful -- restarting service!")
 
         # if this command succeeds, the process dies here
-        subprocess.check_output(
-            ["sudo", "systemctl", "restart", USERNAME]
-        )
+        subprocess.check_output(["sudo", "systemctl", "restart", USERNAME])
     except subprocess.CalledProcessError as e:
         msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
         git_response = (
-            subprocess.check_output(["git", "reset", "--hard", "master@{'30 seconds ago'}"])
+            subprocess.check_output(
+                ["git", "reset", "--hard", "master@{'30 seconds ago'}"]
+            )
             .decode()
             .strip()
         )
@@ -56,9 +54,8 @@ try:
             ["sudo", "systemctl", "restart", USERNAME]
         )
 
-except KeyboardInterrupt:
-    sys.exit(0)
-
 except Exception as e:
-    msg("```\n{}\n```".format(traceback.format_exc()))
-    msg(f":rotating_light: Update failed! :rotating_light:\n\nException:\n\n```\n{e}\n```")
+    print(traceback.format_exc())
+    print("*" * 40)
+    print("Auto-update exploded. See error above.")
+    print("*" * 40)
