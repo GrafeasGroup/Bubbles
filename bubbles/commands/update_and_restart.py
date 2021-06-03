@@ -14,7 +14,6 @@ def update(payload) -> None:
                 os.path.join(os.getcwd(), "update.py"),
             ],
             text=True,
-            shell=True
         )
     )
 
