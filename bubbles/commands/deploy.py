@@ -12,7 +12,7 @@ def _deploy_service(service: str, say: Callable) -> None:
     os.chdir(f"/data/{service}")
 
     def saycode(command):
-        say(f'```{command.decode().strip()}```')
+        say(f"```{command.decode().strip()}```")
 
     def migrate():
         say("Migrating models...")
@@ -33,14 +33,18 @@ def _deploy_service(service: str, say: Callable) -> None:
 
     def collect_static():
         say("Gathering staticfiles...")
-        saycode(subprocess.check_output([PYTHON, "manage.py", "collectstatic", "--noinput"]))
+        saycode(
+            subprocess.check_output(
+                [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
+            )
+        )
 
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
         systemctl_response = subprocess.check_output(
             ["sudo", "systemctl", "restart", loc]
         )
-        if systemctl_response.decode().strip() == '':
+        if systemctl_response.decode().strip() == "":
             say("Restarted successfully!")
         else:
             say("Something went wrong and could not restart.")
@@ -51,7 +55,7 @@ def _deploy_service(service: str, say: Callable) -> None:
 
     PYTHON = f"/data/{service}/.venv/bin/python"
 
-    if service == 'blossom':
+    if service == "blossom":
         say("Running commands specific to Blossom.\n")
         migrate()
         bootstrap_site()
@@ -65,7 +69,7 @@ def _deploy_service(service: str, say: Callable) -> None:
 
 def deploy(payload):
     args = payload.get("text").split()
-    say = payload['extras']['say']
+    say = payload["extras"]["say"]
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
@@ -80,8 +84,10 @@ def deploy(payload):
 
     service = args[1].lower().strip()
     if service not in OPTIONS:
-        say(f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
-            f"Available options: {', '.join(OPTIONS)}")
+        say(
+            f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
+            f"Available options: {', '.join(OPTIONS)}"
+        )
         return
 
     if service == "all":
@@ -92,6 +98,7 @@ def deploy(payload):
 
 
 PluginManager.register_plugin(
-    deploy, r"deploy ?(.+)",
-    help=f"!deploy [{', '.join(OPTIONS)}] - deploys the code currently on github to the staging server."
+    deploy,
+    r"deploy ?(.+)",
+    help=f"!deploy [{', '.join(OPTIONS)}] - deploys the code currently on github to the staging server.",
 )
