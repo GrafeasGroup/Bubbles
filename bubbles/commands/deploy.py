@@ -27,9 +27,8 @@ def _deploy_service(service: str, say: Callable) -> None:
         saycode(subprocess.check_output(["poetry", "install", "--no-dev"]))
 
     def bootstrap_site():
-        say("Bootstrapping site...")
+        say("Verifying that initial data is present...")
         subprocess.check_output([PYTHON, "manage.py", "bootstrap_site"])
-        say("Base objects added!")
 
     def collect_static():
         say("Gathering staticfiles...")
