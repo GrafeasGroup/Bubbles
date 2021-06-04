@@ -18,9 +18,19 @@ def _deploy_service(service: str, say: Callable) -> None:
         say("Migrating models...")
         saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
-    def pull_from_git(branch: str = "master"):
+    def pull_from_git():
+        commands = [["git", "pull", "origin", "master"], ["git", "pull", "origin", "main"]]
         say("Pulling latest code...")
-        saycode(subprocess.check_output(["git", "pull", "origin", branch]))
+        success = False
+        for option in commands:
+            try:
+                saycode(subprocess.check_output(option))
+                success = True
+            except subprocess.CalledProcessError:
+                pass
+        if not success:
+            say("Unable to pull code from git!")
+            raise Exception
 
     def install_deps():
         say("Installing dependencies...")
