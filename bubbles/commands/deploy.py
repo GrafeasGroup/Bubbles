@@ -1,6 +1,6 @@
-from typing import Callable
 import os
 import subprocess
+from typing import Callable
 
 from bubbles.config import PluginManager, COMMAND_PREFIXES
 
@@ -33,11 +33,11 @@ def _deploy_service(service: str, say: Callable) -> None:
 
     def collect_static():
         say("Gathering staticfiles...")
-        saycode(
-            subprocess.check_output(
-                [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
-            )
+        result = subprocess.check_output(
+            [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
         )
+        if result:
+            saycode(result)
 
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
