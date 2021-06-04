@@ -50,6 +50,9 @@ def _deploy_service(service: str, say: Callable) -> None:
 
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
+        if loc == "tor":
+            # difference in how it's named on the server
+            loc = "tor_moderator"
         systemctl_response = subprocess.check_output(
             ["sudo", "systemctl", "restart", loc]
         )
