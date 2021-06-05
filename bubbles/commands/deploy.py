@@ -1,10 +1,13 @@
 import os
 import subprocess
 from typing import Callable
+import time
 
 from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.exceptions import BubblesException
 
 OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
+PROCESS_CHECK_SLEEP_TIME = 1  # seconds
 
 
 def _deploy_service(service: str, say: Callable) -> None:
@@ -19,7 +22,10 @@ def _deploy_service(service: str, say: Callable) -> None:
         saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
     def pull_from_git():
-        commands = [["git", "pull", "origin", "master"], ["git", "pull", "origin", "main"]]
+        commands = [
+            ["git", "pull", "origin", "master"],
+            ["git", "pull", "origin", "main"],
+        ]
         say("Pulling latest code...")
         success = False
         for option in commands:
@@ -29,8 +35,7 @@ def _deploy_service(service: str, say: Callable) -> None:
             except subprocess.CalledProcessError:
                 pass
         if not success:
-            say("Unable to pull code from git!")
-            raise Exception
+            raise BubblesException("Unable to pull code from git!")
 
     def install_deps():
         say("Installing dependencies...")
@@ -48,6 +53,24 @@ def _deploy_service(service: str, say: Callable) -> None:
         if result:
             saycode(result)
 
+    def revert_and_recover(loc):
+        git_response = (
+            subprocess.check_output(
+                ["git", "reset", "--hard", "master@{'30 seconds ago'}"]
+            )
+                .decode()
+                .strip()
+        )
+        say(f"Rolling back to previous state:\n```\n{git_response}```")
+        subprocess.check_output(["sudo", "systemctl", "restart", loc])
+
+    def verify_service_up(loc):
+        time.sleep(PROCESS_CHECK_SLEEP_TIME)
+        if subprocess.check_call(["systemctl", "is-active", "--quiet", loc]) == 0:
+            say("Restarted successfully!")
+        else:
+            revert_and_recover(loc)
+
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
         if loc == "tor":
@@ -56,11 +79,11 @@ def _deploy_service(service: str, say: Callable) -> None:
         systemctl_response = subprocess.check_output(
             ["sudo", "systemctl", "restart", loc]
         )
-        if systemctl_response.decode().strip() == "":
-            say("Restarted successfully!")
-        else:
+        if systemctl_response.decode().strip() != "":
             say("Something went wrong and could not restart.")
             saycode(systemctl_response)
+        else:
+            verify_service_up(loc)
 
     pull_from_git()
     install_deps()
