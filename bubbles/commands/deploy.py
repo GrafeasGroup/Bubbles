@@ -7,7 +7,7 @@ from bubbles.config import PluginManager, COMMAND_PREFIXES
 from bubbles.exceptions import BubblesException
 
 OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
-PROCESS_CHECK_SLEEP_TIME = 1  # seconds
+PROCESS_CHECK_SLEEP_TIME = 4  # seconds
 
 
 def _deploy_service(service: str, say: Callable) -> None:
@@ -65,6 +65,10 @@ def _deploy_service(service: str, say: Callable) -> None:
         subprocess.check_output(["sudo", "systemctl", "restart", loc])
 
     def verify_service_up(loc):
+        say(
+            f"Pausing for {PROCESS_CHECK_SLEEP_TIME}s to verify that {loc} restarted"
+            f" correctly..."
+        )
         time.sleep(PROCESS_CHECK_SLEEP_TIME)
         if subprocess.check_call(["systemctl", "is-active", "--quiet", loc]) == 0:
             say("Restarted successfully!")
