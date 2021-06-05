@@ -1,14 +1,22 @@
 import os
 import subprocess
-from typing import Callable
 import time
+from typing import Callable
 
 from bubbles.config import PluginManager, COMMAND_PREFIXES
 from bubbles.exceptions import BubblesException
 
 OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
+# special cases
+SERVICE_NAMES = {'tor': 'tor_moderator'}
 PROCESS_CHECK_SLEEP_TIME = 10  # seconds
 PROCESS_CHECK_COUNT = 5
+
+
+def get_service_name(service: str) -> str:
+    if service in SERVICE_NAMES:
+        return SERVICE_NAMES[service]
+    return service
 
 
 def _deploy_service(service: str, say: Callable) -> None:
@@ -63,7 +71,7 @@ def _deploy_service(service: str, say: Callable) -> None:
                 .strip()
         )
         say(f"Rolling back to previous state:\n```\n{git_response}```")
-        subprocess.check_output(["sudo", "systemctl", "restart", loc])
+        subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(loc)])
 
     def verify_service_up(loc):
         say(
@@ -73,19 +81,18 @@ def _deploy_service(service: str, say: Callable) -> None:
         try:
             for attempt in range(PROCESS_CHECK_COUNT):
                 time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
-                subprocess.check_call(["systemctl", "is-active", "--quiet", loc])
-                say(f"Check {attempt+1}/{PROCESS_CHECK_COUNT} complete!")
+                subprocess.check_call(
+                    ["systemctl", "is-active", "--quiet", get_service_name(loc)]
+                )
+                say(f"Check {attempt + 1}/{PROCESS_CHECK_COUNT} complete!")
             say("Restarted successfully!")
         except subprocess.CalledProcessError:
             revert_and_recover(loc)
 
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
-        if loc == "tor":
-            # difference in how it's named on the server
-            loc = "tor_moderator"
         systemctl_response = subprocess.check_output(
-            ["sudo", "systemctl", "restart", loc]
+            ["sudo", "systemctl", "restart", get_service_name(loc)]
         )
         if systemctl_response.decode().strip() != "":
             say("Something went wrong and could not restart.")
@@ -94,15 +101,20 @@ def _deploy_service(service: str, say: Callable) -> None:
             verify_service_up(loc)
 
     pull_from_git()
-    install_deps()
+    try:
+        install_deps()
 
-    PYTHON = f"/data/{service}/.venv/bin/python"
+        PYTHON = f"/data/{service}/.venv/bin/python"
 
-    if service == "blossom":
-        say("Running commands specific to Blossom.\n")
-        migrate()
-        bootstrap_site()
-        collect_static()
+        if service == "blossom":
+            say("Running commands specific to Blossom.\n")
+            migrate()
+            bootstrap_site()
+            collect_static()
+    except Exception as e:
+        say(f"Something went wrong! {e}")
+        revert_and_recover(service)
+        return
 
     restart_service(service)
 
