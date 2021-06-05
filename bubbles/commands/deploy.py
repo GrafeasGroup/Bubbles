@@ -70,9 +70,10 @@ def _deploy_service(service: str, say: Callable) -> None:
             f" correctly..."
         )
         time.sleep(PROCESS_CHECK_SLEEP_TIME)
-        if subprocess.check_call(["systemctl", "is-active", "--quiet", loc]) == 0:
+        try:
+            subprocess.check_call(["systemctl", "is-active", "--quiet", loc])
             say("Restarted successfully!")
-        else:
+        except subprocess.CalledProcessError:
             revert_and_recover(loc)
 
     def restart_service(loc):
