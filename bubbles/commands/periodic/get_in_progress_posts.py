@@ -1,4 +1,7 @@
+from blossom_wrapper import BlossomStatus
 from bubbles.config import blossom, app, ENABLE_BLOSSOM
+
+from requests.exceptions import HTTPError
 
 CHANNEL = "transcription_check"
 
@@ -7,15 +10,10 @@ def get_in_progress_callback():
     if not ENABLE_BLOSSOM:
         return
 
-    result = blossom.get("submission/in_progress", params={"source": "reddit"})
 
-    if not str(result.status_code).startswith("2"):
-        msg = f"Got a weird response; Blossom returned a {result.status_code}."
-
-    else:
-        result = result.json()
-
-        if len(result) == 0:
+    try:
+        result = blossom.get("submission/in_progress", params={"source": "reddit"})
+        if len(result.data) == 0:
             return
         else:
             msg = (
@@ -30,11 +28,13 @@ def get_in_progress_callback():
                                     link["id"]
                                 )
                             )
-                            for link in result
+                            for link in result.data
                         ]
                     )
                 )
             )
+    except HTTPError as e:
+        msg = f"Got a weird response; Blossom returned an exception: {e}."
 
     # we have in progress posts, so here we go
     app.client.chat_postMessage(
