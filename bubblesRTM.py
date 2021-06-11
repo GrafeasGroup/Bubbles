@@ -22,7 +22,6 @@ from bubbles.tl_utils import tl
 
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-
 parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
 parser.add_argument("--startup-check", action="store_true")
 CHECK_MODE = parser.parse_args().startup_check
