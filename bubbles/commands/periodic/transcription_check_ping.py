@@ -32,7 +32,7 @@ def transcription_check_ping_callback() -> None:
     tic = time.time()
     
     timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
-    timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
+    timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=12)
 
     response = app.client.conversations_history(
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
@@ -106,10 +106,14 @@ def transcription_check_ping_callback() -> None:
                 i = -1  
             i = i+1
         text = text[:-2]
+        if page == 0:
+            text="List of unhandled checks:" +text,
+        else:
+            text="(last page) "+text
         app.client.chat_postMessage(
                 channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
                 link_names=1,
-                text="(last page) "+text,
+                text=text,
                 unfurl_links=False,
                 unfurl_media=False,
                 as_user=True,

@@ -81,7 +81,7 @@ class TranscriptionCheckPing(TLJob):
 
     class Meta:
         start_interval = timedelta(seconds=0)
-        regular_interval = timedelta(hours=4)
+        regular_interval = timedelta(hours=12)
 
 
 # TODO: This will require major surgery because the events API doesn't support
