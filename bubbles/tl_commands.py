@@ -13,6 +13,7 @@ from bubbles.commands.periodic.welcome_ping import (
     welcome_ping_callback,
     periodic_ping_in_progress_callback,
 )
+from bubbles.commands.periodic.transcription_check_ping import transcription_check_ping_callback
 from bubbles.time_constants import (
     TRIGGER_4_HOURS_AGO,
     TRIGGER_12_HOURS_AGO,
@@ -73,6 +74,14 @@ class WelcomeVolunteersInProgress(TLJob):
     class Meta:
         start_interval = TRIGGER_YESTERDAY - datetime.now()
         regular_interval = timedelta(days=1)
+
+class TranscriptionCheckPing(TLJob):
+    def job(self):
+        transcription_check_ping_callback()
+
+    class Meta:
+        start_interval = timedelta(seconds=0)
+        regular_interval = timedelta(hours=12)
 
 
 # TODO: This will require major surgery because the events API doesn't support
