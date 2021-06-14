@@ -5,6 +5,7 @@ from bubbles.config import PluginManager, ME
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
 ^w+a+t+[.!?\s]*$|
+^w+u+t+[.!?\s]*$|
 ^((you+|u+)\ )? wot[.!?\s]*$|
 ^h+u+h+[.!?\s]*$|
 ^w+h+a+t+\ n+o+w+[.!?\s]*$|
