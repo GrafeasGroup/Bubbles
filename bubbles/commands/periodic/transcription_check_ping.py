@@ -81,7 +81,6 @@ def transcription_check_ping_callback() -> None:
                 break
             users_to_welcome[i] = (username, permalink)
             i = i+1
-    print(users_to_welcome)
     if cry:
         i = 0
         page = 0
@@ -107,7 +106,7 @@ def transcription_check_ping_callback() -> None:
             i = i+1
         text = text[:-2]
         if page == 0:
-            text="List of unhandled checks:" +text,
+            text="List of unhandled checks:" +text
         else:
             text="(last page) "+text
         app.client.chat_postMessage(
