@@ -42,13 +42,12 @@ def transcription_check_ping_callback() -> None:
     ) 
     cry = False
     users_to_welcome = {}
+    mod_having_reacted = {}
     GOOD_REACTIONS = [
-        "heavy_tick",
-        "heavy_check_mark",
-        "speech_bubble",
-        "speech_balloon"
-        "exclamation",
-        "heavy_exclamation_mark",
+       "heavy_tick",
+       "heavy_check_mark",
+       "exclamation",
+       "heavy_exclamation_mark",
     ]
     i = 0
     last_text = ""
@@ -57,11 +56,11 @@ def transcription_check_ping_callback() -> None:
         if message["user"] != users_list["Blossom"]: # Do not handle messages not from Blossom
             continue
         author = extract_author(message, GOOD_REACTIONS)
-        # print(message["text"])
         if author == "Nobody":
             cry = True
             try:
                 username, permalink = get_username_and_permalink(message)
+                mod_reacting = extract_author(message, ["speech_bubble", "speech_balloon", "heavy_tick", "heavy_check_mark"])
             except IndexError:
                 # This is a message that didn't come from Kierra and isn't something we
                 # can process. Ignore it and move onto the next message.
@@ -80,43 +79,53 @@ def transcription_check_ping_callback() -> None:
                 )
                 break
             users_to_welcome[i] = (username, permalink)
+            if mod_reacting not in mod_having_reacted.keys():
+                mod_having_reacted[mod_reacting] = []
+            mod_having_reacted[mod_reacting].append(users_to_welcome[i])
             i = i+1
     if cry:
-        i = 0
-        page = 0
-        text = ""
-        for (username, permalink) in users_to_welcome.values():
-            text = text + "<" + permalink + "|" + username + ">, "
-            if i == 10:
-                if page == 0:
-                    text = "List of unchecked transcriptions: " + text + "..."
-                else:
-                    text = "(page " + str(page+1)+") " + text + "..."
-                app.client.chat_postMessage(
-                channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
-                link_names=1,
-                text=text,
-                unfurl_links=False,
-                unfurl_media=False,
-                as_user=True,
-                )
-                text = ""
-                page = page + 1
-                i = -1  
-            i = i+1
-        text = text[:-2]
-        if page == 0:
-            text="List of unhandled checks:" +text
-        else:
-            text="(last page) "+text
-        app.client.chat_postMessage(
-                channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
-                link_names=1,
-                text=text,
-                unfurl_links=False,
-                unfurl_media=False,
-                as_user=True,
-                )
+        for mod in mod_having_reacted.keys():
+            i = 0
+            page = 0
+            if mod == "Nobody":
+                text = "for [_NOBODY CLAIMED US :(_]: "
+            elif mod == "Conflict":
+                text = "for [_TOO MANY PEOPLE CLAIMED US :(_]: "
+            else:
+                text = "for *"+mod+"*: "
+            for data in mod_having_reacted[mod]:
+                username, permalink = data
+                text = text + "<" + str(permalink) + "|" + str(username) + ">, "
+                if i == 10:
+                    if page == 0:
+                        text = "List of unchecked transcriptions " + text + "..."
+                    else:
+                        text = "(page " + str(page+1)+") " + text + "..."
+                    app.client.chat_postMessage(
+                    channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                    link_names=1,
+                    text=text,
+                    unfurl_links=False,
+                    unfurl_media=False,
+                    as_user=True,
+                    )
+                    text = ""
+                    page = page + 1
+                    i = -1  
+                i = i+1
+            text = text[:-2]
+            if page == 0:
+                text="List of unchecked transcriptions " +text
+            else:
+                text="(last page) "+text
+            app.client.chat_postMessage(
+                    channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                    link_names=1,
+                    text=text,
+                    unfurl_links=False,
+                    unfurl_media=False,
+                    as_user=True,
+                    )
         # print("CALLBACK ENDED! Time elapsed: "+str(time.time()-tic)+" s")
         # print("Last message:" +str(last_text))
 
