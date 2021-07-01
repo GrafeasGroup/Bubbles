@@ -31,8 +31,9 @@ def transcription_check_ping_callback() -> None:
     
     tic = time.time()
     
-    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
+    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=8)
     timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=12)
+    timestamp_needed_start_cry_harder = datetime.datetime.now() - datetime.timedelta(days=7)
 
     response = app.client.conversations_history(
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
@@ -41,8 +42,10 @@ def transcription_check_ping_callback() -> None:
         limit=1000
     ) 
     cry = False
+    cry_harder = False
     users_to_welcome = {}
     mod_having_reacted = {}
+    mod_having_reacted_harder = {}
     GOOD_REACTIONS = [
        "heavy_tick",
        "heavy_check_mark",
@@ -60,7 +63,7 @@ def transcription_check_ping_callback() -> None:
             cry = True
             try:
                 username, permalink = get_username_and_permalink(message)
-                mod_reacting = extract_author(message, ["speech_bubble", "speech_balloon", "heavy_tick", "heavy_check_mark"])
+                mod_reacting = extract_author(message, ["speech_bubble", "speech_balloon"])
             except IndexError:
                 # This is a message that didn't come from Kierra and isn't something we
                 # can process. Ignore it and move onto the next message.
@@ -78,11 +81,18 @@ def transcription_check_ping_callback() -> None:
                 as_user=True,
                 )
                 break
-            users_to_welcome[i] = (username, permalink)
-            if mod_reacting not in mod_having_reacted.keys():
-                mod_having_reacted[mod_reacting] = []
-            mod_having_reacted[mod_reacting].append(users_to_welcome[i])
-            i = i+1
+            if datetime.datetime.fromtimestamp(float(message["ts"])) >= timestamp_needed_start_cry_harder:
+                users_to_welcome[i] = (username, permalink)
+                if mod_reacting not in mod_having_reacted.keys():
+                    mod_having_reacted[mod_reacting] = []
+                mod_having_reacted[mod_reacting].append(users_to_welcome[i])
+                i = i+1
+            else:
+                cry_harder = True
+                if mod_reacting not in mod_having_reacted_harder.keys():
+                    mod_having_reacted_harder[mod_reacting] = []
+                mod_having_reacted_harder[mod_reacting].append((username, permalink))
+                
     if cry:
         for mod in mod_having_reacted.keys():
             i = 0
@@ -119,6 +129,27 @@ def transcription_check_ping_callback() -> None:
             else:
                 text="(last page) "+text
             app.client.chat_postMessage(
+                    channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                    link_names=1,
+                    text=text,
+                    unfurl_links=False,
+                    unfurl_media=False,
+                    as_user=True,
+                    )
+    if cry_harder:
+        for mod in mod_having_reacted_harder.keys():
+            if mod == "Nobody":
+                text = "[_NOBODY CLAIMED US :(_]: "
+            elif mod == "Conflict":
+                text = "[_TOO MANY PEOPLE CLAIMED US :(_]: "
+            else:
+                text = "*"+mod+"* "
+            for data in mod_having_reacted_harder[mod]:
+                username, permalink = data
+                text=":rotating_light: :pinged: :rotating_light: " +text+" These users have not fixed their transcriptions in a whole week. Please check the reactions to this message and, if correct, log these volunteers on the 'Volunteer Warning' spreadsheet: "
+                text = text + "<" + str(permalink) + "|" + str(username) + ">, "
+                text = text[:-2]
+                app.client.chat_postMessage(
                     channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
                     link_names=1,
                     text=text,
