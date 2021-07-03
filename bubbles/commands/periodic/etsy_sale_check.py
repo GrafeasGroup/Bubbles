@@ -1,4 +1,5 @@
 import os
+import random
 import urllib.parse as urlparse
 from datetime import datetime, timedelta
 from urllib.parse import parse_qs
@@ -43,6 +44,19 @@ KNOWN_COUNTRY_CODES = {
     219: "Hong Kong",
 }
 
+WORDS = [
+    "whopping",
+    "amazing",
+    "exciting",
+    "splendiferous",
+    "incredible",
+    "dazzling",
+    "phenomenal",
+    "breathtaking",
+    "spectacular",
+    "magnificent",
+]
+
 
 def get_oauth_keys() -> None:
     """A function that should be run from the command line to generate new keys."""
@@ -72,18 +86,22 @@ def etsy_recent_sale_callback() -> None:
 
     for receipt in receipts:
         try:
-            country_name = KNOWN_COUNTRY_CODES.get(int(receipt.get("currency_code")))
+            country_name = KNOWN_COUNTRY_CODES.get(int(receipt.get("country_id")))
             if not country_name:
-                country_name = etsy.getCountry(country_id=receipt.get("currency_code"))[0].get(
-                    "name"
-                )
+                country_name = etsy.getCountry(country_id=receipt.get("currency_code"))[
+                    0
+                ].get("name")
+            word = random.choice(WORDS)
+            article = "an" if word[0] in "aeiou" else "a"
             msg = (
-                f":moneybag: Just sold a whopping {receipt.get('grandtotal')}"
+                f":moneybag: Just sold {article} {word} {receipt.get('grandtotal')}"
                 f" {receipt.get('currency_code')} to somebody in {country_name}!"
             )
             if buyer_msg := receipt.get("message_from_buyer"):
                 msg += f" They included a message for us:\n\n```\n{buyer_msg}\n```"
         except Exception as e:
-            msg = f"Somebody just bought something, but there was an error on my" \
-                  f" side:\n\n```\n{e}\n```"
+            msg = (
+                f"Somebody just bought something, but there was an error on my"
+                f" side:\n\n```\n{e}\n```"
+            )
         app.client.chat_postMessage(text=msg, channel=rooms_list["merch"], as_user=True)
