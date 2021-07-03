@@ -88,7 +88,7 @@ def etsy_recent_sale_callback() -> None:
         try:
             country_name = KNOWN_COUNTRY_CODES.get(int(receipt.get("country_id")))
             if not country_name:
-                country_name = etsy.getCountry(country_id=receipt.get("currency_code"))[
+                country_name = etsy.getCountry(country_id=receipt.get("country_id"))[
                     0
                 ].get("name")
             word = random.choice(WORDS)
