@@ -17,7 +17,7 @@ def get_username_and_permalink(message):
 
 
 def welcome_ping_callback() -> None:
-    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
+    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=2)
     timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
 
     response = app.client.conversations_history(
@@ -30,7 +30,9 @@ def welcome_ping_callback() -> None:
     GOOD_REACTIONS = [
         "watch",
         "heavy_check_mark",
+        "heavy_tick",
         "email",
+        "envelope",
         "exclamation",
         "heavy_exclamation_mark",
     ]
@@ -47,38 +49,10 @@ def welcome_ping_callback() -> None:
                 continue
             users_to_welcome[username] = permalink
     if cry:
-        hour = datetime.datetime.now().hour
-        person_to_ping = mods_array[hour]
-
-        # First figure out who we're going to ping, then follow up with the list of
-        # users.
-        if person_to_ping is None:
-            app.client.chat_postMessage(
-                channel=rooms_list[META_CHANNEL],
-                link_names=1,
-                text=(
-                    "There are unwelcomed users, but there is no mod to ping in the"
-                    " schedule. Please welcome the new users as soon as possible."
-                ),
-                as_user=True,
-            )
-        else:
-            id_mod_to_ping = users_list[person_to_ping]
-            app.client.chat_postMessage(
-                channel=rooms_list[META_CHANNEL],
-                link_names=1,
-                text=(
-                    f"<@{id_mod_to_ping}> there are unwelcomed users after 4 hours."
-                    f" Please fix that as soon as possible."
-                ),
-                as_user=True,
-            )
-
-        # <{url}|u/{username}>
         app.client.chat_postMessage(
             channel=rooms_list[META_CHANNEL],
             link_names=1,
-            text="List of unwelcomed users: "
+            text="List of unwelcomed users (nobody checked them out or claimed them with :watch:): "
             + ", ".join(
                 [
                     f"<{users_to_welcome[username]}|{username}>"
@@ -120,68 +94,56 @@ def periodic_ping_in_progress_callback() -> None:
     #        as_user=True,
     #    )
     users_to_check = {}
+    mod_having_reacted = {}
+    GOOD_REACTIONS = [
+        "watch",
+        "email",
+        "envelope",
+        "exclamation",
+        "heavy_exclamation_mark",
+    ]
     for message in response_watchping["messages"]:
         # print(message["text"])
-        only_watch = False
-        if "reactions" not in message.keys():
-            continue  # No reactions -> already handled by cry
-        for reaction in message["reactions"]:
-            if reaction["name"] in [
-                "watch",
-                "email",
-                "exclamation",
-                "heavy_exclamation_mark",
-            ]:
-                only_watch = True
-            if reaction["name"] in ["banhammer"]:
-                only_watch = False
-                break
-        if only_watch:
+        author = extract_author(message, ["heavy_check_mark", "heavy_tick"])
+        if author == "Nobody":
             watchping = True
+            mod_reacting = extract_author(message, GOOD_REACTIONS)
             username, permalink = get_username_and_permalink(message)
+            if mod_reacting not in mod_having_reacted.keys():
+                mod_having_reacted[mod_reacting] = []
+            mod_having_reacted[mod_reacting].append(((username, permalink)))
             users_to_check[username] = permalink
     if watchping:
-        hour = datetime.datetime.now().hour
-        person_to_ping = mods_array[hour]
-        if person_to_ping is None:
-            app.client.chat_postMessage(
-                channel=rooms_list[IN_PROGRESS_CHANNEL],
-                link_names=1,
-                text=(
-                    "There are users claimed with a :watch:, a :email: or a"
-                    " :exclamation:. Please check them out when their time has come."
-                ),
-                as_user=True,
-            )
-        else:
-            id_mod_to_ping = users_list[person_to_ping]
-            app.client.chat_postMessage(
-                channel=rooms_list[IN_PROGRESS_CHANNEL],
-                link_names=1,
-                text=(
-                    f"<@{id_mod_to_ping}> there are users claimed with a :watch:, a"
-                    f" :email: or a :exclamation:. Please check them out when their time"
-                    f" has come."
-                ),
-                as_user=True,
-            )
-
         app.client.chat_postMessage(
             channel=rooms_list[IN_PROGRESS_CHANNEL],
             link_names=1,
-            text="List of users to check out: "
-            + ", ".join(
-                [
-                    f"<{users_to_check[username]}|{username}>"
-                    for username in users_to_check
-                ]
+            text=(
+                "There are users claimed with a :watch:, a :email: or a"
+                " :exclamation:. Please check them out when their time has come."
             ),
-            unfurl_links=False,
-            unfurl_media=False,
             as_user=True,
         )
-
-
+        
+        for mod in mod_having_reacted.keys():
+            if mod == "Nobody":
+                text = "[_NOBODY CLAIMED US :(_]: "
+            elif mod == "Conflict":
+                text = "[_TOO MANY PEOPLE CLAIMED US :(_]: "
+            else:
+                text = "*"+mod+"* "
+            for data in mod_having_reacted[mod]:
+                username, permalink = data
+                text="For " +text+": "
+                text = text + "<" + str(permalink) + "|" + str(username) + ">, "
+                text = text[:-2]
+                app.client.chat_postMessage(
+                    channel=rooms_list[IN_PROGRESS_CHANNEL],
+                    link_names=1,
+                    text=text,
+                    unfurl_links=False,
+                    unfurl_media=False,
+                    as_user=True,
+                    )
 #    else:
 #        response = client.chat_postMessage(
 #            channel=DEFAULT_CHANNEL,

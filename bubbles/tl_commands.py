@@ -80,7 +80,7 @@ class TranscriptionCheckPing(TLJob):
         transcription_check_ping_callback()
 
     class Meta:
-        start_interval = timedelta(seconds=0)
+        start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
         regular_interval = timedelta(hours=12)
 
 
