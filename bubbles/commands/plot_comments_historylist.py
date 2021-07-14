@@ -43,7 +43,7 @@ def plot_comments_historylist(payload: Dict) -> None:
         # if "user" in message.keys():
         #     userWhoSentMessage = usersList[message["user"]]
         #
-        if not re.search(r"^<https://reddit.com/user/", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
             continue
         welcomed_username = message["text"].split(">")[0]
         welcomed_username = welcomed_username.split("|")[-1]

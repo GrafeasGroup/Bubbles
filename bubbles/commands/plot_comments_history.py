@@ -17,14 +17,12 @@ warnings.filterwarnings("ignore")
 
 def plot_comments_history(payload: Dict) -> None:
     # Syntax: !history [number of posts]
-
     count_days = {}
     count_hours = [0] * 24
     args = payload.get("text").split()
     say = payload['extras']['say']
     client = payload['extras']['client']
-
-    print(args)
+    # print(args)
     number_posts = 100
     input_value = 100
     if len(args) == 2:
@@ -48,9 +46,9 @@ def plot_comments_history(payload: Dict) -> None:
 
     timestamp = 0  # stop linter from complaining
     timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
-    print(len(response["messages"]))
+    print("Number of messages retrieved: "+str(len(response["messages"])))
     for message in response["messages"]:
-        if not re.search(r"^<https://reddit.com/user/", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
             continue
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():

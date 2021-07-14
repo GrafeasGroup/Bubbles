@@ -37,8 +37,8 @@ def plot_comments_historywho(payload: Dict) -> None:
             and payload.get("text") != "!historywho -h"
     ):
         say(
-            "`historywho` must specify a person, and the name must be inside double"
-            ' quotes. Example: `"!historywho "Bubbles"`'
+            "`historywho` must specify a person (the name must be inside double"
+            ' quotes) and a number of posts. Example: `"!historywho 169 "Bubbles"`'
         )
         return
 
@@ -47,7 +47,9 @@ def plot_comments_historywho(payload: Dict) -> None:
         say(f"ERROR! {name_person_to_search} is not on the list of users.")
         return
 
+    print(payload.get("text"))
     other_params = payload.get("text").split('"')[0]
+    print("--- " + str(other_params))
     args = other_params.split()
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
@@ -67,7 +69,7 @@ def plot_comments_historywho(payload: Dict) -> None:
     timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
     for message in response["messages"]:
         # print(message)
-        if not re.search(r"^<https://reddit.com/user/", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
             continue
 
         timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
