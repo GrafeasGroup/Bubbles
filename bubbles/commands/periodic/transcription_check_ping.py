@@ -144,12 +144,12 @@ def transcription_check_ping_callback() -> None:
                 text = "[_TOO MANY PEOPLE CLAIMED US :(_]: "
             else:
                 text = "*"+mod+"* "
+            text=":rotating_light: :pinged: :rotating_light: " +text+" These users have not fixed their transcriptions in a whole week. Please check the reactions to this message and, if correct, log these volunteers on the 'Volunteer Warning' spreadsheet: "
             for data in mod_having_reacted_harder[mod]:
                 username, permalink = data
-                text=":rotating_light: :pinged: :rotating_light: " +text+" These users have not fixed their transcriptions in a whole week. Please check the reactions to this message and, if correct, log these volunteers on the 'Volunteer Warning' spreadsheet: "
                 text = text + "<" + str(permalink) + "|" + str(username) + ">, "
-                text = text[:-2]
-                app.client.chat_postMessage(
+            text = text[:-2]
+            app.client.chat_postMessage(
                     channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
                     link_names=1,
                     text=text,
