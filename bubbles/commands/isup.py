@@ -9,6 +9,7 @@ def isup(payload):
     text = payload.get("cleaned_text").split()
     if len(text) == 1:
         say("What service should I be checking on?")
+        say("Valid choices: {}".format(", ".join(SERVICES)))
         return
 
     def _check(name):
