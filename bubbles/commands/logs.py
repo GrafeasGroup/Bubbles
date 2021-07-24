@@ -25,7 +25,7 @@ def logs(payload):
         say(VALID)
     result = subprocess.check_output(COMMAND.format(get_service_name(service)).split())
 
-    for block in break_large_message(result.decode().strip(), break_at=3990):
+    for block in break_large_message(result.decode().strip(), break_at=3800):
         say(f"```{block}```")
 
 
