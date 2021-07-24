@@ -5,6 +5,7 @@ import subprocess
 import traceback
 
 from bubbles.config import app, DEFAULT_CHANNEL, USERNAME
+from bubbles.utils import get_branch_head
 
 
 def msg(message: str) -> None:
@@ -15,7 +16,7 @@ def msg(message: str) -> None:
 
 try:
     git_response = (
-        subprocess.check_output(["git", "pull", "origin", "master"]).decode().strip()
+        subprocess.check_output(["git", "pull", "origin", get_branch_head()]).decode().strip()
     )
     msg(f"Git:\n```\n{git_response}```")
 
@@ -44,7 +45,7 @@ try:
         msg(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
         git_response = (
             subprocess.check_output(
-                ["git", "reset", "--hard", "master@{'30 seconds ago'}"]
+                ["git", "reset", "--hard", f"{get_branch_head()}@{{'30 seconds ago'}}"]
             )
             .decode()
             .strip()

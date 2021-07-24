@@ -3,20 +3,9 @@ import subprocess
 import time
 from typing import Callable
 
+from bubbles.commands import PROCESS_CHECK_COUNT, PROCESS_CHECK_SLEEP_TIME, SERVICES, get_service_name
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.exceptions import BubblesException
-
-OPTIONS = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
-# special cases
-SERVICE_NAMES = {'tor': 'tor_moderator'}
-PROCESS_CHECK_SLEEP_TIME = 10  # seconds
-PROCESS_CHECK_COUNT = 5
-
-
-def get_service_name(service: str) -> str:
-    if service in SERVICE_NAMES:
-        return SERVICE_NAMES[service]
-    return service
+from bubbles.utils import get_branch_head
 
 
 def _deploy_service(service: str, say: Callable) -> None:
@@ -31,20 +20,8 @@ def _deploy_service(service: str, say: Callable) -> None:
         saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
     def pull_from_git():
-        commands = [
-            ["git", "pull", "origin", "master"],
-            ["git", "pull", "origin", "main"],
-        ]
         say("Pulling latest code...")
-        success = False
-        for option in commands:
-            try:
-                saycode(subprocess.check_output(option))
-                success = True
-            except subprocess.CalledProcessError:
-                pass
-        if not success:
-            raise BubblesException("Unable to pull code from git!")
+        saycode(subprocess.check_output(f"git pull origin {get_branch_head()}".split()))
 
     def install_deps():
         say("Installing dependencies...")
@@ -65,7 +42,7 @@ def _deploy_service(service: str, say: Callable) -> None:
     def revert_and_recover(loc):
         git_response = (
             subprocess.check_output(
-                ["git", "reset", "--hard", "master@{'30 seconds ago'}"]
+                ["git", "reset", "--hard", f"{get_branch_head()}@{{'30 seconds ago'}}"]
             )
                 .decode()
                 .strip()
@@ -138,15 +115,15 @@ def deploy(payload):
         return
 
     service = args[1].lower().strip()
-    if service not in OPTIONS:
+    if service not in SERVICES:
         say(
             f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
-            f"Available options: {', '.join(OPTIONS)}"
+            f"Available options: {', '.join(SERVICES)}"
         )
         return
 
     if service == "all":
-        for system in [_ for _ in OPTIONS if _ != "all"]:
+        for system in [_ for _ in SERVICES if _ != "all"]:
             _deploy_service(system, say)
     else:
         _deploy_service(service, say)
@@ -155,5 +132,5 @@ def deploy(payload):
 PluginManager.register_plugin(
     deploy,
     r"deploy ?(.+)",
-    help=f"!deploy [{', '.join(OPTIONS)}] - deploys the code currently on github to the staging server.",
+    help=f"!deploy [{', '.join(SERVICES)}] - deploys the code currently on github to the staging server.",
 )
