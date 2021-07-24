@@ -11,7 +11,7 @@ VALID = "Valid choices: {}".format(", ".join(SERVICES))
 
 def logs(payload):
     say = payload['extras']['say']
-    text = payload['cleaned_text']
+    text = payload['cleaned_text'].split()
 
     if len(text) == 1:
         say("What service should I return the logs for?")
