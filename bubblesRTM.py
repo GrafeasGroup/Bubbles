@@ -8,6 +8,7 @@ import sys
 #     presence_update_callback,
 # )
 from bubbles.config import app, DEFAULT_CHANNEL
+from bubbles.commands import clean_text
 from bubbles.message import process_message
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.time_constants import (
@@ -77,7 +78,12 @@ def handle(ack):
 @app.event("message")
 def message_received(ack, payload, client, context, say):
     ack()
-    payload.update({'extras': {'client': client, 'context': context, 'say': say}})
+    payload.update(
+        {
+            "cleaned_text": clean_text(payload.get("text")),
+            "extras": {"client": client, "context": context, "say": say},
+        }
+    )
     try:
         process_message(payload)
     except:

@@ -1,14 +1,12 @@
 import subprocess
 
 from bubbles.commands import SERVICES, get_service_name
-from bubbles.config import BEGINNING_COMMAND_PREFIXES, COMMAND_PREFIXES, PluginManager
+from bubbles.config import PluginManager
 
 
 def isup(payload):
     say = payload['extras']['say']
-    text = payload.get("text").split()
-    if text[0] in COMMAND_PREFIXES or text[0] in BEGINNING_COMMAND_PREFIXES:
-        text.pop(0)
+    text = payload.get("cleaned_text").split()
     if len(text) == 1:
         say("What service should I be checking on?")
         return
