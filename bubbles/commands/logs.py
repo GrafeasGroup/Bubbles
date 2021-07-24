@@ -2,6 +2,7 @@ import subprocess
 
 from bubbles.commands import SERVICES, get_service_name
 from bubbles.config import PluginManager
+from bubbles.utils import break_large_message
 
 
 # note: this command requires setting up sudoers access
@@ -23,7 +24,9 @@ def logs(payload):
         say("Sorry, that's a lot of logs. Please specify the service you want.")
         say(VALID)
     result = subprocess.check_output(COMMAND.format(get_service_name(service)).split())
-    say(f"```{result.decode().strip()}```")
+
+    for block in break_large_message(result.decode().strip(), break_at=3990):
+        say(f"```{block}```")
 
 
 PluginManager.register_plugin(logs, r"logs([ a-zA-Z]+)?", help="!logs [service_name]")
