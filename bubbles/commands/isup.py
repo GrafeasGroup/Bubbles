@@ -7,10 +7,8 @@ from bubbles.config import BEGINNING_COMMAND_PREFIXES, COMMAND_PREFIXES, PluginM
 def isup(payload):
     say = payload['extras']['say']
     text = payload.get("text").split()
-    say(str(text))
     if text[0] in COMMAND_PREFIXES or text[0] in BEGINNING_COMMAND_PREFIXES:
-        text = text.pop(0)
-    say(str(text))
+        text.pop(0)
     if len(text) == 1:
         say("What service should I be checking on?")
         return
