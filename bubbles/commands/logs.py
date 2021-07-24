@@ -23,7 +23,7 @@ def logs(payload):
         say("Sorry, that's a lot of logs. Please specify the service you want.")
         say(VALID)
     result = subprocess.check_output(COMMAND.format(get_service_name(service)).split())
-    say(f"```{result}```")
+    say(f"```{result.decode().strip()}```")
 
 
 PluginManager.register_plugin(logs, r"logs([ a-zA-Z]+)?", help="!logs [service_name]")
