@@ -159,7 +159,7 @@ def plot_comments_historywho(payload: Dict) -> None:
     plt.legend()
     plt.savefig("plotHourMods.png")
     plt.close()
-    utils.upload_file(payload, file="plotHourMods.png")
+    utils.upload_file(file="plotHourMods.png")
 
 
 PluginManager.register_plugin(

@@ -79,10 +79,11 @@ def handle(ack):
 @app.event("message")
 def message_received(ack, payload, client, context, say):
     ack()
+    utils = MessageUtils(client, payload)
     payload.update(
         {
             "cleaned_text": clean_text(payload.get("text")),
-            "extras": {"client": client, "context": context, "say": say, "utils": MessageUtils(client)},
+            "extras": {"client": client, "context": context, "say": say, "utils": utils},
         }
     )
     try:
