@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 from numpy import zeros, flip, cumsum
 
 from bubbles.commands.helper_functions_history.extract_author import extract_author
-from bubbles.commands.helper_functions_history.extract_date_or_number import extract_date_or_number
+from bubbles.commands.helper_functions_history.extract_date_or_number import (
+    extract_date_or_number,
+)
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 from bubbles.config import PluginManager, users_list
 
@@ -29,13 +31,10 @@ def plot_comments_historywho(payload: Dict) -> None:
     count_reactions_people = {}
     datetime_now = datetime.datetime.now()
 
-    say = payload['extras']['say']
-    client = payload['extras']['client']
+    say = payload["extras"]["say"]
+    client = payload["extras"]["client"]
 
-    if (
-            '"' not in payload.get("text")
-            and payload.get("text") != "!historywho -h"
-    ):
+    if '"' not in payload.get("text") and payload.get("text") != "!historywho -h":
         say(
             "`historywho` must specify a person (the name must be inside double"
             ' quotes) and a number of posts. Example: `"!historywho 169 "Bubbles"`'
@@ -69,7 +68,9 @@ def plot_comments_historywho(payload: Dict) -> None:
     timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
     for message in response["messages"]:
         # print(message)
-        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(
+            r"^<https://reddit.com/u", message["text"]
+        ):  # Remove all messages who are not given by the bot
             continue
 
         timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
@@ -83,7 +84,7 @@ def plot_comments_historywho(payload: Dict) -> None:
         if author not in count_reactions_people.keys():
             count_reactions_people[author] = {}
         count_reactions_people[author][difference_days] = (
-                count_reactions_people[author].get(difference_days, 0) + 1
+            count_reactions_people[author].get(difference_days, 0) + 1
         )
 
         timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
@@ -91,14 +92,16 @@ def plot_comments_historywho(payload: Dict) -> None:
         difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
         count_reactions_all[difference_days] = (
-                count_reactions_all.get(difference_days, 0) + 1
+            count_reactions_all.get(difference_days, 0) + 1
         )
         # print(str(time_send)+"| "+userWhoSentMessage+" sent: "+textMessage)
         # last_datetime = timestamp.timestamp()
         # print(str(lastDatetime))
         # print(time_send)
 
-    say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp_min)}")
+    say(
+        f"{str(len(response['messages']))} messages retrieved since {str(timestamp_min)}"
+    )
     number_posts = {}
     print(count_reactions_people.keys())
     dates = []

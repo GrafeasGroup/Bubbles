@@ -1,5 +1,6 @@
 from typing import Any, Dict
 
+
 class MessageUtils:
     def __init__(self, client):
         self.client = client

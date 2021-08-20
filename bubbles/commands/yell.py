@@ -37,7 +37,7 @@ class Yell:
         else:
             response = idk
 
-        payload['extras']['say'](response)
+        payload["extras"]["say"](response)
 
     def yell_callback(self, message):
         if message["user"] == ME:

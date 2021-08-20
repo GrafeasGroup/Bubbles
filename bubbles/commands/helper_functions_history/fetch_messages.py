@@ -2,17 +2,18 @@ from typing import Dict
 
 from bubbles.config import rooms_list
 
+
 def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
     """
     Function that fetches the number of messages required by the input argument.
     
     
     """
-    client = payload['extras']['client']
+    client = payload["extras"]["client"]
     channel = rooms_list[channel_name]
     if input_value > 1000:
         messages = client.conversations_history(
-        channel=channel, oldest=input_value, inclusive=True
+            channel=channel, oldest=input_value, inclusive=True
         )
         print("Has this message more data?" + str(messages["has_more"]))
         is_there_other_data = messages["has_more"]
@@ -24,8 +25,8 @@ def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
         input_value = last_message["ts"]
         while is_there_other_data:
             newMessages = client.conversations_history(
-        channel=channel, oldest=input_value, inclusive=True
-        )
+                channel=channel, oldest=input_value, inclusive=True
+            )
             # print("---" + str(type(messages["messages"])))
             # print("--- ---" + str(type(newMessages["messages"])))
             # print("-------")
@@ -43,7 +44,5 @@ def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
                 input_value = last_message["ts"]
             # print("Has this new message more data?" + str(is_there_other_data))
     else:
-        messages = client.conversations_history(
-        channel=channel, limit=input_value
-        )
+        messages = client.conversations_history(channel=channel, limit=input_value)
     return messages

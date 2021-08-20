@@ -28,7 +28,7 @@ def help(payload):
             plugins_with_help[plugin_name] = plugin["help"]
     # sort that sucker alphabetically
     plugins_with_help = {key: value for key, value in sorted(plugins_with_help.items())}
-    payload['extras']['say'](format_text(plugins_with_help))
+    payload["extras"]["say"](format_text(plugins_with_help))
 
 
 PluginManager.register_plugin(

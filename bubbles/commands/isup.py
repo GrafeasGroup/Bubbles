@@ -5,7 +5,7 @@ from bubbles.config import PluginManager
 
 
 def isup(payload):
-    say = payload['extras']['say']
+    say = payload["extras"]["say"]
     text = payload.get("cleaned_text").split()
     if len(text) == 1:
         say("What service should I be checking on?")

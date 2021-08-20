@@ -16,7 +16,7 @@ def fuck_off(payload):
         "https://mrwgifs.com/wp-content/uploads/2014/02/Bubbles-Sad-Crying-In-The-Rain-With-Puppy-Eyes-On-Powerpuff-Girlfs_408x408.jpg",
         "https://media2.giphy.com/media/j9COtyaa3nnAQ/200w.gif",
     ]
-    payload['extras']['say'](random.choice(responses))
+    payload["extras"]["say"](random.choice(responses))
 
 
 PluginManager.register_plugin(fuck_off, pattern, flags=re.IGNORECASE)

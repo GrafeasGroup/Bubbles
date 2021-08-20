@@ -123,26 +123,28 @@ def periodic_ping_in_progress_callback() -> None:
             ),
             as_user=True,
         )
-        
+
         for mod in mod_having_reacted.keys():
             if mod == "Nobody":
                 text = "[_NOBODY CLAIMED US :(_]: "
             elif mod == "Conflict":
                 text = "[_TOO MANY PEOPLE CLAIMED US :(_]: "
             else:
-                text = "For *"+mod+"*: "
+                text = "For *" + mod + "*: "
             for data in mod_having_reacted[mod]:
                 username, permalink = data
                 text = text + " <" + str(permalink) + "|" + str(username) + ">, "
             text = text[:-2]
             app.client.chat_postMessage(
-                    channel=rooms_list[IN_PROGRESS_CHANNEL],
-                    link_names=1,
-                    text=text,
-                    unfurl_links=False,
-                    unfurl_media=False,
-                    as_user=True,
-                    )
+                channel=rooms_list[IN_PROGRESS_CHANNEL],
+                link_names=1,
+                text=text,
+                unfurl_links=False,
+                unfurl_media=False,
+                as_user=True,
+            )
+
+
 #    else:
 #        response = client.chat_postMessage(
 #            channel=DEFAULT_CHANNEL,

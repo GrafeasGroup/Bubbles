@@ -29,7 +29,7 @@ def get_pic(func, extra_args=None):
         return (
             None,
             f"Something went horribly wrong and I don't know what!"
-            f"\n\n{error_img}\n\nDoes {e} mean anything to you?"
+            f"\n\n{error_img}\n\nDoes {e} mean anything to you?",
         )
 
 
@@ -78,7 +78,7 @@ animals = {
     "fox": [get_fox],
     "owl": [get_owl],
     "duck": [get_duck],
-    "shibe": [get_shibe]
+    "shibe": [get_shibe],
 }
 
 

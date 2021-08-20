@@ -78,7 +78,7 @@ def get_time_diffs(post_list: List) -> [int, int]:
 
 
 def calculate_hours_and_minutes_timedelta_from_diffs(
-        start_diff: int, end_diff: int
+    start_diff: int, end_diff: int
 ) -> [int, int]:
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
@@ -142,7 +142,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
 def suggest_filter(payload) -> None:
     sub = re.search(SUGGEST_FILTER_RE, payload["text"]).groups()[1]
-    say = payload['extras']['say']
+    say = payload["extras"]["say"]
     say(f"Processing data for r/{sub}. This may take a moment...")
 
     ten_post_window, all_posts = get_new_posts_from_sub(sub)

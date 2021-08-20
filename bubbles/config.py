@@ -101,10 +101,10 @@ mpl.rcParams["figure.figsize"] = [20, 10]
 
 etsy = Etsy(
     etsy_oauth_client=EtsyOAuthClient(
-        client_key=os.environ.get('etsy_key'),
-        client_secret=os.environ.get('etsy_secret'),
-        resource_owner_key=os.environ.get('etsy_oauth_token'),
-        resource_owner_secret=os.environ.get('etsy_oauth_token_secret')
+        client_key=os.environ.get("etsy_key"),
+        client_secret=os.environ.get("etsy_secret"),
+        resource_owner_key=os.environ.get("etsy_oauth_token"),
+        resource_owner_secret=os.environ.get("etsy_oauth_token_secret"),
     )
 )
 

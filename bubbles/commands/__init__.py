@@ -45,4 +45,4 @@ def clean_text(text: Union[str, List]) -> str:
         text = text.split()
     if text[0] in COMMAND_PREFIXES or text[0] in BEGINNING_COMMAND_PREFIXES:
         text.pop(0)
-    return ' '.join(text)
+    return " ".join(text)

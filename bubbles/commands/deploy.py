@@ -3,7 +3,12 @@ import subprocess
 import time
 from typing import Callable
 
-from bubbles.commands import PROCESS_CHECK_COUNT, PROCESS_CHECK_SLEEP_TIME, SERVICES, get_service_name
+from bubbles.commands import (
+    PROCESS_CHECK_COUNT,
+    PROCESS_CHECK_SLEEP_TIME,
+    SERVICES,
+    get_service_name,
+)
 from bubbles.config import PluginManager, COMMAND_PREFIXES
 from bubbles.utils import get_branch_head
 
@@ -44,8 +49,8 @@ def _deploy_service(service: str, say: Callable) -> None:
             subprocess.check_output(
                 ["git", "reset", "--hard", f"{get_branch_head()}@{{'30 seconds ago'}}"]
             )
-                .decode()
-                .strip()
+            .decode()
+            .strip()
         )
         say(f"Rolling back to previous state:\n```\n{git_response}```")
         subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(loc)])

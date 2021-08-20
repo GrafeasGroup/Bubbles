@@ -40,7 +40,7 @@ def process_message(payload):
         # to use regular command syntax, though.
         # For example, trigger on "!hello" but not for "isn't bubbles great".
         if PluginManager.has_beginning_command_prefix(message):
-            payload['extras']['say'](f"Unknown command: `{message}`")
+            payload["extras"]["say"](f"Unknown command: `{message}`")
 
     # If a command needs to be able to see all traffic for historical reasons,
     # register a separate callback function in a class for the command. See

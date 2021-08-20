@@ -3,7 +3,9 @@ import re
 from typing import Dict
 
 from bubbles.commands.helper_functions_history.extract_author import extract_author
-from bubbles.commands.helper_functions_history.extract_date_or_number import extract_date_or_number
+from bubbles.commands.helper_functions_history.extract_date_or_number import (
+    extract_date_or_number,
+)
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 from bubbles.config import PluginManager
 
@@ -14,7 +16,7 @@ warnings.filterwarnings("ignore")
 def plot_comments_historylist(payload: Dict) -> None:
     # Syntax: !historylist [number of posts]
     args = payload.get("text").split()
-    say = payload['extras']['say']
+    say = payload["extras"]["say"]
     # client = payload['extras']['client']
     print(args)
     if len(args) == 2:
@@ -43,7 +45,9 @@ def plot_comments_historylist(payload: Dict) -> None:
         # if "user" in message.keys():
         #     userWhoSentMessage = usersList[message["user"]]
         #
-        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(
+            r"^<https://reddit.com/u", message["text"]
+        ):  # Remove all messages who are not given by the bot
             continue
         welcomed_username = message["text"].split(">")[0]
         welcomed_username = welcomed_username.split("|")[-1]

@@ -10,7 +10,7 @@ def ping_payment(payload):
     try:
         result.raise_for_status()
     except:
-        payload['extras']['say']("I... I don't see anything out there...")
+        payload["extras"]["say"]("I... I don't see anything out there...")
 
 
 PluginManager.register_plugin(

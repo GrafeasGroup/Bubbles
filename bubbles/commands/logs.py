@@ -10,9 +10,10 @@ from bubbles.utils import break_large_message
 COMMAND = "journalctl -u {} -n 50"
 VALID = "Valid choices: {}".format(", ".join(SERVICES))
 
+
 def logs(payload):
-    say = payload['extras']['say']
-    text = payload['cleaned_text'].split()
+    say = payload["extras"]["say"]
+    text = payload["cleaned_text"].split()
 
     if len(text) == 1:
         say("What service should I return the logs for?")

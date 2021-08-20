@@ -8,7 +8,9 @@ from numpy import flip
 
 from bubbles.config import PluginManager
 
-from bubbles.commands.helper_functions_history.extract_date_or_number import extract_date_or_number
+from bubbles.commands.helper_functions_history.extract_date_or_number import (
+    extract_date_or_number,
+)
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 
 # get rid of matplotlib's complaining
@@ -20,8 +22,8 @@ def plot_comments_history(payload: Dict) -> None:
     count_days = {}
     count_hours = [0] * 24
     args = payload.get("text").split()
-    say = payload['extras']['say']
-    client = payload['extras']['client']
+    say = payload["extras"]["say"]
+    client = payload["extras"]["client"]
     # print(args)
     number_posts = 100
     input_value = 100
@@ -46,9 +48,11 @@ def plot_comments_history(payload: Dict) -> None:
 
     timestamp = 0  # stop linter from complaining
     timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
-    print("Number of messages retrieved: "+str(len(response["messages"])))
+    print("Number of messages retrieved: " + str(len(response["messages"])))
     for message in response["messages"]:
-        if not re.search(r"^<https://reddit.com/u", message["text"]): # Remove all messages who are not given by the bot
+        if not re.search(
+            r"^<https://reddit.com/u", message["text"]
+        ):  # Remove all messages who are not given by the bot
             continue
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
         # if "user" in message.keys():
@@ -90,16 +94,16 @@ def plot_comments_history(payload: Dict) -> None:
     plt.ylabel("Number of messages")
     plt.xticks(range(0, 24, 2))
     print("---------------------")
-    print(int(max(count_hours)/25)+1)
-    plt.yticks(range(0, max(count_hours), int(max(count_hours)/25)+1))
+    print(int(max(count_hours) / 25) + 1)
+    plt.yticks(range(0, max(count_hours), int(max(count_hours) / 25) + 1))
     plt.grid(True, which="both")
-    plt.axvline(6, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
-    plt.axvline(12, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
-    plt.axvline(18, 0, max(count_hours)+1, linestyle="--", color = [0, 0, 0])
-    plt.text(1, max(count_hours)+0.5, "East Coast/S. America evening")
-    plt.text(8, max(count_hours)+0.5, "West Coast evening")
-    plt.text(13.5, max(count_hours)+0.5, "Far East/Oceania evening")
-    plt.text(19.5, max(count_hours)+0.5, "Europe/Africa/Middle East evening")
+    plt.axvline(6, 0, max(count_hours) + 1, linestyle="--", color=[0, 0, 0])
+    plt.axvline(12, 0, max(count_hours) + 1, linestyle="--", color=[0, 0, 0])
+    plt.axvline(18, 0, max(count_hours) + 1, linestyle="--", color=[0, 0, 0])
+    plt.text(1, max(count_hours) + 0.5, "East Coast/S. America evening")
+    plt.text(8, max(count_hours) + 0.5, "West Coast evening")
+    plt.text(13.5, max(count_hours) + 0.5, "Far East/Oceania evening")
+    plt.text(19.5, max(count_hours) + 0.5, "Europe/Africa/Middle East evening")
     plt.savefig("plotHours.png")
     client.files_upload(
         channels=payload.get("channel"),

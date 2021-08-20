@@ -5,7 +5,7 @@ from bubbles.config import PluginManager
 
 
 def update(payload) -> None:
-    payload['extras']['say']("Preparing update...")
+    payload["extras"]["say"]("Preparing update...")
     # print the results so that it shows up in the system logs if something goes wrong
     print(
         subprocess.Popen(
