@@ -13,7 +13,7 @@ def poll(payload):
         )
         return
 
-    response = say(text)
+    response = say(f"VOTE: {text}")
     for vote in ["upvote", "downvote"]:
         client.reactions_add(
             channel=response["channel"], timestamp=response["ts"], name=vote
