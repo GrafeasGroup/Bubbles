@@ -3,7 +3,7 @@ from bubbles.config import PluginManager
 
 def vote(payload):
     say = payload["extras"]["say"]
-    client = payload["extras"]["client"]
+    utils = payload["extras"]["utils"]
     text = " ".join(payload.get("cleaned_text").split()[1:])
 
     if len(text) == 0:
@@ -15,9 +15,7 @@ def vote(payload):
 
     response = say(f"VOTE: {text}")
     for vote in ["upvote", "downvote"]:
-        client.reactions_add(
-            channel=response["channel"], timestamp=response["ts"], name=vote
-        )
+        utils.reaction_add(response, vote)
 
 
 PluginManager.register_plugin(vote, r"vote([ \S]+)?", help="!vote [your vote!]")

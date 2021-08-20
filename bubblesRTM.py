@@ -10,6 +10,7 @@ import sys
 from bubbles.config import app, DEFAULT_CHANNEL
 from bubbles.commands import clean_text
 from bubbles.message import process_message
+from bubbles.message_utils import MessageUtils
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.time_constants import (
     NEXT_TRIGGER_DAY,
@@ -81,7 +82,7 @@ def message_received(ack, payload, client, context, say):
     payload.update(
         {
             "cleaned_text": clean_text(payload.get("text")),
-            "extras": {"client": client, "context": context, "say": say},
+            "extras": {"client": client, "context": context, "say": say, "utils": MessageUtils(client)},
         }
     )
     try:
