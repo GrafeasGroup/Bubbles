@@ -1,7 +1,7 @@
 from bubbles.config import PluginManager
 
 
-def poll(payload):
+def vote(payload):
     say = payload["extras"]["say"]
     client = payload["extras"]["client"]
     text = " ".join(payload.get("cleaned_text").split()[1:])
@@ -20,4 +20,4 @@ def poll(payload):
         )
 
 
-PluginManager.register_plugin(poll, r"poll([ \S]+)?", help="!poll [your poll!]")
+PluginManager.register_plugin(vote, r"vote([ \S]+)?", help="!vote [your vote!]")
