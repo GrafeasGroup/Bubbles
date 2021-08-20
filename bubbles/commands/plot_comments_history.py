@@ -23,7 +23,7 @@ def plot_comments_history(payload: Dict) -> None:
     count_hours = [0] * 24
     args = payload.get("text").split()
     say = payload["extras"]["say"]
-    client = payload["extras"]["client"]
+    utils = payload["extras"]["utils"]
     # print(args)
     number_posts = 100
     input_value = 100
@@ -82,12 +82,8 @@ def plot_comments_history(payload: Dict) -> None:
     plt.ylabel("Number of messages")
     plt.grid(True, which="both")
     plt.savefig("plotHour.png")
-    client.files_upload(
-        channels=payload.get("channel"),
-        file="plotHour.png",
-        title="Just vibing.",
-        as_user=True,
-    )
+    utils.upload_file(payload, file="plotHour.png")
+
     plt.close()
     plt.bar(range(0, 24), count_hours, 1, align="edge")
     plt.xlabel("Hour UTC")
@@ -105,12 +101,8 @@ def plot_comments_history(payload: Dict) -> None:
     plt.text(13.5, max(count_hours) + 0.5, "Far East/Oceania evening")
     plt.text(19.5, max(count_hours) + 0.5, "Europe/Africa/Middle East evening")
     plt.savefig("plotHours.png")
-    client.files_upload(
-        channels=payload.get("channel"),
-        file="plotHours.png",
-        title="Just vibing.",
-        as_user=True,
-    )
+    utils.upload_file(payload, file="plotHours.png")
+
     plt.close()
 
 

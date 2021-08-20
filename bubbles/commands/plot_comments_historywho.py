@@ -33,6 +33,7 @@ def plot_comments_historywho(payload: Dict) -> None:
 
     say = payload["extras"]["say"]
     client = payload["extras"]["client"]
+    utils = payload["extras"]["utils"]
 
     if '"' not in payload.get("text") and payload.get("text") != "!historywho -h":
         say(
@@ -158,12 +159,7 @@ def plot_comments_historywho(payload: Dict) -> None:
     plt.legend()
     plt.savefig("plotHourMods.png")
     plt.close()
-    client.files_upload(
-        channels=payload.get("channel"),
-        file="plotHourMods.png",
-        title="Just vibing.",
-        as_user=True,
-    )
+    utils.upload_file(payload, file="plotHourMods.png")
 
 
 PluginManager.register_plugin(

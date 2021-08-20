@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 
 class MessageUtils:
@@ -9,4 +9,14 @@ class MessageUtils:
         # this is mostly just annoying to remember
         return self.client.reactions_add(
             channel=message["channel"], timestamp=message["ts"], name=name
+        )
+
+    def upload_file(self, payload: Dict, file: str, title: Union[str, None] = None) -> Any:
+        if not title:
+            title = "Just vibing."
+        self.client.files_upload(
+            channels=payload.get("channel"),
+            file=file,
+            title=title,
+            as_user=True,
         )
