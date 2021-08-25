@@ -1,5 +1,4 @@
 import re
-from re import Pattern
 from typing import Callable, Dict, List, Tuple, Union, Any
 
 
