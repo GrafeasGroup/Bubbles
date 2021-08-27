@@ -16,7 +16,7 @@ __all__ = [
     basename(f)[:-3] for f in modules if isfile(f) and not f.endswith("__init__.py")
 ]
 
-SERVICES = ["tor", "tor_ocr", "tor_archivist", "blossom", "all"]
+SERVICES = ["tor", "tor_ocr", "tor_archivist", "blossom", "all", "buttercup"]
 # special cases
 SERVICE_NAMES = {"tor": "tor_moderator"}
 PROCESS_CHECK_SLEEP_TIME = 10  # seconds
