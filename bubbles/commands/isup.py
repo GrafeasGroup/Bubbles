@@ -22,7 +22,9 @@ def isup(payload):
             say(f"...something might be wrong; {name} doesn't look like it's up.")
 
     service = text[1]
-
+    if service not in SERVICES:
+        say("That's not a service I recognize, sorry :slightly_frowning_face:")
+        return
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
             _check(system)
