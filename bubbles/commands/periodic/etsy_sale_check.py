@@ -17,7 +17,7 @@ OAUTH_TOKEN_SECRET = os.environ.get("etsy_oauth_token_secret")
 permission_scopes = ["transactions_r"]
 
 # Etsy has their own internal map of country codes that doesn't map to anything.
-# Here are some of the ones that we know we have volunteers in so we can save
+# Here are some of the ones that we know we have volunteers in so that we can save
 # an API call.
 KNOWN_COUNTRY_CODES = {
     10: "Antarctica",

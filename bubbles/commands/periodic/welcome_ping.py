@@ -48,7 +48,9 @@ def welcome_ping_callback() -> None:
                 # can process. Ignore it and move onto the next message.
                 continue
             users_to_welcome[username] = permalink
-    if cry:
+    # We check the length of the list here because if the only new post is
+    # someone joining, it will output an empty list
+    if cry and len(users_to_welcome) > 0:
         app.client.chat_postMessage(
             channel=rooms_list[META_CHANNEL],
             link_names=1,
