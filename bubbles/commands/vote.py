@@ -18,4 +18,8 @@ def vote(payload):
         utils.reaction_add(response, vote)
 
 
-PluginManager.register_plugin(vote, r"vote([ \S]+)?", help="!vote [your vote!]")
+PluginManager.register_plugin(
+    vote,
+    r"vote([ \S]+)?|poll([ \S]+)?",
+    help="!vote [your vote!] Example: `!vote Is this cool or what?`"
+)
