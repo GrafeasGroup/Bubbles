@@ -79,6 +79,9 @@ def handle(ack):
 @app.event("message")
 def message_received(ack, payload, client, context, say):
     ack()
+    if not payload.get("text"):
+        # we got a message that is not really a message for some reason.
+        return
     utils = MessageUtils(client, payload)
     payload.update(
         {
