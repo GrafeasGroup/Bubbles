@@ -2,6 +2,7 @@ from bubbles.config import PluginManager
 
 
 def echo(payload):
+    print(payload.get('cleaned_text'))
     payload["extras"]["say"](
         f"```{' '.join(payload.get('cleaned_text').split()[1:])}```"
     )
