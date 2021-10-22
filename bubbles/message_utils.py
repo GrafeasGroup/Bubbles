@@ -14,14 +14,26 @@ class MessageUtils:
 
     def upload_file(
         self,
-        file: str,
+        file: str = None,
         title: Union[str, None] = None,
         payload: Union[None, Dict] = None,
+        content: str = None,
+        filetype: str = None,  # https://api.slack.com/types/file#file_types
+        initial_comment: str = None,
     ) -> Any:
+        if (not file and not content) or (file and content):
+            raise Exception("Must have either a file or content to post!")
+
         if not payload:
             payload = self.payload
         if not title:
             title = "Just vibing."
         self.client.files_upload(
-            channels=payload.get("channel"), file=file, title=title, as_user=True,
+            channels=payload.get("channel"),
+            file=file,
+            content=content,
+            filetype=filetype,
+            title=title,
+            as_user=True,
+            initial_comment=initial_comment,
         )

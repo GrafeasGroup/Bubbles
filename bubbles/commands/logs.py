@@ -1,4 +1,5 @@
 import subprocess
+from datetime import datetime
 
 from bubbles.commands import SERVICES, get_service_name
 from bubbles.config import PluginManager
@@ -26,8 +27,12 @@ def logs(payload):
         say(VALID)
     result = subprocess.check_output(COMMAND.format(get_service_name(service)).split())
 
-    for block in break_large_message(result.decode().strip(), break_at=3800):
-        say(f"```{block}```")
+    payload["extras"]["utils"].upload_file(
+        content=result.decode().strip(),
+        initial_comment=f"Requested logs for {service}:",
+        title=f"{service} logs {str(datetime.now())}",
+        filetype="text",
+    )
 
 
 PluginManager.register_plugin(logs, r"logs([ a-zA-Z]+)?", help="!logs [service_name]")
