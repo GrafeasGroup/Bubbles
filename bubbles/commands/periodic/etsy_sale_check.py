@@ -81,7 +81,8 @@ def get_oauth_keys() -> None:
 def etsy_recent_sale_callback() -> None:
     receipts = etsy.findAllShopReceipts(
         shop_id=SHOP_ID,
-        min_created=int((datetime.now() - timedelta(seconds=15)).timestamp()),
+        # one second longer than the repeat, just to account for any delays
+        min_created=int((datetime.now() - timedelta(seconds=61)).timestamp()),
     )
 
     for receipt in receipts:

@@ -39,7 +39,7 @@ class EtsySaleCheck(TLJob):
 
     class Meta:
         start_interval = timedelta(seconds=0)  # start now
-        regular_interval = timedelta(seconds=15)
+        regular_interval = timedelta(seconds=60)
 
 
 class WelcomePing(TLJob):
