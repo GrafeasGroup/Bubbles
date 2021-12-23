@@ -7,7 +7,6 @@ VOLUNTEER_CHANNEL = "new_volunteers"
 META_CHANNEL = "new_volunteers_meta"
 IN_PROGRESS_CHANNEL = "new_volunteers_pings_in_progress"
 
-
 def get_username_and_permalink(message):
     username = message["text"].split(" ")[0].split("|")[1][:-1]
     permalink = app.client.chat_getPermalink(
@@ -17,7 +16,7 @@ def get_username_and_permalink(message):
 
 
 def welcome_ping_callback() -> None:
-    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=2)
+    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
     timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
 
     response = app.client.conversations_history(
@@ -37,8 +36,14 @@ def welcome_ping_callback() -> None:
         "heavy_exclamation_mark",
     ]
     for message in response["messages"]:
+        try:
+            if message["username"] != "Kierra": # Ignore all messages not done by Kierra
+                print("This user is not Kierra. Message ignored. "+str(message["username"]))
+                continue
+        except KeyError: # Bubbles' messages have no "username" key, and we don't want them.
+            print("This message has not 'username' field. Message ignored. "+str(message["text"]))
+            continue
         author = extract_author(message, GOOD_REACTIONS)
-        # print(message["text"])
         if author == "Nobody":
             cry = True
             try:
@@ -48,6 +53,7 @@ def welcome_ping_callback() -> None:
                 # can process. Ignore it and move onto the next message.
                 continue
             users_to_welcome[username] = permalink
+    print("I'm here!")
     # We check the length of the list here because if the only new post is
     # someone joining, it will output an empty list
     if cry and len(users_to_welcome) > 0:
@@ -105,6 +111,13 @@ def periodic_ping_in_progress_callback() -> None:
         "heavy_exclamation_mark",
     ]
     for message in response_watchping["messages"]:
+        try:
+            if message["username"] != "Kierra": # Ignore all messages not done by Kierra
+                print("This user is not Kierra. Message ignored. "+str(message["username"]))
+                continue
+        except KeyError: # Bubbles' messages have no "username" key, and we don't want them.
+            print("This message has not 'username' field. Message ignored. "+str(message["text"]))
+            continue
         # print(message["text"])
         author = extract_author(message, ["heavy_check_mark", "heavy_tick"])
         if author == "Nobody":
