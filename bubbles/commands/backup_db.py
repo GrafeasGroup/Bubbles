@@ -13,7 +13,9 @@ def backup_db(payload):
 
     # the db info is injected into the bot environment, so we'll grab it
     # and regurgitate it for the command
-    password = os.environ.get("postgres_password")
+    env_copy = os.environ.copy()
+    env_copy["PGPASSWORD"] = os.environ.get("postgres_password")
+
     user = os.environ.get("postgres_user")
     db = os.environ.get("postgres_db")
     host = os.environ.get("postgres_host")
@@ -23,8 +25,8 @@ def backup_db(payload):
         say("Starting DB export. This may take a moment.")
         subprocess.check_call(
             shlex.split(
-                f"PGPASSWORD={password} pg_dump -U {user} {db} -h {host} > {filename}"
-            )
+                f"pg_dump -U {user} {db} -h {host} > {filename}"
+            ), env=env_copy
         )
         say("DB export complete. Uploading...")
         utils.upload_file(file=filename, title=filename)
