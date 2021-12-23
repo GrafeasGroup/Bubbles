@@ -20,11 +20,13 @@ def backup_db(payload):
     filename = f"db_backup_{str(datetime.now().date())}.tar"
 
     say("Starting DB export. This may take a moment.")
-    subprocess.check_call(
-        shlex.split(
-            f"env PGPASSWORD={password} pg_dump -U {user} {db} -h {host} > {filename}"
-        )
-    )
+
+    with open(filename, "w") as outfile:
+        subprocess.Popen(
+            shlex.split(f"pg_dump -U {user} {db} -h {host}"),
+            env={"PGPASSWORD": password}, stdout=outfile
+        ).wait()
+
     say("DB export complete. Uploading...")
     utils.upload_file(file=filename, title=filename)
 
