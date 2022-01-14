@@ -1,6 +1,6 @@
 import datetime
 
-from bubbles.config import app, users_list, rooms_list, mods_array
+from bubbles.config import app, rooms_list
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 VOLUNTEER_CHANNEL = "qa_new_volunteers"
