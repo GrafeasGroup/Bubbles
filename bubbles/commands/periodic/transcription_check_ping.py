@@ -5,11 +5,11 @@ from bubbles.commands.helper_functions_history.extract_author import extract_aut
 import time
 import urllib
 
-VOLUNTEER_CHANNEL = "new_volunteers"
-META_CHANNEL = "new_volunteers_meta"
-IN_PROGRESS_CHANNEL = "new_volunteers_pings_in_progress"
-TRANSCRIPTION_CHECK_CHANNEL = "transcription_check"
-TRANSCRIPTION_CHECK_META_CHANNEL = "transcription_check_pings"
+VOLUNTEER_CHANNEL = "qa_new_volunteers"
+META_CHANNEL = "qa_general"
+IN_PROGRESS_CHANNEL = "qa_new_volunteers_pings"
+TRANSCRIPTION_CHECK_CHANNEL = "qa_transcription_check"
+TRANSCRIPTION_CHECK_META_CHANNEL = "qa_transcription_check_pings"
 
 
 def get_username_and_permalink(message):

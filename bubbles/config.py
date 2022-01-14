@@ -17,7 +17,7 @@ load_dotenv()
 
 USERNAME = os.environ.get("username", "bubbles")
 API_KEY = os.environ.get("api_key", None)
-DEFAULT_CHANNEL = os.environ.get("default_channel", "bottest")
+DEFAULT_CHANNEL = os.environ.get("default_channel", "dev_test")
 PAYMENT_KEY = os.environ.get("payment_key", None)
 PAYMENT_VALUE = os.environ.get("payment_value", None)
 REDDIT_SECRET = os.environ.get("reddit_secret", None)

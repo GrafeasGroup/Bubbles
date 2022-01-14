@@ -105,4 +105,4 @@ def etsy_recent_sale_callback() -> None:
                 f"Somebody just bought something, but there was an error on my"
                 f" side:\n\n```\n{e}\n```"
             )
-        app.client.chat_postMessage(text=msg, channel=rooms_list["merch"], as_user=True)
+        app.client.chat_postMessage(text=msg, channel=rooms_list["admin_merch"], as_user=True)

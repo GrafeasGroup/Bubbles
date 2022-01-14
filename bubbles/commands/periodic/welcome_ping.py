@@ -3,9 +3,10 @@ import datetime
 from bubbles.config import app, users_list, rooms_list, mods_array
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 
-VOLUNTEER_CHANNEL = "new_volunteers"
-META_CHANNEL = "new_volunteers_meta"
-IN_PROGRESS_CHANNEL = "new_volunteers_pings_in_progress"
+VOLUNTEER_CHANNEL = "qa_new_volunteers"
+META_CHANNEL = "qa_general"
+IN_PROGRESS_CHANNEL = "qa_new_volunteers_pings"
+
 
 def get_username_and_permalink(message):
     username = message["text"].split(" ")[0].split("|")[1][:-1]

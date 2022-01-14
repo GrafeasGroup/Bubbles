@@ -1,4 +1,3 @@
-import os
 import subprocess
 import time
 from typing import Callable
