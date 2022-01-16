@@ -1,15 +1,13 @@
 import datetime
 
-from bubbles.config import app, users_list, rooms_list, mods_array
+from bubbles.commands.periodic import (
+    TRANSCRIPTION_CHECK_CHANNEL,
+    TRANSCRIPTION_CHECK_PING_CHANNEL,
+)
+from bubbles.config import app, users_list, rooms_list
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 import time
 import urllib
-
-VOLUNTEER_CHANNEL = "qa_new_volunteers"
-META_CHANNEL = "qa_general"
-IN_PROGRESS_CHANNEL = "qa_new_volunteers_pings"
-TRANSCRIPTION_CHECK_CHANNEL = "qa_transcription_check"
-TRANSCRIPTION_CHECK_META_CHANNEL = "qa_transcription_check_pings"
 
 
 def get_username_and_permalink(message):
@@ -86,7 +84,7 @@ def transcription_check_ping_callback() -> None:
                 # will reach this part if the rate limit has been reached.
                 time.sleep(60)
                 app.client.chat_postMessage(
-                    channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                    channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
                     link_names=1,
                     text="ERROR! RATE LIMIT REACHED! I must stop here :(",
                     unfurl_links=False,
@@ -128,7 +126,7 @@ def transcription_check_ping_callback() -> None:
                     else:
                         text = "(page " + str(page + 1) + ") " + text + "..."
                     app.client.chat_postMessage(
-                        channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                        channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
                         link_names=1,
                         text=text,
                         unfurl_links=False,
@@ -145,7 +143,7 @@ def transcription_check_ping_callback() -> None:
             else:
                 text = "(last page) " + text
             app.client.chat_postMessage(
-                channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
                 link_names=1,
                 text=text,
                 unfurl_links=False,
@@ -170,7 +168,7 @@ def transcription_check_ping_callback() -> None:
                 text = text + "<" + str(permalink) + "|" + str(username) + ">, "
             text = text[:-2]
             app.client.chat_postMessage(
-                channel=rooms_list[TRANSCRIPTION_CHECK_META_CHANNEL],
+                channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
                 link_names=1,
                 text=text,
                 unfurl_links=False,

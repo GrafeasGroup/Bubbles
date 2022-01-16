@@ -1,6 +1,5 @@
+from bubbles.commands.periodic import NEW_VOLUNTEER_PING_CHANNEL
 from bubbles.config import blossom, app, ENABLE_BLOSSOM
-
-CHANNEL = "transcription_check"
 
 
 def get_in_progress_callback():
@@ -38,5 +37,9 @@ def get_in_progress_callback():
 
     # we have in progress posts, so here we go
     app.client.chat_postMessage(
-        channel=CHANNEL, text=msg, as_user=True, unfurl_links=False, unfurl_media=False,
+        channel=NEW_VOLUNTEER_PING_CHANNEL,
+        text=msg,
+        as_user=True,
+        unfurl_links=False,
+        unfurl_media=False,
     )

@@ -1,17 +1,17 @@
 import datetime
 
+from bubbles.commands.periodic import (
+    NEW_VOLUNTEER_CHANNEL,
+    NEW_VOLUNTEER_PING_CHANNEL,
+)
 from bubbles.config import app, rooms_list
 from bubbles.commands.helper_functions_history.extract_author import extract_author
-
-VOLUNTEER_CHANNEL = "qa_new_volunteers"
-META_CHANNEL = "qa_general"
-IN_PROGRESS_CHANNEL = "qa_new_volunteers_pings"
 
 
 def get_username_and_permalink(message):
     username = message["text"].split(" ")[0].split("|")[1][:-1]
     permalink = app.client.chat_getPermalink(
-        channel=rooms_list[VOLUNTEER_CHANNEL], message_ts=message["ts"]
+        channel=rooms_list[NEW_VOLUNTEER_CHANNEL], message_ts=message["ts"]
     ).data.get("permalink")
     return username, permalink
 
@@ -21,7 +21,7 @@ def welcome_ping_callback() -> None:
     timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
 
     response = app.client.conversations_history(
-        channel=rooms_list[VOLUNTEER_CHANNEL],
+        channel=rooms_list[NEW_VOLUNTEER_CHANNEL],
         oldest=timestamp_needed_end_cry.timestamp(),
         latest=timestamp_needed_start_cry.timestamp(),
     )  # ID for #bottest
@@ -38,11 +38,19 @@ def welcome_ping_callback() -> None:
     ]
     for message in response["messages"]:
         try:
-            if message["username"] != "Kierra": # Ignore all messages not done by Kierra
-                print("This user is not Kierra. Message ignored. "+str(message["username"]))
+            if (
+                message["username"] != "Kierra"
+            ):  # Ignore all messages not done by Kierra
+                print(
+                    "This user is not Kierra. Message ignored. "
+                    + str(message["username"])
+                )
                 continue
-        except KeyError: # Bubbles' messages have no "username" key, and we don't want them.
-            print("This message has not 'username' field. Message ignored. "+str(message["text"]))
+        except KeyError:  # Bubbles' messages have no "username" key, and we don't want them.
+            print(
+                "This message has not 'username' field. Message ignored. "
+                + str(message["text"])
+            )
             continue
         author = extract_author(message, GOOD_REACTIONS)
         if author == "Nobody":
@@ -59,7 +67,7 @@ def welcome_ping_callback() -> None:
     # someone joining, it will output an empty list
     if cry and len(users_to_welcome) > 0:
         app.client.chat_postMessage(
-            channel=rooms_list[META_CHANNEL],
+            channel=rooms_list[NEW_VOLUNTEER_PING_CHANNEL],
             link_names=1,
             text="List of unwelcomed users (nobody checked them out or claimed them with :watch:): "
             + ", ".join(
@@ -91,7 +99,7 @@ def periodic_ping_in_progress_callback() -> None:
         hours=24
     )
     response_watchping = app.client.conversations_history(
-        channel=rooms_list[VOLUNTEER_CHANNEL],
+        channel=rooms_list[NEW_VOLUNTEER_CHANNEL],
         oldest=timestamp_needed_end_watchping.timestamp(),
         latest=timestamp_needed_start_watchping.timestamp(),
     )  # ID for #bottest
@@ -113,11 +121,19 @@ def periodic_ping_in_progress_callback() -> None:
     ]
     for message in response_watchping["messages"]:
         try:
-            if message["username"] != "Kierra": # Ignore all messages not done by Kierra
-                print("This user is not Kierra. Message ignored. "+str(message["username"]))
+            if (
+                message["username"] != "Kierra"
+            ):  # Ignore all messages not done by Kierra
+                print(
+                    "This user is not Kierra. Message ignored. "
+                    + str(message["username"])
+                )
                 continue
-        except KeyError: # Bubbles' messages have no "username" key, and we don't want them.
-            print("This message has not 'username' field. Message ignored. "+str(message["text"]))
+        except KeyError:  # Bubbles' messages have no "username" key, and we don't want them.
+            print(
+                "This message has not 'username' field. Message ignored. "
+                + str(message["text"])
+            )
             continue
         # print(message["text"])
         author = extract_author(message, ["heavy_check_mark", "heavy_tick"])
@@ -131,7 +147,7 @@ def periodic_ping_in_progress_callback() -> None:
             users_to_check[username] = permalink
     if watchping:
         app.client.chat_postMessage(
-            channel=rooms_list[IN_PROGRESS_CHANNEL],
+            channel=rooms_list[NEW_VOLUNTEER_PING_CHANNEL],
             link_names=1,
             text=(
                 "There are users claimed with a :watch:, a :email: or a"
@@ -152,7 +168,7 @@ def periodic_ping_in_progress_callback() -> None:
                 text = text + " <" + str(permalink) + "|" + str(username) + ">, "
             text = text[:-2]
             app.client.chat_postMessage(
-                channel=rooms_list[IN_PROGRESS_CHANNEL],
+                channel=rooms_list[NEW_VOLUNTEER_PING_CHANNEL],
                 link_names=1,
                 text=text,
                 unfurl_links=False,
