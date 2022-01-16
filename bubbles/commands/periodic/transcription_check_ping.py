@@ -73,7 +73,7 @@ def transcription_check_ping_callback() -> None:
             try:
                 username, permalink = get_username_and_permalink(message)
                 mod_reacting = extract_author(
-                    message, ["speech_bubble", "speech_balloon"]
+                    message, ["watch", "speech_bubble", "speech_balloon"]
                 )
             except IndexError:
                 # This is a message that didn't come from Kierra and isn't something we
