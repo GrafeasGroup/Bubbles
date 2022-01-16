@@ -6,6 +6,7 @@ from urllib.parse import parse_qs
 
 from etsy2.oauth import EtsyOAuthHelper
 
+from bubbles.commands.periodic import MERCH_CHANNEL
 from bubbles.config import app, etsy, rooms_list
 
 KEY = os.environ.get("etsy_key")
@@ -105,4 +106,6 @@ def etsy_recent_sale_callback() -> None:
                 f"Somebody just bought something, but there was an error on my"
                 f" side:\n\n```\n{e}\n```"
             )
-        app.client.chat_postMessage(text=msg, channel=rooms_list["admin_merch"], as_user=True)
+        app.client.chat_postMessage(
+            text=msg, channel=rooms_list[MERCH_CHANNEL], as_user=True
+        )
