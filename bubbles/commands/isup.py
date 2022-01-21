@@ -32,4 +32,6 @@ def isup(payload):
         _check(service)
 
 
-PluginManager.register_plugin(isup, r"isup([ a-zA-Z]+)?", help="!isup [service_name]")
+PluginManager.register_plugin(
+    isup, r"isup([ a-zA-Z]+)?", help="!isup [service_name]", interactive_friendly=False
+)

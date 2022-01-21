@@ -24,7 +24,8 @@ def backup_db(payload):
     with open(filename, "w") as outfile:
         subprocess.Popen(
             shlex.split(f"pg_dump -U {user} {db} -h {host}"),
-            env={"PGPASSWORD": password}, stdout=outfile
+            env={"PGPASSWORD": password},
+            stdout=outfile,
         ).wait()
 
     say("DB export complete. Uploading...")

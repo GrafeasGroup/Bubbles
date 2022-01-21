@@ -17,6 +17,7 @@ F = """
 ⠀⠀⠀⠙⠷⠶⠶⠶⠿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀
 """
 
+
 def fancy_f(payload):
     if random.random() > 0.85:
         payload["extras"]["say"](F)

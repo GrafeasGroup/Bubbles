@@ -20,7 +20,15 @@ poetry install
 poetry shell
 ```
 
-You'll need a .env file for secrets -- copy `.env-example` to `.env` and fill it out. If you're testing in your own slack instance, [create a bot token here](https://my.slack.com/services/new/bot).
+You may need a .env file for secrets -- copy `.env-example` to `.env` and fill it out. If you're testing in your own slack instance, [create a bot token here](https://my.slack.com/services/new/bot).
+
+If you're testing commands locally that do not need to access to advanced functionality (external services, mostly), you can invoke the interactive terminal by running:
+
+```shell script
+python bubblesRTM.py --interactive
+```
+
+This will create a shell session where you can test commands without needing to be hooked up to anything special.
 
 ## Adding Commands
 

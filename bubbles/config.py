@@ -1,9 +1,14 @@
+import argparse
 import os
 from datetime import datetime
 from typing import Any, Dict, List
 from unittest import mock
+import logging
+from unittest.mock import MagicMock
 
 import matplotlib as mpl  # type: ignore
+import praw
+import slack_bolt
 from blossom_wrapper import BlossomAPI  # type: ignore
 from dotenv import load_dotenv
 from etsy2 import Etsy
@@ -13,7 +18,19 @@ from slack_bolt import App
 
 from bubbles.plugins import PluginManager as PM
 
+parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
+parser.add_argument("--startup-check", action="store_true")
+parser.add_argument("--interactive", action="store_true")
+CHECK_MODE = parser.parse_args().startup_check
+INTERACTIVE_MODE = parser.parse_args().interactive
+
+log = logging.getLogger(__name__)
 load_dotenv()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(funcName)s | %(message)s",
+)
 
 USERNAME = os.environ.get("username", "bubbles")
 API_KEY = os.environ.get("api_key", None)
@@ -26,18 +43,40 @@ REDDIT_USER_AGENT = os.environ.get("reddit_user_agent", None)
 
 ENABLE_BLOSSOM = os.environ.get("enable_blossom", False)
 
-reddit = Reddit(
-    username=os.environ.get("reddit_username"),
-    password=os.environ.get("reddit_password"),
-    client_id=os.environ.get("reddit_client_id"),
-    client_secret=os.environ.get("reddit_secret"),
-    user_agent=os.environ.get("reddit_user_agent"),
-)
+try:
+    reddit = Reddit(
+        username=os.environ.get("reddit_username"),
+        password=os.environ.get("reddit_password"),
+        client_id=os.environ.get("reddit_client_id"),
+        client_secret=os.environ.get("reddit_secret"),
+        user_agent=os.environ.get("reddit_user_agent"),
+    )
+except praw.exceptions.MissingRequiredAttributeException as e:
+    log.warning(f"Missing required Reddit secret:{e}\nDisabling Reddit access.")
+    reddit = MagicMock()
 
-app = App(
-    signing_secret=os.environ.get("slack_signing_secret"),
-    token=os.environ.get("slack_oauth_token"),
-)
+try:
+    app = App(
+        signing_secret=os.environ.get("slack_signing_secret"),
+        token=os.environ.get("slack_oauth_token"),
+    )
+except slack_bolt.error.BoltError as e:
+    log.warning(
+        f"Missing required Slack secret: {e}\nDisabling Slack. If you are not running"
+        f" in interactive mode, the bot will not function as expected."
+    )
+    app = MagicMock()
+
+    class AuthResponse:
+        data = {"user_id": "1234"}
+
+    app.client.auth_test.return_value = AuthResponse
+    app.client.users_list.return_value = {
+        "members": [{"real_name": "console", "deleted": False, "id": "abc"}]
+    }
+    app.client.conversations_list.return_value = {
+        "channels": [{"id": "456", "name": DEFAULT_CHANNEL}]
+    }
 
 if ENABLE_BLOSSOM:
     # Feature flag means that we can lock away blossom functionality until
@@ -95,17 +134,23 @@ for i in range(0, 24):
     mods_array.append(None)
 
 # Import PluginManager from here
-PluginManager = PM(COMMAND_PREFIXES, BEGINNING_COMMAND_PREFIXES)
+PluginManager = PM(COMMAND_PREFIXES, BEGINNING_COMMAND_PREFIXES, INTERACTIVE_MODE)
 
 mpl.rcParams["figure.figsize"] = [20, 10]
 
-etsy = Etsy(
-    etsy_oauth_client=EtsyOAuthClient(
-        client_key=os.environ.get("etsy_key"),
-        client_secret=os.environ.get("etsy_secret"),
-        resource_owner_key=os.environ.get("etsy_oauth_token"),
-        resource_owner_secret=os.environ.get("etsy_oauth_token_secret"),
+try:
+    etsy = Etsy(
+        etsy_oauth_client=EtsyOAuthClient(
+            client_key=os.environ.get("etsy_key"),
+            client_secret=os.environ.get("etsy_secret"),
+            resource_owner_key=os.environ.get("etsy_oauth_token"),
+            resource_owner_secret=os.environ.get("etsy_oauth_token_secret"),
+        )
     )
-)
+except ValueError:
+    # Like everything Etsy does, this library is half-assed too
+    log.warning("Missing one or more required Etsy secrets. Disabling Etsy.")
+    etsy = MagicMock()
+
 
 TIME_STARTED = datetime.now()

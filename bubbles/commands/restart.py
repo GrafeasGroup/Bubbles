@@ -84,4 +84,5 @@ PluginManager.register_plugin(
     deploy,
     r"restart ?(.+)",
     help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
+    interactive_friendly=False,
 )
