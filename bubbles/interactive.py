@@ -44,7 +44,11 @@ class InteractiveSession:
         return [ack, payload, client, context, self.say]
 
     def repl(self) -> None:
-        print("\nStarting interactive mode for Bubbles!\n")
+        print("\nStarting interactive mode for Bubbles!")
+        print(
+            "Type 'quit' to exit. All commands need to have their normal prefix;"
+            " try !ping as an example."
+        )
         while True:
             command = input(">>> ")
             if command.lower() in ["exit", "quit"]:
