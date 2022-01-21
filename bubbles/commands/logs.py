@@ -33,4 +33,6 @@ def logs(payload):
     )
 
 
-PluginManager.register_plugin(logs, r"logs([ a-zA-Z]+)?", help="!logs [service_name]")
+PluginManager.register_plugin(
+    logs, r"logs([ a-zA-Z]+)?", help="!logs [service_name]", interactive_friendly=False
+)

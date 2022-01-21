@@ -7,18 +7,19 @@ SLACK_TEXT_EXTRACTOR = re.compile(
     r"<(?:https?://)?[\w-]+(?:\.[\w-]+)+\.?(?::\d+)?(?:/\S*)?\|([^>]+)>"
 )
 
+
 def clean_links(text):
     results = [_ for _ in re.finditer(SLACK_TEXT_EXTRACTOR, text)]
     # we'll replace things going backwards so that we don't mess up indexing
     results.reverse()
 
     for match in results:
-        text = text[:match.start()] + match.groups()[0] + text[match.end():]
+        text = text[: match.start()] + match.groups()[0] + text[match.end() :]
     return text
 
 
 def echo(payload):
-    text = clean_links(payload.get('cleaned_text'))
+    text = clean_links(payload.get("cleaned_text"))
     payload["extras"]["say"](f"```{' '.join(text.split()[1:])}```")
 
 

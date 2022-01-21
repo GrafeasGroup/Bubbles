@@ -1,15 +1,16 @@
-import argparse
 import os
 import traceback
 import sys
+import logging
 
 # from bubbles.commands.periodic.activity_checkin import (
 #     configure_presence_change_event,
 #     presence_update_callback,
 # )
-from bubbles.config import app, DEFAULT_CHANNEL
+from bubbles.config import app, CHECK_MODE, DEFAULT_CHANNEL, INTERACTIVE_MODE
 from bubbles.commands import clean_text
 from bubbles.message import process_message
+from bubbles.interactive import InteractiveSession
 from bubbles.message_utils import MessageUtils
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.time_constants import (
@@ -24,9 +25,7 @@ from bubbles.tl_utils import tl
 
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
-parser.add_argument("--startup-check", action="store_true")
-CHECK_MODE = parser.parse_args().startup_check
+log = logging.getLogger(__name__)
 
 """
 Notes:
@@ -76,7 +75,6 @@ def handle(ack):
     ack()
 
 
-@app.event("message")
 def message_received(ack, payload, client, context, say):
     ack()
     if not payload.get("text"):
@@ -95,20 +93,30 @@ def message_received(ack, payload, client, context, say):
         say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
 
 
+@app.event("message")
+def handle_message(ack, payload, client, context, say):
+    # Actually put the slack event handler on this one so that we can dual-wield
+    # `message_received` for interactive mode and normal interaction.
+    message_received(ack, payload, client, context, say)
+
+
 @app.event("reaction_added")
 def reaction_added(ack, payload):
     ack()
     reaction_added_callback(payload)
 
 
-print("TRIGGER TIMES (hopefully in the future)")
-print(f"welcome_ping: {TRIGGER_4_HOURS_AGO}")
-print(f"check_for_saferbot: {TRIGGER_12_HOURS_AGO}")
-print(f"periodic_ping_in_progress: {TRIGGER_YESTERDAY}")
-print(f"check_in_as_needed: {TRIGGER_LAST_WEEK}")
-print(f"update_presence_information: {NEXT_TRIGGER_DAY}")
+log.debug("TRIGGER TIMES (hopefully in the future)")
+log.debug(f"welcome_ping: {TRIGGER_4_HOURS_AGO}")
+log.debug(f"check_for_saferbot: {TRIGGER_12_HOURS_AGO}")
+log.debug(f"periodic_ping_in_progress: {TRIGGER_YESTERDAY}")
+log.debug(f"check_in_as_needed: {TRIGGER_LAST_WEEK}")
+log.debug(f"update_presence_information: {NEXT_TRIGGER_DAY}")
 
 if __name__ == "__main__":
+    if INTERACTIVE_MODE:
+        InteractiveSession(message_received).repl()
+        sys.exit(0)
     enable_tl_jobs()
     tl.start()
     if not CHECK_MODE:

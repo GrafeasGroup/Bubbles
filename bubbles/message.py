@@ -1,4 +1,9 @@
+import logging
+
 from bubbles.config import PluginManager, users_list, USERNAME, ME
+
+
+log = logging.getLogger(__name__)
 
 
 def _is_from_us(username):
@@ -7,15 +12,15 @@ def _is_from_us(username):
 
 
 def process_message(payload):
-    print("Message received!")
+    log.debug("Message received!")
     if len(payload) == 0:
-        print("Unprocessable message. Ignoring.")
+        log.info("Unprocessable message. Ignoring.")
         return
     message = payload.get("text")
 
     if not message:
         # sometimes we'll get an object without text; just discard it.
-        print("Unprocessable message. Ignoring.")
+        log.info("Unprocessable message. Ignoring.")
         return
 
     try:
@@ -27,13 +32,16 @@ def process_message(payload):
     if _is_from_us(user_who_sent_message):
         return
 
-    print(f"I received: {message} from {user_who_sent_message}")
+    log.debug(f"I received: {message} from {user_who_sent_message}")
 
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
         plugin(payload)
-
+    elif plugin is False:
+        # we're in interactive mode and hit a locked plugin, so we just need
+        # to skip the else block
+        pass
     else:
         # we don't know what they were trying to do, so we fall through to here.
         # Let's only limit responses to things that look like they're trying

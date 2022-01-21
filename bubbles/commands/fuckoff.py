@@ -7,7 +7,9 @@ pattern = r"""
 f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{0}
 |h+a+t+e+[,\ ]+?{0}
 |{0}(\W+)?f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?
-""".format(USERNAME)
+""".format(
+    USERNAME
+)
 
 
 def fuck_off(payload):

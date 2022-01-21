@@ -21,5 +21,5 @@ def vote(payload):
 PluginManager.register_plugin(
     vote,
     r"vote([ \S]+)?|poll([ \S]+)?",
-    help="!vote [your vote!] Example: `!vote Is this cool or what?`"
+    help="!vote [your vote!] Example: `!vote Is this cool or what?`",
 )
