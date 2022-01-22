@@ -16,7 +16,6 @@ class PluginManager:
         self.callbacks: List[Callable] = list()
         self.command_prefixes = command_prefixes
         self.interactive_mode = interactive_mode
-        log.warning(command_prefixes)
 
     def message_is_for_us(self, message: str) -> bool:
         return any(
@@ -27,6 +26,7 @@ class PluginManager:
         )
 
     def get_plugin(self, message: str) -> Union[Callable, None, bool]:
+        log.info(f"message is for us? {self.message_is_for_us(message)}")
         for plugin in self.plugins:
             if plugin["ignore_prefix"] or self.message_is_for_us(message):
                 result = re.search(plugin.get("regex", None), message)
