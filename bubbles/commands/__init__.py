@@ -5,16 +5,18 @@ This allows the plugin manager to actually find everything!
 """
 # source: https://stackoverflow.com/a/1057534
 from typing import List, Union
-import glob
-from os.path import dirname, basename, isfile, join
+from pathlib import Path
 
 from bubbles.config import COMMAND_PREFIXES
 
 
-modules = glob.glob(join(dirname(__file__), "*.py"))
-__all__ = [
-    basename(f)[:-3] for f in modules if isfile(f) and not f.endswith("__init__.py")
-]
+# Allow `import bubbles.commands.*` to work for all commands
+__all__ = list([
+    module.name[:-3]
+    for module in Path(__file__).parent.glob('*.py')
+    if module.name != '__init__.py'
+])  # type: ignore
+
 
 SERVICES = ["tor", "tor_ocr", "tor_archivist", "blossom", "all", "buttercup"]
 # special cases
