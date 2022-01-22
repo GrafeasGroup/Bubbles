@@ -24,4 +24,6 @@ def fuck_off(payload):
     payload["extras"]["say"](random.choice(responses))
 
 
-PluginManager.register_plugin(fuck_off, pattern, flags=re.IGNORECASE)
+PluginManager.register_plugin(
+    fuck_off, pattern, flags=re.IGNORECASE, ignore_prefix=True
+)
