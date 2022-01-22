@@ -26,7 +26,6 @@ class PluginManager:
         )
 
     def get_plugin(self, message: str) -> Union[Callable, None, bool]:
-        log.info(f"message is for us? {self.message_is_for_us(message)}")
         for plugin in self.plugins:
             if plugin["ignore_prefix"] or self.message_is_for_us(message):
                 result = re.search(plugin.get("regex", None), message)
