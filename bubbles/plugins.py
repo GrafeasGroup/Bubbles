@@ -30,7 +30,7 @@ class PluginManager:
             if plugin["ignore_prefix"] or self.message_is_for_us(message):
                 result = re.search(plugin.get("regex", None), message)
                 if result:
-                    if not plugin['interactive_friendly']:
+                    if self.interactive_mode and not plugin['interactive_friendly']:
                         log.warning(
                             f"Plugin {plugin['callable']} cannot be run in"
                             f" interactive mode."
