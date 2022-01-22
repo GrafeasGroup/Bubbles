@@ -8,7 +8,7 @@ from typing import List, Union
 import glob
 from os.path import dirname, basename, isfile, join
 
-from bubbles.config import BEGINNING_COMMAND_PREFIXES, COMMAND_PREFIXES
+from bubbles.config import COMMAND_PREFIXES
 
 
 modules = glob.glob(join(dirname(__file__), "*.py"))
@@ -43,6 +43,6 @@ def clean_text(text: Union[str, List]) -> str:
     """
     if not isinstance(text, list):
         text = text.split()
-    if text[0] in COMMAND_PREFIXES or text[0] in BEGINNING_COMMAND_PREFIXES:
+    if text[0] in COMMAND_PREFIXES:
         text.pop(0)
     return " ".join(text)

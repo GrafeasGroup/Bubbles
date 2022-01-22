@@ -10,33 +10,18 @@ class PluginManager:
     def __init__(
         self,
         command_prefixes: Tuple,
-        beginning_command_prefixes: Tuple,
         interactive_mode: bool,
     ) -> None:
         self.plugins: List[Dict[str, Any]] = list()
         self.callbacks: List[Callable] = list()
         self.command_prefixes = command_prefixes
-        self.beginning_command_prefixes = beginning_command_prefixes
         self.interactive_mode = interactive_mode
-
-    def has_beginning_command_prefix(self, message: str) -> bool:
-        return any(
-            [
-                message.lower().startswith(prefix)
-                for prefix in self.beginning_command_prefixes
-            ]
-        )
-
-    def has_command_prefix(self, message: str) -> bool:
-        return any(
-            [prefix.lower() in message.lower() for prefix in self.command_prefixes]
-        )
 
     def message_is_for_us(self, message: str) -> bool:
         return any(
             [
-                self.has_beginning_command_prefix(message),
-                self.has_command_prefix(message),
+                message.lower().startswith(prefix)
+                for prefix in self.command_prefixes
             ]
         )
 

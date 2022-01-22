@@ -98,10 +98,7 @@ ME: str = app.client.auth_test().data["user_id"]  # type: ignore
 # Slack will send the internal ID to represent the user, so we need to
 # dynamically add that ID so we can listen for it. This will change
 # per workspace, so it can't be hardcoded.
-COMMAND_PREFIXES = (USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
-# The above prefixes can trigger anywhere in a sentence; the below ones
-# can only trigger if they're the first character in the message.
-BEGINNING_COMMAND_PREFIXES = ("!",)
+COMMAND_PREFIXES = ("!", USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
 
 # Define the list of users (conversion ID <-> name)
 # 'Any' here is either a list or a str; mypy can't handle that.
@@ -134,7 +131,7 @@ for i in range(0, 24):
     mods_array.append(None)
 
 # Import PluginManager from here
-PluginManager = PM(COMMAND_PREFIXES, BEGINNING_COMMAND_PREFIXES, INTERACTIVE_MODE)
+PluginManager = PM(COMMAND_PREFIXES, INTERACTIVE_MODE)
 
 mpl.rcParams["figure.figsize"] = [20, 10]
 

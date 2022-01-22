@@ -47,7 +47,7 @@ def process_message(payload):
         # Let's only limit responses to things that look like they're trying
         # to use regular command syntax, though.
         # For example, trigger on "!hello" but not for "isn't bubbles great".
-        if PluginManager.has_beginning_command_prefix(message):
+        if PluginManager.message_is_for_us(message):
             payload["extras"]["say"](f"Unknown command: `{message}`")
 
     # If a command needs to be able to see all traffic for historical reasons,
