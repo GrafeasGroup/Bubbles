@@ -33,7 +33,6 @@ def process_message(payload):
         return
 
     log.info(f"I received: {message} from {user_who_sent_message}")
-
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
