@@ -20,7 +20,7 @@ class PluginManager:
     def message_is_for_us(self, message: str) -> bool:
         return any(
             [
-                message.lower().startswith(prefix)
+                message.lower().startswith(prefix.lower())
                 for prefix in self.command_prefixes
             ]
         )
