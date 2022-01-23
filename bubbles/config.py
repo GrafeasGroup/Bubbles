@@ -14,15 +14,16 @@ from dotenv import load_dotenv
 from etsy2 import Etsy
 from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
-from slack_bolt import App
+from slack_bolt import App  # type: ignore
 
 from bubbles.plugins import PluginManager as PM
 
 parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
 parser.add_argument("--startup-check", action="store_true")
 parser.add_argument("--interactive", action="store_true")
-CHECK_MODE = parser.parse_args().startup_check
-INTERACTIVE_MODE = parser.parse_args().interactive
+args = parser.parse_args()
+CHECK_MODE = args.startup_check
+INTERACTIVE_MODE = args.interactive
 
 log = logging.getLogger(__name__)
 load_dotenv()
@@ -45,13 +46,13 @@ ENABLE_BLOSSOM = os.environ.get("enable_blossom", False)
 
 try:
     reddit = Reddit(
-        username=os.environ.get("reddit_username"),
-        password=os.environ.get("reddit_password"),
-        client_id=os.environ.get("reddit_client_id"),
-        client_secret=os.environ.get("reddit_secret"),
-        user_agent=os.environ.get("reddit_user_agent"),
+        username=os.environ.get("reddit_username") or "",
+        password=os.environ.get("reddit_password") or "",
+        client_id=os.environ.get("reddit_client_id") or "",
+        client_secret=os.environ.get("reddit_secret") or "",
+        user_agent=os.environ.get("reddit_user_agent") or "",
     )
-except praw.exceptions.MissingRequiredAttributeException as e:
+except praw.exceptions.MissingRequiredAttributeException as e:  # type: ignore
     log.warning(f"Missing required Reddit secret:{e}\nDisabling Reddit access.")
     reddit = MagicMock()
 
@@ -60,7 +61,7 @@ try:
         signing_secret=os.environ.get("slack_signing_secret"),
         token=os.environ.get("slack_oauth_token"),
     )
-except slack_bolt.error.BoltError as e:
+except slack_bolt.error.BoltError as e:  # type: ignore
     log.warning(
         f"Missing required Slack secret: {e}\nDisabling Slack. If you are not running"
         f" in interactive mode, the bot will not function as expected."
@@ -82,10 +83,10 @@ if ENABLE_BLOSSOM:
     # Feature flag means that we can lock away blossom functionality until
     # blossom is actually ready to roll.
     blossom = BlossomAPI(
-        email=os.getenv("blossom_email"),
-        password=os.getenv("blossom_password"),
-        api_key=os.getenv("blossom_api_key"),
-        api_base_url=os.getenv("blossom_api_url"),
+        email=os.getenv("blossom_email") or "",
+        password=os.getenv("blossom_password") or "",
+        api_key=os.getenv("blossom_api_key") or "",
+        api_base_url=os.getenv("blossom_api_url") or "",
     )
     print("blossom loaded!")
 else:
