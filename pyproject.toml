@@ -22,6 +22,44 @@ etsy2 = {git = "https://github.com/simpassi/etsy-python2"}
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
 pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+
+[tool.poetry.scripts]
+bubbles-bot = "bubbles.cli:main"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+
+[tool.coverage.run]
+branch = true
+omit = [
+	"test/",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+	# re-enable the default skip-coverage sigil
+	"pragma: no cover",
+
+	# ignore debugging helpers
+	"def __repr__",
+	"if self\\.debug",
+
+	# Don't complain if tests hit defensive assertion code
+	"raise AssertionError",
+	"raise NotImplementedError",
+
+	# ignore non-runnable code
+	"if 0:",
+	"if __name__ == .__main__.:",
+
+	# don't complain about abstract base class stuff that isn't executed
+	"@(abc\\.)?abstract(class|static)?(method|property)",
+]
+show_missing = true
+fail_under = 30
+skip_covered = true
+skip_empty = true
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -2,8 +2,8 @@ import logging
 import re
 from typing import Callable, Dict, List, Tuple, Union, Any
 
-log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
 
 class PluginManager:
     # don't import this directly -- import from bubbles.config
@@ -55,11 +55,11 @@ class PluginManager:
         help: str = None,
         interactive_friendly: bool = True,
     ) -> None:
-        regex = re.compile(regex, flags if flags else 0)
+        pattern = re.compile(regex, flags if flags else 0)
         self.plugins.append(
             {
                 "callable": plugin,
-                "regex": regex,
+                "regex": pattern,
                 "ignore_prefix": ignore_prefix,
                 "help": help,
                 "interactive_friendly": interactive_friendly,
@@ -68,3 +68,4 @@ class PluginManager:
         if callback:
             self.callbacks.append(callback)
         log.info(f"Registered {str(plugin)}")
+
