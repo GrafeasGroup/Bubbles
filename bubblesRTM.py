@@ -61,16 +61,21 @@ Full list of available event keys:
 #     presence_update_callback(**payload)
 
 
+@app.event("reaction_removed")
 @app.event("app_mention")
 def handle(ack):
     """
-    Gracefully handle mentions so that slack is okay with it.
+    Gracefully handle extra events so that slack is okay with it.
 
     Because we listen for direct pings under the `message` event, we don't
     need to have a handler for `app_mention` events. Unfortunately, if we
     don't, then slack-bolt spams our logs with "Unhandled request!!!" for
     `app_mention`. So... we'll just accept `app_mention` events and sinkhole
     them.
+
+    Same goes for "reaction_removed" -- we need "reaction_added" but don't
+    currently care about removals. If we ever start caring about removals,
+    then we have the handler and can move it somewhere else.
     """
     ack()
 
