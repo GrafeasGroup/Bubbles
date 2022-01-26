@@ -1,30 +1,51 @@
-import pytest
+# import pytest
 
-import importlib
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from bubbles.plugins import BaseCommand, ChatPluginManager
-from bubbles.plugins.__base__ import import_subclasses
-
-
-@pytest.mark.skip(reason='Really hard to test, given pytest and using importlib in the code. Just test manually instead')
-def test_load_subclasses(helpers):
-    helpers.clear_subclasses(BaseCommand)
-    importlib.invalidate_caches()
-
-    initial_commands = set(BaseCommand._subclasses)
-    import_subclasses()
-    assert len(BaseCommand._subclasses) > len(initial_commands)
 
 
 @patch('bubbles.plugins.__base_command__.import_subclasses')
-def test_route_unknown_message(import_subclasses, helpers):
-    helpers.clear_subclasses(BaseCommand)
-    import_subclasses.side_effect = lambda *_: helpers.new_command_class()
+def test_route_unknown_message(import_subclasses, helpers, slack_utils):
+    process = MagicMock()
+    is_relevant = MagicMock()
+    is_relevant.return_value = False
 
-    assert len(BaseCommand._subclasses) == 0
+    helpers.new_command_class(methods={
+        'process': process,
+        'is_relevant': is_relevant,
+        'trigger_words': ['lorem'],
+        'help_text': "Hello world",
+    })
+
     with ChatPluginManager() as mgr:
-        assert len(BaseCommand._subclasses) > 0
-        assert len(mgr.commands) > 0
+        mgr.process({'text': '@Bubbles ipsum dolor sit amet'}, slack_utils)
 
+    is_relevant.assert_called_once()
+    assert not process.called
+    import_subclasses.assert_called_once()
+
+
+@patch('bubbles.plugins.__base_command__.import_subclasses')
+def test_routable_message(import_subclasses, helpers, slack_utils):
+    process = MagicMock()
+    is_relevant = MagicMock()
+    is_relevant.return_value = True  # I said it was routable...
+
+    helpers.new_command_class(methods={
+        'process': process,
+        'is_relevant': is_relevant,
+        'trigger_words': ['lorem'],
+    })
+
+    with ChatPluginManager() as mgr:
+        assert len(BaseCommand._subclasses) == 1
+        assert len(mgr.commands) == 1
+        mgr.process({'text': '@Bubbles lorem ipsum dolor'}, slack_utils)
+
+    is_relevant.assert_called()
+    process.assert_called_once()
     import_subclasses.assert_called()
+
+    assert not slack_utils.respond.called
+    assert not slack_utils.say.called

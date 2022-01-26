@@ -1,39 +1,32 @@
 from abc import ABC, abstractmethod
 import re
-from dataclasses import dataclass
-from typing import Any, Dict, List, Set, Union, cast
+from typing import List, Set
 
 from bubbles.plugins.__base__ import BasePlugin, BaseRegistry, import_subclasses
 
+from bubbles.slack import SlackUtils, SlackPayload
 
-SlackPayload = Dict[str, Any]
 
 ME = 'Bubbles'  # TODO: replace with the bot name
 
 
-def regex_for_trigger(trigger_words: List[str] = []) -> re.Pattern:
+def regex_for_trigger(trigger_words: List[str], utils: SlackUtils) -> re.Pattern:
     if len(trigger_words) == 0:
         raise ValueError('Unable to create a regex if there are no trigger words')
 
     return re.compile(
-        r'\A\s*(?:@' f'{ME}' r'\s+|!)' f'(?:{"|".join(trigger_words)})\\b',
+        r'\A\s*(?:@' f'{utils.bot_username}' r'\s+|!)' f'(?:{"|".join(trigger_words)})\\b\\s*',
         re.MULTILINE|re.IGNORECASE
     )
 
 
-class SlackUtils:
-    def say(self) -> None:
-        raise NotImplementedError()
-
-    def say(self) -> None:
-        raise NotImplementedError()
-
-
 class BaseCommand(BasePlugin, ABC):
+    # Automatically managed
     _subclasses = []
 
     # Overridden in subclasses:
-    trigger_word: Union[str, re.Pattern]
+    sanitize_prefix: bool = True
+    trigger_words: List[str]
     help_text: str
 
     def __init_subclass__(cls, **kwargs):
@@ -55,34 +48,59 @@ class BaseCommand(BasePlugin, ABC):
         # See: https://stackoverflow.com/a/43057166
         cls._subclasses.append(cls)
 
-    def is_relevant(self, msg: str) -> bool:
+    def _trigger_regex(self, utils: SlackUtils) -> re.Pattern:
+        return regex_for_trigger(self.trigger_words, utils)
+
+    def is_relevant(self, payload: SlackPayload, utils: SlackUtils) -> bool:
         """
         Processes the raw message to know if we should trigger the chat
         command assigned by the subclass's plugin, returning True if it
         should be triggered.
+
+        This is generally okay to leave alone, but can also be overridden
+        if there's more intricate logic required for interaction, such as
+        only acting if a certain set of users triggers it.
         """
-        trigger_word = self.trigger_word
-        if not isinstance(self.trigger_word, re.Pattern):
-            trigger_word = regex_for_trigger([cast(str, trigger_word)])
-        raise NotImplementedError()
+        return bool(self._trigger_regex(utils).match(payload.get("text") or ""))
+
+    def sanitize_message(self, msg: str, utils: SlackUtils) -> str:
+        """
+        Removes any references to `@Bubbles <cmd>` or `!<cmd>`, leaving
+        only the text after the invocation.
+        """
+        return self._trigger_regex(utils).sub('', msg)
 
     @abstractmethod
-    def process(self, msg: str, util: SlackUtils):
+    def process(self, msg: str, util: SlackUtils) -> None:
         """
-        @param msg  : Processed message so it does not include the
-                      trigger word or bot username, but includes
-                      everything else in the message.
-        @param util : Message-specific helper object, including methods
-                      for sending a response.
+        Takes the message (without the triggering word or @<bot-name>)
+        and does whatever action the chat command is supposed to do.
         """
         ...
 
-    def run(self, payload: SlackPayload):
-        ...
+    def run(self, payload: SlackPayload, utils: SlackUtils) -> None:
+        """
+        A wrapper that orchestrates the running of the command.
+
+        Do not ever override this or things will act strangely!
+        """
+        msg: str = self.sanitize_message(payload['text'], utils)
+
+        try:
+            self.process(msg, utils)
+        except Exception as e:
+            err_msg = f"Ow! What are you doing? That hurt! :crying_bubbles:\n\n{e}"
+            if hasattr(self, 'help_text') and getattr(self, 'help_text'):  # pragma: no cover
+                err_msg += f"\n\n{self.help_text}"
+
+            utils.respond(err_msg)
 
 
 class ChatPluginManager(BaseRegistry):
-    commands: Set[BaseCommand] = set([])
+    commands: Set[BaseCommand]
+
+    def __init__(self):
+        self.commands = set([])
 
     def __enter__(self, *_) -> 'ChatPluginManager':
         self.load()
@@ -97,18 +115,20 @@ class ChatPluginManager(BaseRegistry):
         i = 0
         for cmd in BaseCommand._subclasses:
             i += 1
-            self.commands.add(cast(BaseCommand, cmd))
+            self.commands.add(cmd())
 
         self.log.info(f'Registered {i} chat commands')
 
         return self
 
-    def process(self, payload: SlackPayload):
-        msg = payload.get("text") or ""
-
+    def process(self, payload: SlackPayload, utils: SlackUtils):
         for cmd in self.commands:
-            if not cmd.is_relevant(msg):
+            if not cmd.is_relevant(payload, utils):
                 continue
 
-            # Only process a message with 1 plugin, not all of them
+            cmd.run(payload, utils)
+
+            # Only process a message with the first applicable plugin,
+            # not all of them. We don't want a swarm of recursive Bubbles
+            # responses to take over and accidentally form Skynet.
             return

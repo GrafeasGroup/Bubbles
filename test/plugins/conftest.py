@@ -1,6 +1,7 @@
 import pytest
 
-from typing import Type
+from unittest.mock import MagicMock
+from typing import Callable, Dict, Type
 
 from bubbles.plugins import BaseCommand, BasePeriodicJob
 
@@ -25,24 +26,43 @@ class Helpers:
             subject_class._subclasses.pop()
 
     @staticmethod
-    def new_periodic_job_class(name: str = None) -> Type:
+    def new_periodic_job_class(name: str = None, methods: Dict[str, Callable] = {}) -> Type:
         if not name:
             name = random_class_name('TestJob')
-        return type(name, (BasePeriodicJob,), {
+
+        attached_methods = {
             '__init__': lambda *_: None,
             'job': lambda *_: None,
-        })
+        }
+        attached_methods.update(methods)
+        return type(name, (BasePeriodicJob,), attached_methods)
 
     @staticmethod
-    def new_command_class(name: str = None) -> Type:
+    def new_command_class(name: str = None, methods: Dict[str, Callable] = {}) -> Type:
         if not name:
             name = random_class_name('TestCommand')
-        return type(name, (BaseCommand,), {
+
+        attached_methods = {
             '__init__': lambda *_: None,
             'process': lambda *_: None,
-        })
+        }
+        attached_methods.update(methods)
+        return type(name, (BaseCommand,), attached_methods)
 
 
 @pytest.fixture
 def helpers():
     return Helpers
+
+
+@pytest.fixture
+def slack_utils():
+    mock_utils = MagicMock()
+    mock_utils.bot_username = "Bubbles"
+    return mock_utils
+
+
+@pytest.fixture(autouse=True)
+def clear_subclasses_before_each_test(helpers):
+    helpers.clear_subclasses(BaseCommand)
+    helpers.clear_subclasses(BasePeriodicJob)

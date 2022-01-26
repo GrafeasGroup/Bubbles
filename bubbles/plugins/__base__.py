@@ -113,14 +113,12 @@ class BaseRegistry(ABC):
 
     @abstractmethod
     def load():
-        import_subclasses()
+        ...
 
-    @abstractmethod
     def __enter__(self):
         self.load()
         return self
 
-    @abstractmethod
     def __exit__(self, *_):
         ...
 
@@ -129,8 +127,10 @@ class EventLoop(BaseRegistry):  # pragma: no cover
     jobs: Set[BasePeriodicJob] = set([])
 
     def __enter__(self):
-        super().__enter__()
+        self.load()
         self.start()
+
+        return self
 
     def __exit__(self):
         self.stop()
@@ -156,7 +156,7 @@ class EventLoop(BaseRegistry):  # pragma: no cover
         return self
 
 
-def import_subclasses():
+def import_subclasses():  # pragma: no cover
     """
     Automatically imports all of the plugins so we can call the base
     classes' `.__subclasses__()` methods to create a plugin manager of

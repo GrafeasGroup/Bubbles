@@ -1,13 +1,9 @@
 import os
-import re
-from typing import Any, Dict
 
 from bubbles.plugins import BaseCommand
+from bubbles.slack import SlackUtils
 
 import requests
-
-
-ME = 'Bubbles'
 
 
 # On the project page, click on the 3 dots for the column and copy column link.
@@ -17,12 +13,13 @@ ME = 'Bubbles'
 #
 # We extract the ID from there
 github_project_column_id = "17559696"
+github_token = os.environ['GITHUB_TOKEN']
 
 
 def new_project_note(suggestion: str) -> None:
     url = f"https://api.github.com/projects/columns/{github_project_column_id}/cards"
     headers = {
-        "Authorization": f"bearer {os.environ['GITHUB_TOKEN']}",
+        "Authorization": f"bearer {github_token}",
 
         # required for GitHub REST API versioning
         "Content-Type": "application/vnd.github.v3+json",
@@ -37,34 +34,9 @@ def new_project_note(suggestion: str) -> None:
 
 
 class WishlistCommand(BaseCommand):
-    trigger_word = 'wish'
-    help_text = f'!wish [suggestion] - adds a note to the dev suggestion box'
-    # regex = re.compile(
-    #     r'^\s*(?:@' f'{ME}' r'\s+|!)wish(?:\s+|\s*\r?\n)(?P<suggestion>(?:.|\n|\r\n)+)\s*$',
-    #     re.MULTILINE | re.IGNORECASE,
-    # )
+    trigger_words = ['wish']
+    help_text = f'wish [suggestion] - adds a note to the dev suggestion box'
 
-    def process(self, payload: Dict[str, Any]) -> None:
-        say = payload["extras"]["say"]
-        m = self.regex.match(payload.get("text") or "")
-        try:
-            if not m:
-                # If code got here, this means the pattern in PluginManager.register_plugin()
-                # did not also match in our regex above. Which should never happen unless
-                # there's a bug in this code.
-                raise Exception(
-                    "Weird thing happened that devs should look at."
-                )
-            suggestion = m.group('suggestion')
-            if not suggestion:
-                raise ValueError(
-                    "I couldn't quite understand your suggestion. Can you try telling me"
-                    " again in a different way? Perhaps formatting it differently?"
-                )
-
-            new_project_note(suggestion)
-        except ValueError as e:
-            say(f"Ahhhh! {e}")
-        except Exception as e:
-            say(f"Error! Beep bloop! {e}")
-            raise
+    def process(self, msg: str, utils: SlackUtils) -> None:
+        new_project_note(msg)
+        utils.respond('Your suggestion has been catalogued. Thanks for the input!')
