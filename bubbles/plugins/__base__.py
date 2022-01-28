@@ -6,6 +6,8 @@ from datetime import timedelta
 from threading import Event, Thread
 from typing import Any, Set, cast
 
+from praw.reddit import Reddit
+
 
 """
 This module holds a whole bunch of base classes and governors of those
@@ -125,6 +127,9 @@ class BaseRegistry(ABC):
 
 class EventLoop(BaseRegistry):  # pragma: no cover
     jobs: Set[BasePeriodicJob] = set([])
+
+    def __init__(self, *_, **kwargs):
+        self.reddit: Reddit = kwargs['reddit']
 
     def __enter__(self):
         self.load()

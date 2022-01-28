@@ -1,58 +1,61 @@
 import traceback
 
-# from bubbles.message import process_message
+from bubbles.interfaces import SlackApp
+from bubbles.plugins import ChatPluginManager
 from bubbles.slack.utils import SlackUtils
 from bubbles.slack.types import (
     BoltContext,
     SlackPayload,
 )
 
-def process_message(*_) -> None:
-    # TODO
-    ...
 
-def handle_mention(context: BoltContext):
-    """
-    Gracefully handle mentions so that slack is okay with it.
+class EventHandlers:
+    chat: ChatPluginManager
 
-    Because we listen for direct pings under the `message` event, we don't
-    need to have a handler for `app_mention` events. Unfortunately, if we
-    don't, then slack-bolt spams our logs with "Unhandled request!!!" for
-    `app_mention`. So... we'll just accept `app_mention` events and sinkhole
-    them.
-    """
-    context.ack()
+    def __init__(self, chat_manager: ChatPluginManager):
+        self.chat = chat_manager
 
+    def mention(self, context: BoltContext):
+        """
+        Gracefully handle mentions so that slack is okay with it.
 
-def handle_message(payload: SlackPayload, context: BoltContext):
-    context.ack()
-
-    if not (payload.get("text") or ""):
-        # we got a message that is not really a message for some reason.
-        return
-
-    utils = SlackUtils(payload=payload, context=context)
-
-    try:
-        process_message(payload, utils)
-    except:
-        context.say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
+        Because we listen for direct pings under the `message` event, we don't
+        need to have a handler for `app_mention` events. Unfortunately, if we
+        don't, then slack-bolt spams our logs with "Unhandled request!!!" for
+        `app_mention`. So... we'll just accept `app_mention` events and sinkhole
+        them.
+        """
+        context.ack()
 
 
-def handle_reaction_added(payload: SlackPayload, context: BoltContext):
-    util = SlackUtils(payload=payload, context=context)
-    util.ack()
+    def message(self, payload: SlackPayload, context: BoltContext):
+        context.ack()
 
-    user_who_reacted = util.sender_username
-    user_receiving_reaction = util.receiver_username
-    reaction = payload["reaction"]
-    print(
-        f"{user_who_reacted} has replied to one of {user_receiving_reaction}'s"
-        f" messages with a :{reaction}:."
-    )
+        if not payload.get("text"):
+            # we got a message that is not really a message for some reason.
+            return
+
+        utils = SlackUtils(payload=payload, context=context)
+
+        try:
+            self.chat.process(payload=payload, utils=utils)
+        except:
+            context.say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
 
 
-def register_event_handlers(app):
+    def reaction_added(self, payload: SlackPayload, context: BoltContext):
+        util = SlackUtils(payload=payload, context=context)
+        util.ack()
+
+        user_who_reacted = util.sender_username
+        user_receiving_reaction = util.receiver_username
+        reaction = payload["reaction"]
+        print(
+            f"{user_who_reacted} has replied to one of {user_receiving_reaction}'s"
+            f" messages with a :{reaction}:."
+        )
+
+def register_event_handlers(app: SlackApp, chat_manager: ChatPluginManager):
     """
     This acts like we decorated the above methods, similar to
 
@@ -88,6 +91,7 @@ def register_event_handlers(app):
       - https://www.python.org/dev/peps/pep-0318/#id8
       - https://github.com/slackapi/bolt-python/blob/cb3891bb0be1405d851d61efa73dd6fd66915eba/README.md#listening-for-events
     """
-    app.event("app_mention")(handle_mention)
-    app.event("message")(handle_message)
-    app.event("reaction_added")(handle_reaction_added)
+    handlers = EventHandlers(chat_manager=chat_manager)
+    app.event("app_mention")(handlers.mention)
+    app.event("message")(handlers.message)
+    app.event("reaction_added")(handlers.reaction_added)

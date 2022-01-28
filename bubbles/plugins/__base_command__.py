@@ -99,7 +99,8 @@ class BaseCommand(BasePlugin, ABC):
 class ChatPluginManager(BaseRegistry):
     commands: Set[BaseCommand]
 
-    def __init__(self):
+    def __init__(self, *_, **kwargs):
+        self.reddit = kwargs['reddit']
         self.commands = set([])
 
     def __enter__(self, *_) -> 'ChatPluginManager':
