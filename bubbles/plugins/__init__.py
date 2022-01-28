@@ -6,8 +6,3 @@
 # EventLoop = base.EventLoop
 # BaseCommand = cmd.BaseCommand
 # BasePeriodicJob = base.BasePeriodicJob
-
-
-# TODO: Remove these when restructure is complete
-# import bubbles.plugins.__legacy__ as legacy
-# PluginManager = legacy.PluginManager
