@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from bubbles.plugins import BaseCommand, ChatPluginManager
+from bubbles.plugins.__base_command__ import BaseCommand, ChatPluginManager
 
 
 @patch('bubbles.plugins.__base_command__.import_subclasses')
@@ -18,7 +18,7 @@ def test_route_unknown_message(import_subclasses, helpers, slack_utils):
         'help_text': "Hello world",
     })
 
-    with ChatPluginManager() as mgr:
+    with ChatPluginManager(reddit=MagicMock()) as mgr:
         mgr.process({'text': '@Bubbles ipsum dolor sit amet'}, slack_utils)
 
     is_relevant.assert_called_once()
@@ -38,7 +38,7 @@ def test_routable_message(import_subclasses, helpers, slack_utils):
         'trigger_words': ['lorem'],
     })
 
-    with ChatPluginManager() as mgr:
+    with ChatPluginManager(reddit=MagicMock()) as mgr:
         assert len(BaseCommand._subclasses) == 1
         assert len(mgr.commands) == 1
         mgr.process({'text': '@Bubbles lorem ipsum dolor'}, slack_utils)

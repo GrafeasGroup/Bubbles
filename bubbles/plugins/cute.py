@@ -5,8 +5,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Callable, Literal, Tuple
 
-from bubbles.plugins import BaseCommand
-from bubbles.slack import SlackUtils
+from bubbles.plugins.__base_command__ import BaseCommand
+from bubbles.slack.utils import SlackUtils
 
 import requests
 

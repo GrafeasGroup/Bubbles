@@ -1,7 +1,7 @@
 import traceback
 
-from bubbles.interfaces import SlackApp
-from bubbles.plugins import ChatPluginManager
+from bubbles.services.slack import SlackApp
+from bubbles.plugins.__base_command__ import ChatPluginManager
 from bubbles.slack.utils import SlackUtils
 from bubbles.slack.types import (
     BoltContext,

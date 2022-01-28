@@ -4,8 +4,8 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 
-from bubbles.plugins import BaseCommand
-from bubbles.slack import SlackUtils
+from bubbles.plugins.__base_command__ import BaseCommand
+from bubbles.slack.utils import SlackUtils
 
 
 pg_user = os.environ.get('postgres_user') or ''

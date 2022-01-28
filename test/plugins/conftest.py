@@ -3,7 +3,8 @@ import pytest
 from unittest.mock import MagicMock
 from typing import Callable, Dict, Type
 
-from bubbles.plugins import BaseCommand, BasePeriodicJob
+from bubbles.plugins.__base_command__ import BaseCommand
+from bubbles.plugins.__base__ import BasePeriodicJob
 
 
 _index = 0

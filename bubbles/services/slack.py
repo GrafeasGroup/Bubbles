@@ -2,7 +2,7 @@ import logging
 import os
 from mock import MagicMock
 
-from bubbles.slack import DEFAULT_CHANNEL
+from bubbles.slack.config import DEFAULT_CHANNEL
 
 from slack_bolt.app.app import App as SlackApp
 from slack_bolt.error import BoltError

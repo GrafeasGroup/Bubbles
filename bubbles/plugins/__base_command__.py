@@ -4,7 +4,8 @@ from typing import List, Set
 
 from bubbles.plugins.__base__ import BasePlugin, BaseRegistry, import_subclasses
 
-from bubbles.slack import SlackUtils, SlackPayload
+from bubbles.slack.utils import SlackUtils
+from bubbles.slack.types import SlackPayload
 
 
 ME = 'Bubbles'  # TODO: replace with the bot name
