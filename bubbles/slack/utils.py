@@ -16,6 +16,7 @@ major versions.
 from abc import ABC
 from dataclasses import dataclass
 from functools import cached_property
+from typing import Any, Dict, Union
 
 from bubbles.slack.users import user_map
 from bubbles.slack.types import (
@@ -68,6 +69,10 @@ class SlackPayloadInterpreter(ABC):
     def channel(self):
         return self.payload['channel']
 
+    @property
+    def timestamp(self):
+        return self.payload['ts']
+
 
 class SlackContextActions(SlackPayloadInterpreter):
     context: BoltContext
@@ -94,10 +99,20 @@ class SlackContextActions(SlackPayloadInterpreter):
 
         return self.context.respond
 
-    def reaction_add(self, message: SlackResponse, emote_name: str) -> SlackResponse:
+    def reaction_add(self, emote_name: str, message: SlackResponse = None) -> SlackResponse:
+        if not message:
+            # if message isn't given, assume the one that triggered the
+            # Slack event
+            msg = {
+                'channel': self.channel,
+                'ts': self.timestamp,
+            }
+        else:
+            msg = message
+
         return self.client.reactions_add(
-            channel=message["channel"],
-            timestamp=message["ts"],
+            channel=msg["channel"],
+            timestamp=msg["ts"],
             name=emote_name,
         )
 
