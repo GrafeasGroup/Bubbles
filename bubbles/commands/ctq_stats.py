@@ -1,10 +1,106 @@
 from datetime import datetime, timedelta
+from typing import List, Dict, Optional
 
-from bubbles.config import PluginManager
+from bubbles.config import PluginManager, blossom
+
+
+def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
+    """Convert a Blossom date string to a datetime object."""
+    return (
+        datetime.strptime(blossom_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        if blossom_date
+        else None
+    )
+
+
+def _is_submission_in_queue(
+    submission: Dict, start_date: datetime, end_date: datetime
+) -> bool:
+    """Determine if the given submission was in the queue during the given time frame."""
+    create_time = _convert_blossom_date(submission["create_time"])
+
+    if start_date <= create_time <= end_date:
+        # The submission entered the queue in the time frame
+        return True
+
+    first_time = start_date - timedelta(hours=18)
+
+    if create_time < first_time or create_time > end_date:
+        # The submission entered the queue too early or too late
+        return False
+
+    claim_time = (
+        _convert_blossom_date(submission["claim_time"])
+        if submission["claim_time"]
+        else None
+    )
+
+    if claim_time and claim_time < start_date:
+        # The transcription has already been worked on before the event
+        return False
+
+    return True
+
+
+def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[Dict]:
+    """Get the submissions during the CtQ time."""
+    say("Getting the CtQ submissions...")
+
+    # Posts remain in the queue for 18 hours
+    # We need to consider the posts that were already there at the start
+    first_time = start_date - timedelta(hours=18)
+
+    submissions = []
+    page = 1
+
+    # Fetch the submissions in the time frame
+    while True:
+        response = blossom.get(
+            "submission",
+            params={
+                "page_size": 500,
+                "page": page,
+                "create_time__gte": first_time.isoformat(),
+                "create_time__lte": end_date.isoformat(),
+                "removed_from_queue": False,
+            },
+        )
+        if not response.ok:
+            say(
+                f"Error while fetching the submissions: {response.status_code}\n{response.content}"
+            )
+            return []
+
+        data = response.json()
+        submissions += data["results"]
+
+        if data["next"] is None:
+            # No more submissions to fetch
+            break
+
+        page += 1
+
+    # Filter out the submissions that have been done before the start
+    submissions = [
+        submission
+        for submission in submissions
+        if _is_submission_in_queue(submission, start_date, end_date)
+    ]
+
+    say(f"Fetched {len(submissions)} from Blossom.")
+
+    return submissions
+
+
+def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
+    """Generate the stats for the CtQ event."""
+    say(f"start: {start_date}, end: {end_date}")
+
+    submissions = get_ctq_submissions(start_date, end_date, say)
 
 
 def ctq_stats(payload):
-    """Generate stats about a clear the queue event."""
+    """Process the !ctqstats command."""
     say = payload["extras"]["say"]
     args = payload.get("text").split()
 
@@ -14,37 +110,43 @@ def ctq_stats(payload):
         return
 
     # Parse the start time
-    start_time_str = args[1]
+    start_date_str = args[1]
     try:
-        start_time = datetime.fromisoformat(start_time_str)
+        start_date = datetime.fromisoformat(start_date_str)
     except ValueError:
-        say(f"'{start_time_str}' is not a valid date/time. Try something like 2021-01-30T12:00.")
+        say(
+            f"'{start_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
+        )
         return
 
     if len(args) >= 3:
         # An end time was provided
         if len(args) > 3:
             # Too many arguments
-            say(f"You provided too many arguments, I need a start time and an optional end time.")
+            say(
+                f"You provided too many arguments, I need a start time and an optional end time."
+            )
             return
 
         # Parse the end time
-        end_time_str = args[2]
+        end_date_str = args[2]
         try:
-            end_time = datetime.fromisoformat(end_time_str)
+            end_date = datetime.fromisoformat(end_date_str)
         except ValueError:
-            say(f"'{end_time_str}' is not a valid date/time. Try something like 2021-01-30T12:00.")
+            say(
+                f"'{end_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
+            )
             return
     else:
         # No end time provided, default to 12 hours after the start time
-        end_time = start_time + timedelta(hours=12)
+        end_date = start_date + timedelta(hours=12)
 
-    if end_time <= start_time:
+    if end_date <= start_date:
         # The end time must be after the start time
         say("The end time must be after the start time.")
         return
 
-    say(f"start: {start_time}, end: {end_time}")
+    generate_ctq_stats(start_date, end_date, say)
 
 
 PluginManager.register_plugin(
