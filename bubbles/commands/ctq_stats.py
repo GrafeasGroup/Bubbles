@@ -1,7 +1,15 @@
+import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 
 from bubbles.config import PluginManager, blossom
+
+
+# The time for which posts remain in the queue until they are removed
+QUEUE_POST_TIMEOUT = timedelta(hours=int(os.getenv("QUEUE_POST_TIMEOUT", "18")))
+# The default duration of a CtQ event
+# Set this lower when debugging to reduce loading times
+DEFAULT_CTQ_DURATION = timedelta(hours=int(os.getenv("DEFAULT_CTQ_DURATION", "12")))
 
 
 def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
@@ -23,7 +31,7 @@ def _is_submission_in_queue(
         # The submission entered the queue in the time frame
         return True
 
-    first_time = start_date - timedelta(hours=18)
+    first_time = start_date - QUEUE_POST_TIMEOUT
 
     if create_time < first_time or create_time > end_date:
         # The submission entered the queue too early or too late
@@ -44,11 +52,11 @@ def _is_submission_in_queue(
 
 def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[Dict]:
     """Get the submissions during the CtQ time."""
-    say("Getting the CtQ submissions...")
+    say("Fetching the submissions from the queue... (0%)")
 
-    # Posts remain in the queue for 18 hours
+    # Posts remain in the queue for a given time
     # We need to consider the posts that were already there at the start
-    first_time = start_date - timedelta(hours=18)
+    first_time = start_date - QUEUE_POST_TIMEOUT
 
     submissions = []
     page = 1
@@ -74,6 +82,10 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         data = response.json()
         submissions += data["results"]
 
+        percentage = len(submissions) / data["count"] if data["count"] > 0 else 1
+
+        say(f"Fetching the submissions from the queue... ({percentage:.0%})")
+
         if data["next"] is None:
             # No more submissions to fetch
             break
@@ -87,9 +99,13 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         if _is_submission_in_queue(submission, start_date, end_date)
     ]
 
-    say(f"Fetched {len(submissions)} from Blossom.")
+    say(f"Fetched {len(submissions)} submissions from the queue.")
 
     return submissions
+
+
+def attach_transcriptions(submissions: List[Dict]) -> List[Dict]:
+    """For each submission, attach the corresponding transcription (if available)."""
 
 
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
@@ -138,8 +154,8 @@ def ctq_stats(payload):
             )
             return
     else:
-        # No end time provided, default to 12 hours after the start time
-        end_date = start_date + timedelta(hours=12)
+        # No end time provided, use the default CTQ duration
+        end_date = start_date + DEFAULT_CTQ_DURATION
 
     if end_date <= start_date:
         # The end time must be after the start time
