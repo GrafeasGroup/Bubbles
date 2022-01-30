@@ -176,7 +176,7 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
             if len(results) > 0:
                 # Attach the transcription text
                 transcription = results[0]
-                updated_submission["transcription"] = transcription["text"]
+                updated_submission["transcription"] = transcription
                 tr_count += 1
 
             updated_submissions.append(updated_submission)
