@@ -28,6 +28,12 @@ def _get_list_chunks(original_list: List[T], chunk_size: int) -> List[List[T]]:
     ]
 
 
+def _get_elapsed(start: datetime) -> str:
+    """Get a string representing the elapsed time."""
+    duration = datetime.now() - start
+    return f"{duration.total_seconds():.3f} s"
+
+
 def _extract_blossom_id(blossom_url: str) -> str:
     """Extract the ID from a Blossom URL."""
     return blossom_url.split("/")[-2]
@@ -73,6 +79,7 @@ def _is_submission_in_queue(
 
 def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[Dict]:
     """Get the submissions during the CtQ time."""
+    start = datetime.now()
     say("Fetching the queue submissions from Blossom... (0%)")
 
     # Posts remain in the queue for a given time
@@ -120,13 +127,14 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         if _is_submission_in_queue(submission, start_date, end_date)
     ]
 
-    say(f"Fetched {len(submissions)} queue submissions from Blossom.")
+    say(f"Fetched {len(submissions)} queue submissions from Blossom ({_get_elapsed(start)})")
 
     return submissions
 
 
 def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
     """For each submission, attach the corresponding transcription (if available)."""
+    start = datetime.now()
     say("Fetching the transcriptions from Blossom... (0%)")
 
     updated_submissions = []
@@ -176,13 +184,14 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
         percentage = (idx + 1) / len(chunks)
         say(f"Fetching the transcriptions from Blossom... ({percentage:.0%})")
 
-    say(f"Fetched {tr_count} transcriptions from Blossom.")
+    say(f"Fetched {tr_count} transcriptions from Blossom ({_get_elapsed(start)})")
 
     return updated_submissions
 
 
 def attach_users(submissions: List[Dict], say) -> List[Dict]:
     """For each submission, attach the corresponding user (if available)."""
+    start = datetime.now()
     say("Fetching the users from Blossom... (0%)")
 
     updated_submissions = []
@@ -232,18 +241,21 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
         percentage = (idx + 1) / len(chunks)
         say(f"Fetching the users from Blossom... ({percentage:.0%})")
 
-    say(f"Fetched {len(user_cache)} users from Blossom.")
+    say(f"Fetched {len(user_cache)} users from Blossom ({_get_elapsed(start)})")
 
     return updated_submissions
 
 
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     """Generate the stats for the CtQ event."""
+    start = datetime.now()
     say(f"start: {start_date}, end: {end_date}")
 
     submissions = get_ctq_submissions(start_date, end_date, say)
     submissions = attach_transcriptions(submissions, say)
     submissions = attach_users(submissions, say)
+
+    say(f"Generated the CtQ stats in {_get_elapsed(start)}.")
 
 
 def ctq_stats(payload):
