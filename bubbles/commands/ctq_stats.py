@@ -159,7 +159,7 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
             )
             if not response.ok:
                 say(
-                    f"Error while fetching the submissions: {response.status_code}\n{response.content}"
+                    f"Error while fetching the transcriptions: {response.status_code}\n{response.content}"
                 )
                 return []
 
@@ -181,12 +181,69 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
     return updated_submissions
 
 
+def attach_users(submissions: List[Dict], say) -> List[Dict]:
+    """For each submission, attach the corresponding user (if available)."""
+    say("Fetching the users from Blossom... (0%)")
+
+    updated_submissions = []
+
+    user_cache = {}
+
+    chunks = _get_list_chunks(submissions, 25)
+
+    # Try to get the transcriptions for the submissions
+    for idx, chunk in enumerate(chunks):
+        for submission in chunk:
+            updated_submission = dict(**submission, user=None)
+
+            if not submission["completed_by"]:
+                # There's no transcription to attach
+                updated_submissions.append(updated_submission)
+                continue
+
+            user_id = _extract_blossom_id(submission["completed_by"])
+
+            # Try to get the user from the cache, if available
+            if user := user_cache.get(user_id):
+                updated_submission["user"] = user
+                continue
+
+            # Try to get the user from Blossom
+            response = blossom.get(
+                "volunteer", params={"page_size": 1, "page": 1, "id": user_id},
+            )
+            if not response.ok:
+                say(
+                    f"Error while fetching the users: {response.status_code}\n{response.content}"
+                )
+                return []
+
+            results = response.json()["results"]
+
+            if len(results) > 0:
+                # Attach the transcription text
+                user = results[0]
+                updated_submission["user"] = user
+                # Cache the user for later
+                user_cache[user_id] = user
+
+            updated_submissions.append(updated_submission)
+
+        percentage = (idx + 1) / len(chunks)
+        say(f"Fetching the users from Blossom... ({percentage:.0%})")
+
+    say(f"Fetched {len(user_cache)} users from Blossom.")
+
+    return updated_submissions
+
+
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     """Generate the stats for the CtQ event."""
     say(f"start: {start_date}, end: {end_date}")
 
     submissions = get_ctq_submissions(start_date, end_date, say)
     submissions = attach_transcriptions(submissions, say)
+    submissions = attach_users(submissions, say)
 
 
 def ctq_stats(payload):
