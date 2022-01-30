@@ -12,6 +12,11 @@ QUEUE_POST_TIMEOUT = timedelta(hours=int(os.getenv("QUEUE_POST_TIMEOUT", "18")))
 DEFAULT_CTQ_DURATION = timedelta(hours=int(os.getenv("DEFAULT_CTQ_DURATION", "12")))
 
 
+def _extract_blossom_id(blossom_url: str) -> str:
+    """Extract the ID from a Blossom URL."""
+    return blossom_url.split("/")[-2]
+
+
 def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
     """Convert a Blossom date string to a datetime object."""
     return (
@@ -52,7 +57,7 @@ def _is_submission_in_queue(
 
 def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[Dict]:
     """Get the submissions during the CtQ time."""
-    say("Fetching the submissions from the queue... (0%)")
+    say("Fetching the queue submissions from Blossom... (0%)")
 
     # Posts remain in the queue for a given time
     # We need to consider the posts that were already there at the start
@@ -84,7 +89,7 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
 
         percentage = len(submissions) / data["count"] if data["count"] > 0 else 1
 
-        say(f"Fetching the submissions from the queue... ({percentage:.0%})")
+        say(f"Fetching the queue submissions from Blossom... ({percentage:.0%})")
 
         if data["next"] is None:
             # No more submissions to fetch
@@ -99,13 +104,59 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         if _is_submission_in_queue(submission, start_date, end_date)
     ]
 
-    say(f"Fetched {len(submissions)} submissions from the queue.")
+    say(f"Fetched {len(submissions)} queue submissions from Blossom.")
 
     return submissions
 
 
-def attach_transcriptions(submissions: List[Dict]) -> List[Dict]:
+def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
     """For each submission, attach the corresponding transcription (if available)."""
+    say("Fetching the transcriptions from Blossom... (0%)")
+
+    updated_submissions = []
+
+    tr_count = 0
+
+    # Try to get the transcriptions for the submissions
+    for submission in submissions:
+        updated_submission = dict(**submission, transcription=None)
+
+        if not submission["completed_by"]:
+            # There's no transcription to attach
+            updated_submissions.append(updated_submission)
+            continue
+
+        author_id = _extract_blossom_id(submission["completed_by"])
+
+        # Try to get the transcription from Blossom
+        response = blossom.get(
+            "transcription",
+            params={
+                "page_size": 1,
+                "page": 1,
+                "author": author_id,
+                "submission": submission["id"],
+            },
+        )
+        if not response.ok:
+            say(
+                f"Error while fetching the submissions: {response.status_code}\n{response.content}"
+            )
+            return []
+
+        results = response.json()["results"]
+
+        if len(results) > 0:
+            # Attach the transcription text
+            transcription = results[0]
+            updated_submission["transcription"] = transcription["text"]
+            tr_count += 1
+
+        updated_submissions.append(updated_submission)
+
+    say(f"Fetched {tr_count} transcriptions from Blossom.")
+
+    return updated_submissions
 
 
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
@@ -113,6 +164,7 @@ def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     say(f"start: {start_date}, end: {end_date}")
 
     submissions = get_ctq_submissions(start_date, end_date, say)
+    submissions = attach_transcriptions(submissions, say)
 
 
 def ctq_stats(payload):
