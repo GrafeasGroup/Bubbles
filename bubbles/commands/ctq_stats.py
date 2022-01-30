@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TypeVar
 
 from bubbles.config import PluginManager, blossom
 
@@ -10,6 +10,22 @@ QUEUE_POST_TIMEOUT = timedelta(hours=int(os.getenv("QUEUE_POST_TIMEOUT", "18")))
 # The default duration of a CtQ event
 # Set this lower when debugging to reduce loading times
 DEFAULT_CTQ_DURATION = timedelta(hours=int(os.getenv("DEFAULT_CTQ_DURATION", "12")))
+
+
+T = TypeVar("T")
+
+
+def _get_list_chunks(original_list: List[T], chunk_size: int) -> List[List[T]]:
+    """Partition a list into chunks of the given size.
+
+    We mostly use this if we want to iterate through a full list,
+    but send a progress update to Slack in-between.
+    """
+    # See https://favtutor.com/blogs/partition-list-python
+    return [
+        original_list[i : i + chunk_size]
+        for i in range(0, len(original_list), chunk_size)
+    ]
 
 
 def _extract_blossom_id(blossom_url: str) -> str:
@@ -117,42 +133,48 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
 
     tr_count = 0
 
+    chunks = _get_list_chunks(submissions, 10)
+
     # Try to get the transcriptions for the submissions
-    for submission in submissions:
-        updated_submission = dict(**submission, transcription=None)
+    for idx, chunk in enumerate(chunks):
+        for submission in chunk:
+            updated_submission = dict(**submission, transcription=None)
 
-        if not submission["completed_by"]:
-            # There's no transcription to attach
-            updated_submissions.append(updated_submission)
-            continue
+            if not submission["completed_by"]:
+                # There's no transcription to attach
+                updated_submissions.append(updated_submission)
+                continue
 
-        author_id = _extract_blossom_id(submission["completed_by"])
+            author_id = _extract_blossom_id(submission["completed_by"])
 
-        # Try to get the transcription from Blossom
-        response = blossom.get(
-            "transcription",
-            params={
-                "page_size": 1,
-                "page": 1,
-                "author": author_id,
-                "submission": submission["id"],
-            },
-        )
-        if not response.ok:
-            say(
-                f"Error while fetching the submissions: {response.status_code}\n{response.content}"
+            # Try to get the transcription from Blossom
+            response = blossom.get(
+                "transcription",
+                params={
+                    "page_size": 1,
+                    "page": 1,
+                    "author": author_id,
+                    "submission": submission["id"],
+                },
             )
-            return []
+            if not response.ok:
+                say(
+                    f"Error while fetching the submissions: {response.status_code}\n{response.content}"
+                )
+                return []
 
-        results = response.json()["results"]
+            results = response.json()["results"]
 
-        if len(results) > 0:
-            # Attach the transcription text
-            transcription = results[0]
-            updated_submission["transcription"] = transcription["text"]
-            tr_count += 1
+            if len(results) > 0:
+                # Attach the transcription text
+                transcription = results[0]
+                updated_submission["transcription"] = transcription["text"]
+                tr_count += 1
 
-        updated_submissions.append(updated_submission)
+            updated_submissions.append(updated_submission)
+
+        percentage = (idx + 1) / len(chunks)
+        say(f"Fetching the transcriptions from Blossom... ({percentage:.0%})")
 
     say(f"Fetched {tr_count} transcriptions from Blossom.")
 
