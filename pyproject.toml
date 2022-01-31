@@ -29,6 +29,7 @@ bubbles-bot = "bubbles.cli:main"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
+addopts = "--cov=bubbles/plugins/"
 
 [tool.coverage.run]
 # branch = true
