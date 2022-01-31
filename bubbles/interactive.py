@@ -1,4 +1,8 @@
 import random
+from tempfile import NamedTemporaryFile, TemporaryFile
+from typing import List, Optional
+
+import matplotlib.pyplot as plt
 
 
 class MockClient:
@@ -21,8 +25,27 @@ class InteractiveSession:
 
         self.message = message_func
 
-    def say(self, message):
-        print(message)
+    def say(self, message: str, figures: Optional[List[plt.Figure]] = None):
+        print_msg = message
+
+        if figures and len(figures) > 0:
+            # Save the figures and add them to the message
+            attachments = []
+            for fig in figures:
+                # Save the figure to a file in the temp folder
+                file = NamedTemporaryFile(delete=False, suffix=".jpg")
+                fig.savefig(file, format="jpg")
+                attachments.append(file)
+                plt.close(fig)
+                file.close()
+
+            # Generate (in most cases) clickable links to the files
+            attachment_links = ", ".join(
+                [f"file://{attachment.name}" for attachment in attachments]
+            )
+            print_msg += f"\n[{len(attachments)} Attachment(s): {attachment_links}]"
+
+        print(print_msg)
         return self.build_payload(message)
 
     def build_payload(self, text) -> dict:
