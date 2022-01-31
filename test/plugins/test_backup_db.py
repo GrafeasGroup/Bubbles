@@ -21,7 +21,10 @@ def generate_path(name: str, mtime: int, mock: MagicMock = None) -> MagicMock:
 
     path.lstat.return_value = lstat
 
-    path.name = f'/tmp/testfile-{uuid4()}'
+    path.name = f'testfile-{uuid4()}'
+    path.__str__.return_value = f'/tmp/{path.name}'
+
+    path.samefile.side_effect = lambda other_file: path.name == other_file.name
 
     return path
 
@@ -157,10 +160,11 @@ def test_prune_backups(popen):
 
     cmd = base.BackupPostgresCommand()
     assert len(other_paths) + 1 == cmd.remove_old_backups(my_path)
+    popen.assert_not_called()
+
     newer_path.unlink.assert_called_once()
-    for item in other_paths:
-        item.unlink.assert_called_once()
     newest_path.unlink.assert_not_called()
     my_path.unlink.assert_not_called()
 
-    popen.assert_not_called()
+    for item in other_paths:
+        item.unlink.assert_called_once()

@@ -34,9 +34,9 @@ def test_cute_action(mock_animals, slack_utils):
     # Mock out the "random" API choice so we don't abuse actual web
     # services
     fake_image = MagicMock(spec=Path)
-    fake_image.exists.return_value = True
-    fake_image.name.return_value = "/tmp/foo.jpg"
-    fake_image.suffix.return_value = ".jpg"
+    fake_image.name = "foo.jpg"
+    fake_image.suffix = ".jpg"
+    fake_image.__str__.return_value = "/tmp/foo.jpg"
 
     get_dog = MagicMock()
     get_dog.return_value = ('dog', image_url)
@@ -57,7 +57,7 @@ def test_cute_action(mock_animals, slack_utils):
     cmd.download_pic.assert_called_once_with(image_url)
 
     # Test that we passed the image to Slack:
-    slack_utils.upload_file.assert_called_once_with(file=fake_image.name, filetype=fake_image.suffix[1:], title='dog', initial_comment=None)
+    slack_utils.upload_file.assert_called_once_with(file=str(fake_image), filetype=fake_image.suffix[1:], title='dog', initial_comment=None)
 
     # Test download cleanup:
     fake_image.unlink.assert_called_once()
@@ -71,9 +71,8 @@ def test_cute_action_failed_apis(mock_animals, slack_utils):
     # Mock out the "random" API choice so we don't abuse actual web
     # services
     fake_image = MagicMock(spec=Path)
-    fake_image.exists.return_value = True
-    fake_image.name.return_value = "/tmp/foo.jpg"
-    fake_image.suffix.return_value = ".jpg"
+    fake_image.name = "foo.jpg"
+    fake_image.suffix = ".jpg"
 
     get_dog = MagicMock()
     get_dog.return_value = ('dog', image_url)
@@ -108,9 +107,9 @@ def test_cute_action_no_animal(mock_animals, slack_utils):
     # Mock out the "random" API choice so we don't abuse actual web
     # services
     fake_image = MagicMock(spec=Path)
-    fake_image.exists.return_value = True
-    fake_image.name.return_value = "/tmp/foo.jpg"
-    fake_image.suffix.return_value = ".jpg"
+    fake_image.name = "foo.jpg"
+    fake_image.suffix = ".jpg"
+    fake_image.__str__.return_value = "/tmp/foo.jpg"
 
     get_dog = MagicMock()
     get_dog.return_value = ('dog', image_url)
@@ -137,7 +136,7 @@ def test_cute_action_no_animal(mock_animals, slack_utils):
 
     # Test that we passed the image to Slack:
     slack_utils.upload_file.assert_called_once_with(
-        file=fake_image.name,
+        file=str(fake_image),
         filetype=fake_image.suffix[1:],
         title='dog',
         initial_comment="I'm not sure what you asked for by 'fop', so here's a 'dog' instead",

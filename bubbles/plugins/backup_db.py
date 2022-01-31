@@ -35,7 +35,7 @@ class BackupPostgresCommand(BaseCommand):
 
         utils.respond('DB Export complete. Uploading...')
         utils.upload_file(
-            file=dest_file.name,
+            file=str(dest_file),
             filetype='tar',
             title=dest_file.name,
             initial_comment=f"Removed {num_removed} old backups",
@@ -72,7 +72,7 @@ class BackupPostgresCommand(BaseCommand):
         try:
             newest_two = (old_backups.pop(),old_backups.pop())
             for bak in old_backups:
-                if this_backup.name == bak.name:
+                if this_backup.samefile(bak):
                     # Somehow the backup we just made is older than 2
                     # others in the same directory. This is definitely
                     # an error, but we're going to skip removing this

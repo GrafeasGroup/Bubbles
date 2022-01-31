@@ -76,14 +76,13 @@ class InsultBubblesCommand(BaseCommand, PictureDownloader):
             # Get a "sad Bubbles" image and post it
             img = self.download_pic(self.random_response())
             utils.upload_file(
-                file=img.name,
+                file=str(img),
                 filetype=img.suffix[1:],
                 title='Sad Bubbles',
             )
         finally:
             try:
-                if img.exists:
-                    img.unlink()
+                img.unlink(missing_ok=True)
             except OSError:  # pragma: no cover
                 ...
 

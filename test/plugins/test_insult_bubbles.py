@@ -21,7 +21,6 @@ def test_trigger_on_insult(phrase, is_relevant, slack_utils):
 
 def test_insult_response(slack_utils):
     fake_img = MagicMock()
-    fake_img.exists = True
 
     cmd = base.InsultBubblesCommand()
     cmd.download_pic = MagicMock()

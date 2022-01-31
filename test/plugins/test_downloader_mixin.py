@@ -27,8 +27,7 @@ def test_downloads_url(image_url, filetype):
         img = cmd.download_pic(image_url)
         assert img.suffix == f'.{filetype}'
     finally:
-        if img.exists:
-            img.unlink()
+        img.unlink(missing_ok=True)
 
 
 def test_suffix_normalizer():

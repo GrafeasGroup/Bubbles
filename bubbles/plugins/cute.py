@@ -112,15 +112,14 @@ class CuteAnimalCommand(BaseCommand, PictureDownloader):
                         raise ValueError(f'Could not find a valid {animal_name} picture')
 
             utils.upload_file(
-                file=image.name,
+                file=str(image),
                 filetype=image.suffix[1:],
                 title=animal_name,
                 initial_comment=output if output else None,
             )
         finally:
-            if image.exists:
-                try:
-                    image.unlink()
-                except OSError:  # pragma: no cover
-                    # We don't care if it fails, this is just cleanup
-                    ...
+            try:
+                image.unlink(missing_ok=True)
+            except OSError:  # pragma: no cover
+                # We don't care if it fails, this is just cleanup
+                ...
