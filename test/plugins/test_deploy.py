@@ -14,7 +14,7 @@ def test_responds_to_trigger_word(slack_utils):
     assert cmd.is_relevant({'text': '@Bubbles deploy kraken'}, slack_utils)
 
 
-@patch('bubbles.plugins.deploy.subprocess.check_output')
+@patch('bubbles.plugins.__common__.subprocess.check_output')
 def test_error_message_if_deploy_bubbles(proc, slack_utils):
     cmd = base.DeployCommand()
 
@@ -24,7 +24,7 @@ def test_error_message_if_deploy_bubbles(proc, slack_utils):
     proc.assert_not_called()
 
 
-@patch('bubbles.plugins.deploy.subprocess.check_output')
+@patch('bubbles.plugins.__common__.subprocess.check_output')
 def test_error_if_unknown_service(proc, slack_utils):
     cmd = base.DeployCommand()
 
@@ -35,9 +35,9 @@ def test_error_if_unknown_service(proc, slack_utils):
     proc.assert_not_called()
 
 
-@patch('bubbles.plugins.deploy.time.sleep')
+@patch('bubbles.plugins.__common__.time.sleep')
 @patch('bubbles.plugins.deploy.os.chdir')
-@patch('bubbles.plugins.deploy.subprocess.check_output')
+@patch('bubbles.plugins.__common__.subprocess.check_output')
 @patch('bubbles.plugins.deploy.VladTheDeployer.default_git_branch')
 def test_deploys_things(mock_default_branch, proc, os_chdir, time_sleep, slack_utils):
     cmd = base.DeployCommand()
@@ -68,7 +68,7 @@ def test_deploys_things(mock_default_branch, proc, os_chdir, time_sleep, slack_u
 
 
 @patch('bubbles.plugins.deploy.os.chdir')
-@patch('bubbles.plugins.deploy.subprocess.check_output')
+@patch('bubbles.plugins.__common__.subprocess.check_output')
 @patch('bubbles.plugins.deploy.VladTheDeployer.default_git_branch')
 @patch('bubbles.plugins.deploy.VladTheDeployer.verify_service_up')
 def test_reverts_failed_deployments(verify_service, mock_default_branch, proc, os_chdir, slack_utils):
@@ -98,7 +98,7 @@ def test_reverts_failed_deployments(verify_service, mock_default_branch, proc, o
     os_chdir.assert_called_with('/data/bubbles')
 
 
-@patch('bubbles.plugins.deploy.subprocess.check_output')
+@patch('bubbles.plugins.__common__.subprocess.check_output')
 def test_git_default_branch(proc, slack_utils):
     deploy = base.VladTheDeployer(slack_utils)
 
@@ -107,5 +107,3 @@ def test_git_default_branch(proc, slack_utils):
     branch_name = deploy.default_git_branch()
 
     assert branch_name == 'master'
-
-
