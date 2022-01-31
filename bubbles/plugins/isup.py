@@ -2,16 +2,8 @@ import subprocess
 from typing import Dict, List
 
 from bubbles.plugins.__base_command__ import BaseCommand
+from bubbles.plugins.__common__ import SERVICES
 from bubbles.slack.utils import SlackUtils
-
-
-SERVICES = {
-    'tor': 'tor_moderator.service',
-    'tor_archivist': 'tor_archivist.service',
-    'tor_ocr': 'tor_ocr.service',
-    'blossom': 'blossom.service',
-    'buttercup': 'buttercup.service',
-}
 
 
 class IsUpCommand(BaseCommand):
