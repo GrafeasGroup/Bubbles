@@ -12,6 +12,11 @@ QUEUE_POST_TIMEOUT = timedelta(hours=int(os.getenv("QUEUE_POST_TIMEOUT", "18")))
 # The default duration of a CtQ event
 # Set this lower when debugging to reduce loading times
 DEFAULT_CTQ_DURATION = timedelta(hours=int(os.getenv("DEFAULT_CTQ_DURATION", "12")))
+# A default value for the CtQ start time
+# This can be useful during development to test the generation without
+# specifying the times every time.
+# This variable should NOT be set in production
+DEFAULT_CTQ_START = os.getenv("DEFAULT_CTQ_START")
 
 
 T = TypeVar("T")
@@ -326,11 +331,15 @@ def ctq_stats(payload):
 
     if len(args) < 2:
         # No start time provided
-        say(f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00")
-        return
+        if not DEFAULT_CTQ_START:
+            say(f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00")
+            return
+        else:
+            start_date_str = DEFAULT_CTQ_START
+    else:
+        start_date_str = args[1]
 
     # Parse the start time
-    start_date_str = args[1]
     try:
         start_date = datetime.fromisoformat(start_date_str)
     except ValueError:
