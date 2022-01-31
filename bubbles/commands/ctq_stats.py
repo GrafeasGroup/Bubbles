@@ -256,19 +256,14 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
     return updated_submissions
 
 
-def generate_user_gamma_stats(submissions: List[Dict], say) -> plt.Figure:
+def generate_user_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
     """Generate gamma stats per user."""
     max_users = 10
     count_dir = {}
 
     # Count the transcriptions per user
-    for submission in submissions:
-        if user := submission["user"]:
-            username = user["username"]
-        else:
-            continue
-
-        print(username)
+    for submission in completed_posts:
+        username = "u/" + submission["user"]["username"]
         cur_count = count_dir.get(username, 0)
         count_dir[username] = cur_count + 1
 
@@ -310,6 +305,55 @@ def generate_user_gamma_stats(submissions: List[Dict], say) -> plt.Figure:
     return fig
 
 
+def generate_sub_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate gamma stats per subreddit."""
+    max_subs = 10
+    count_dir = {}
+
+    # Count the transcriptions per subreddit
+    for submission in completed_posts:
+        sub = "r/" + submission["url"].split("/")[4]
+        cur_count = count_dir.get(sub, 0)
+        count_dir[sub] = cur_count + 1
+
+    # Sort the users by completed transcriptions
+    count_list = [item for item in count_dir.items()]
+    count_list.sort(key=lambda entry: entry[1], reverse=True)
+
+    plot_entries = count_list[:max_subs]
+    if len(count_list) > max_subs:
+        # Aggregate the rest of the subs
+        other_count = sum([entry[1] for entry in count_list[max_subs:]])
+        plot_entries.append(("Other Subreddits", other_count))
+
+    # We want to display the entries top to bottom
+    plot_entries.reverse()
+
+    labels = [entry[0] for entry in plot_entries]
+    data = [entry[1] for entry in plot_entries]
+
+    fig: plt.Figure = plt.Figure()
+    ax: plt.Axes = fig.gca()
+
+    ax.barh(labels, data)
+    ax.set_ylabel("Subreddit")
+    ax.set_xlabel("Transcriptions")
+    ax.set_title(f"Top {max_subs} Subreddits with the Most Transcriptions")
+
+    # Annotate data
+    for x, y in zip(data, labels):
+        ax.annotate(
+            x,  # label with gamma
+            (x, y),
+            textcoords="offset points",
+            xytext=(3, 0),
+            ha="left",
+            va="center",
+        )
+
+    return fig
+
+
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     """Generate the stats for the CtQ event."""
     start = datetime.now()
@@ -318,10 +362,17 @@ def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     submissions = get_ctq_submissions(start_date, end_date, say)
     submissions = attach_transcriptions(submissions, say)
     submissions = attach_users(submissions, say)
-    user_gamma_fig = generate_user_gamma_stats(submissions, say)
 
-    say("Here are the CtQ stats!", figures=[user_gamma_fig])
-    say(f"Generated the CtQ stats in {_get_elapsed(start)}.")
+    completed_posts = [
+        post for post in submissions if post["transcription"] and post["user"]
+    ]
+
+    figures = [
+        generate_user_gamma_stats(completed_posts),
+        generate_sub_gamma_stats(completed_posts),
+    ]
+
+    say(f"Here are the CtQ stats! ({_get_elapsed(start)})", figures=figures)
 
 
 def ctq_stats(payload):
@@ -332,7 +383,9 @@ def ctq_stats(payload):
     if len(args) < 2:
         # No start time provided
         if not DEFAULT_CTQ_START:
-            say(f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00")
+            say(
+                f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00"
+            )
             return
         else:
             start_date_str = DEFAULT_CTQ_START
