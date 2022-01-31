@@ -64,11 +64,11 @@ class BaseRegistry(ABC):
     def load():
         ...
 
-    def __enter__(self):
+    def __enter__(self):  # pragma: no cover
         self.load()
         return self
 
-    def __exit__(self, *_):
+    def __exit__(self, *_):  # pragma: no cover
         ...
 
 
