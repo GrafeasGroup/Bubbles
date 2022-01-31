@@ -1,13 +1,11 @@
 """Generation of graphs for the !ctqstats command."""
-import os
 import re
+from datetime import datetime
 from typing import Dict, List, Any
 
 from matplotlib import pyplot as plt
 
-
-# The maximum number of entries to display per chart
-MAX_GRAPH_ENTRIES = int(os.getenv("MAX_GRAPH_ENTRIES", "10"))
+from bubbles.commands.ctq_utils import MAX_GRAPH_ENTRIES, _convert_blossom_date
 
 header_regex = re.compile(
     r"^\s*\*(?P<format>\w+)\s*Transcription:?(?:\s*(?P<type>[^\n*]+))?\*", re.IGNORECASE
@@ -265,7 +263,87 @@ def generate_post_type_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
+def generate_post_timeline(
+    submissions: List[Dict], start_time: datetime, end_time: datetime
+) -> plt.Figure:
+    """Generate a timeline of posts."""
+    events = []
+
+    # Generate events for creation, claim and done
+    for post in submissions:
+        # Created
+        events.append(("created", _convert_blossom_date(post["create_time"])))
+        if post["claim_time"]:
+            # Claimed
+            events.append(("claimed", _convert_blossom_date(post["claim_time"])))
+
+            if post["complete_time"]:
+                events.append(
+                    ("completed", _convert_blossom_date(post["complete_time"]))
+                )
+
+    # Sort by event date
+    events.sort(key=lambda evt: evt[1])
+
+    unclaimed_count = 0
+    claimed_count = 0
+    completed_count = 0
+
+    unclaimed = []
+    claimed = []
+    completed = []
+
+    dates = []
+
+    queue_cleared = False
+
+    fig: plt.Figure = plt.Figure()
+    ax: plt.Axes = fig.gca()
+
+    ax.set_ylabel("Posts")
+    ax.set_xlabel("Time")
+    ax.set_title("Posts over time")
+
+    for (event, time) in events:
+        if start_time <= time <= end_time:
+            # Add an entry before the change
+            dates.append(time)
+            unclaimed.append(unclaimed_count)
+            claimed.append(claimed_count)
+            completed.append(completed_count)
+
+        # Process the change
+        if event == "created":
+            unclaimed_count += 1
+        elif event == "claimed":
+            unclaimed_count -= 1
+            claimed_count += 1
+        elif event == "completed":
+            claimed_count -= 1
+            completed_count += 1
+
+        if start_time <= time <= end_time:
+            # Add an entry after the change
+            dates.append(time)
+            unclaimed.append(unclaimed_count)
+            claimed.append(claimed_count)
+            completed.append(completed_count)
+
+        # Add a vertical line if the queue is clear
+        if not queue_cleared and (unclaimed_count + claimed_count == 0):
+            queue_cleared = True
+            ax.axvline(time, color="green")
+
+    ax.plot(dates, unclaimed, color="orange")
+    ax.plot(dates, claimed, color="cyan")
+    ax.plot(dates, completed, color="green")
+
+    return fig
+
+
+def generate_ctq_graphs(
+    submissions: List[Dict], start_time: datetime, end_time: datetime
+) -> List[plt.Figure]:
     """Generate the graphs for the CtQ event."""
     completed_posts = [
         post for post in submissions if post["transcription"] and post["user"]
@@ -279,4 +357,5 @@ def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
         generate_user_avg_length_stats(completed_posts),
         generate_sub_avg_length_stats(completed_posts),
         generate_post_type_stats(completed_posts),
+        generate_post_timeline(submissions, start_time, end_time),
     ]
