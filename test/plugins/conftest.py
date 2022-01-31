@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from typing import Callable, Dict, Type
 
 from bubbles.plugins.__base_command__ import BaseCommand
-from bubbles.plugins.__base__ import BasePeriodicJob
+from bubbles.plugins.__base_periodic_job__ import BasePeriodicJob
 from bubbles.slack.utils import SlackUtils
 
 

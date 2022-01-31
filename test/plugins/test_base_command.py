@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 from typing import List
 
 from bubbles.plugins.__base_command__ import BaseCommand, regex_for_trigger
-from bubbles.plugins.__base__ import BasePeriodicJob
 
 
 def trigger_patterns(trigger_word: str) -> List[str]:

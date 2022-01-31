@@ -2,16 +2,12 @@ import importlib
 import logging
 import pathlib
 from abc import ABC, abstractmethod
-from datetime import timedelta
-from threading import Event, Thread
-from typing import Any, Set, cast
 
-from praw.reddit import Reddit
 
 
 """
-This module holds a whole bunch of base classes and governors of those
-subclasses, generally to form a registry.
+This module holds a common set of classes among the types of plugins
+supported by Bubbles.
 
 So far it only manages a plugin registry for Bubbles' commands and for
 an event loop managing tasks that run on some schedule.
@@ -44,59 +40,10 @@ class BasePlugin(ABC):  # pragma: no cover
         ))
 
 
-class BasePeriodicJob(BasePlugin, ABC, Thread):  # pragma: no cover
-    _subclasses = []
-
-    # These should be filled out in subclasses
-    start_at: timedelta
-    interval: timedelta
-
-    def __init__(self):
-        Thread.__init__(self, name=self.__class__.__name__)
-        self.name = self.__class__.__name__
-        self.first_run = True
-        self.stopped = Event()
-
-    @abstractmethod
-    def job(self) -> Any:
-        """
-        This is where the meat of the backgrounded, periodically executed
-        job is defined.
-        """
-        ...
-
-    def run(self):
-        while not self.stopped.wait((self.start_at if self.first_run else self.interval).total_seconds()):
-            self.job()
-            self.first_run = False
-
-    def stop(self):
-        self.stopped.set()
-        self.join()
-
-    def __init_subclass__(cls, **kwargs):
-        """
-        Hook that fires when a class is loaded which inherits from this
-        class. We use this hook to track the subclasses (which are added
-        to the registry) in a way that they can be removed later if need
-        be. Such as providing an automated test harness. Hint hint.
-        """
-        super().__init_subclass__(**kwargs)
-
-        # We override this instead of using __subclasses__()
-        # because __subclasses__() cannot be overridden to
-        # remove a class. Even if it's dynamically generated.
-        # This messes with our automated testing strategy and
-        # could become an issue further down the road if we
-        # have an item we want to remove from the registry
-        #
-        # See: https://stackoverflow.com/a/43057166
-        cls._subclasses.append(cls)
-
-
 class BaseRegistry(ABC):
     """
-    A mixin that defines an interface common to all registries we manage
+    A mixin that defines an interface common to all plugin registries
+    we manage
 
     Functionality:
       - Logger instance
@@ -123,42 +70,6 @@ class BaseRegistry(ABC):
 
     def __exit__(self, *_):
         ...
-
-
-class EventLoop(BaseRegistry):  # pragma: no cover
-    jobs: Set[BasePeriodicJob] = set([])
-
-    def __init__(self, *_, **kwargs):
-        self.reddit: Reddit = kwargs['reddit']
-
-    def __enter__(self):
-        self.load()
-        self.start()
-
-        return self
-
-    def __exit__(self):
-        self.stop()
-
-    def start(self):
-        for job in self.jobs:
-            job.start()
-
-    def stop(self):
-        for job in self.jobs:
-            job.stop()
-
-    def load(self) -> 'EventLoop':
-        import_subclasses()
-
-        i = 0
-        for job in BasePeriodicJob._subclasses:
-            i += 1
-            self.jobs.add(cast(BasePeriodicJob, job))
-
-        self.log.info(f'Registered {i} periodic jobs')
-
-        return self
 
 
 def import_subclasses():  # pragma: no cover
