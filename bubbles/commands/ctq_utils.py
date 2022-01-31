@@ -5,6 +5,8 @@ from datetime import timedelta, datetime
 # The time for which posts remain in the queue until they are removed
 from typing import TypeVar, List, Optional
 
+from matplotlib import pyplot as plt
+
 QUEUE_POST_TIMEOUT = timedelta(hours=int(os.getenv("QUEUE_POST_TIMEOUT", "18")))
 # The default duration of a CtQ event
 # Set this lower when debugging to reduce loading times
@@ -16,6 +18,32 @@ DEFAULT_CTQ_DURATION = timedelta(hours=int(os.getenv("DEFAULT_CTQ_DURATION", "12
 DEFAULT_CTQ_START = os.getenv("DEFAULT_CTQ_START")
 # The maximum number of entries to display per chart
 MAX_GRAPH_ENTRIES = int(os.getenv("MAX_GRAPH_ENTRIES", "10"))
+
+BACKGROUND_COLOR = "#36393f"  # Discord background color
+TEXT_COLOR = "white"
+LINE_COLOR = "white"
+PRIMARY_COLOR = "#94e044"
+SECONDARY_COLOR = "#8282ed"
+
+UNCLAIMED_COLOR = "#ffc033"
+CLAIMED_COLOR = "#0eebd0"
+COMPLETED_COLOR = "#94e044"
+
+FIGURE_WIDTH = 10
+FIGURE_HEIGHT = 4.2
+
+# Global settings for all plots
+plt.rcParams["figure.facecolor"] = BACKGROUND_COLOR
+plt.rcParams["axes.facecolor"] = BACKGROUND_COLOR
+plt.rcParams["axes.labelcolor"] = TEXT_COLOR
+plt.rcParams["axes.edgecolor"] = LINE_COLOR
+plt.rcParams["text.color"] = TEXT_COLOR
+plt.rcParams["xtick.color"] = LINE_COLOR
+plt.rcParams["ytick.color"] = LINE_COLOR
+plt.rcParams["grid.color"] = LINE_COLOR
+plt.rcParams["grid.alpha"] = 0.8
+plt.rcParams["figure.dpi"] = 200.0
+
 T = TypeVar("T")
 
 
@@ -50,3 +78,9 @@ def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
         if blossom_date
         else None
     )
+
+
+def _reformat_figure(fig: plt.Figure):
+    """Reformat the given figure to the default size."""
+    fig.set_size_inches(FIGURE_WIDTH, FIGURE_HEIGHT)
+    fig.tight_layout()

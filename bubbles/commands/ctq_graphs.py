@@ -5,7 +5,16 @@ from typing import Dict, List, Any
 
 from matplotlib import pyplot as plt
 
-from bubbles.commands.ctq_utils import MAX_GRAPH_ENTRIES, _convert_blossom_date
+from bubbles.commands.ctq_utils import (
+    MAX_GRAPH_ENTRIES,
+    _convert_blossom_date,
+    _reformat_figure,
+    UNCLAIMED_COLOR,
+    CLAIMED_COLOR,
+    COMPLETED_COLOR,
+    PRIMARY_COLOR,
+    SECONDARY_COLOR,
+)
 
 header_regex = re.compile(
     r"^\s*\*(?P<format>\w+)\s*Transcription:?(?:\s*(?P<type>[^\n*]+))?\*", re.IGNORECASE
@@ -121,15 +130,19 @@ def _generate_aggregated_bar_chart(
     count_list.sort(key=lambda entry: entry[1], reverse=True)
 
     plot_entries = count_list[:MAX_GRAPH_ENTRIES]
+    colors = [PRIMARY_COLOR for _ in range(0, len(plot_entries))]
+
     if len(count_list) > MAX_GRAPH_ENTRIES:
         # Aggregate the rest of the entries
         other_count = aggregate_rest(
             [entry[1] for entry in count_list[MAX_GRAPH_ENTRIES:]]
         )
         plot_entries.append((rest_label, other_count))
+        colors.append(SECONDARY_COLOR)
 
     # We want to display the entries top to bottom
     plot_entries.reverse()
+    colors.reverse()
 
     labels = [entry[0] for entry in plot_entries]
     data = [entry[1] for entry in plot_entries]
@@ -137,7 +150,7 @@ def _generate_aggregated_bar_chart(
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
 
-    ax.barh(labels, data)
+    ax.barh(labels, data, color=colors)
     ax.set_ylabel(y_label)
     ax.set_xlabel(x_label)
     ax.set_title(title)
@@ -153,6 +166,7 @@ def _generate_aggregated_bar_chart(
             va="center",
         )
 
+    _reformat_figure(fig)
     return fig
 
 
@@ -332,12 +346,13 @@ def generate_post_timeline(
         # Add a vertical line if the queue is clear
         if not queue_cleared and (unclaimed_count + claimed_count == 0):
             queue_cleared = True
-            ax.axvline(time, color="green")
+            ax.axvline(time, color=COMPLETED_COLOR)
 
-    ax.plot(dates, unclaimed, color="orange")
-    ax.plot(dates, claimed, color="cyan")
-    ax.plot(dates, completed, color="green")
+    ax.plot(dates, unclaimed, color=UNCLAIMED_COLOR)
+    ax.plot(dates, claimed, color=CLAIMED_COLOR)
+    ax.plot(dates, completed, color=COMPLETED_COLOR)
 
+    _reformat_figure(fig)
     return fig
 
 
