@@ -9,6 +9,16 @@ from matplotlib import pyplot as plt
 MAX_GRAPH_ENTRIES = int(os.getenv("MAX_GRAPH_ENTRIES", "10"))
 
 
+def _get_username(post: Dict) -> str:
+    """Get the username for the given post."""
+    return "u/" + post["user"]["username"]
+
+
+def _get_subreddit_name(post: Dict) -> str:
+    """Get the subreddit name for the given post."""
+    return "r/" + post["url"].split("/")[4]
+
+
 def _generate_aggregated_bar_chart(
     *,  # Don't allow positional arguments
     posts: List[Dict],
@@ -87,7 +97,7 @@ def generate_user_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
     """Generate gamma stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
-        get_key=lambda post: "u/" + post["user"]["username"],
+        get_key=_get_username,
         get_value=lambda _post: 1,
         update_value=lambda a, b: a + b,
         default_value=0,
@@ -103,7 +113,7 @@ def generate_sub_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
     """Generate gamma stats per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
-        get_key=lambda post: "r/" + post["url"].split("/")[4],
+        get_key=_get_subreddit_name,
         get_value=lambda _post: 1,
         update_value=lambda a, b: a + b,
         default_value=0,
@@ -119,7 +129,7 @@ def generate_user_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     """Generate max transcription length stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
-        get_key=lambda post: "u/" + post["user"]["username"],
+        get_key=_get_username,
         get_value=lambda post: len(post["transcription"]["text"]),
         update_value=lambda a, b: max(a, b),
         default_value=0,
@@ -128,6 +138,22 @@ def generate_user_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
         x_label="Transcription length",
         y_label="Volunteer",
         rest_label="Other volunteers",
+    )
+
+
+def generate_sub_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate max transcription length stats per subreddit."""
+    return _generate_aggregated_bar_chart(
+        posts=completed_posts,
+        get_key=_get_subreddit_name,
+        get_value=lambda post: len(post["transcription"]["text"]),
+        update_value=lambda a, b: max(a, b),
+        default_value=0,
+        aggregate_rest=max,
+        title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest transcriptions",
+        x_label="Transcription length",
+        y_label="Subreddit",
+        rest_label="Other subreddits",
     )
 
 
@@ -141,4 +167,5 @@ def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
         generate_user_gamma_stats(completed_posts),
         generate_sub_gamma_stats(completed_posts),
         generate_user_max_length_stats(completed_posts),
+        generate_sub_max_length_stats(completed_posts),
     ]
