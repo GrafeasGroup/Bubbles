@@ -1,6 +1,6 @@
 """Generation of graphs for the !ctqstats command."""
 import os
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from matplotlib import pyplot as plt
 
@@ -19,14 +19,20 @@ def _get_subreddit_name(post: Dict) -> str:
     return "r/" + post["url"].split("/")[4]
 
 
+def _get_transcription_length(post: Dict) -> int:
+    """Get the length of the transcription for the given post."""
+    return len(post["transcription"]["text"])
+
+
 def _generate_aggregated_bar_chart(
     *,  # Don't allow positional arguments
     posts: List[Dict],
     get_key,
     get_value,
-    default_value,
-    update_value,
-    aggregate_rest,
+    default_value: Any = 0,
+    update_value=lambda a, b: a + b,
+    final_update_value=lambda value: value,
+    aggregate_rest=sum,
     title: str,
     x_label: str,
     y_label: str,
@@ -39,6 +45,7 @@ def _generate_aggregated_bar_chart(
     :param get_value: Function to determine the value of a post.
     :param default_value: The default value if no post was given so far.
     :param update_value: Function to update the value given the previous aggregate and a new value.
+    :param final_update_value: Function to apply a final update to the aggregate value.
     :param aggregate_rest: Function to aggregate the rest of the entries.
     :param title: The title of the chart.
     :param x_label: The label of the x-axis.
@@ -54,7 +61,7 @@ def _generate_aggregated_bar_chart(
         count_dir[key] = update_value(cur_count, get_value(post))
 
     # Sort the users by completed transcriptions
-    count_list = [item for item in count_dir.items()]
+    count_list = [(key, final_update_value(value)) for key, value in count_dir.items()]
     count_list.sort(key=lambda entry: entry[1], reverse=True)
 
     plot_entries = count_list[:MAX_GRAPH_ENTRIES]
@@ -99,9 +106,6 @@ def generate_user_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
         posts=completed_posts,
         get_key=_get_username,
         get_value=lambda _post: 1,
-        update_value=lambda a, b: a + b,
-        default_value=0,
-        aggregate_rest=sum,
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the most transcriptions",
         x_label="Transcriptions",
         y_label="Volunteer",
@@ -115,9 +119,6 @@ def generate_sub_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
         posts=completed_posts,
         get_key=_get_subreddit_name,
         get_value=lambda _post: 1,
-        update_value=lambda a, b: a + b,
-        default_value=0,
-        aggregate_rest=sum,
         title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the most transcriptions",
         x_label="Transcriptions",
         y_label="Subreddit",
@@ -130,9 +131,8 @@ def generate_user_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_username,
-        get_value=lambda post: len(post["transcription"]["text"]),
+        get_value=_get_transcription_length,
         update_value=lambda a, b: max(a, b),
-        default_value=0,
         aggregate_rest=max,
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the longest transcriptions",
         x_label="Transcription length",
@@ -146,11 +146,48 @@ def generate_sub_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_subreddit_name,
-        get_value=lambda post: len(post["transcription"]["text"]),
+        get_value=_get_transcription_length,
         update_value=lambda a, b: max(a, b),
-        default_value=0,
         aggregate_rest=max,
         title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest transcriptions",
+        x_label="Transcription length",
+        y_label="Subreddit",
+        rest_label="Other subreddits",
+    )
+
+
+def generate_user_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate average transcription length stats per user."""
+    return _generate_aggregated_bar_chart(
+        posts=completed_posts,
+        get_key=_get_username,
+        get_value=lambda post: (_get_transcription_length(post), 1),
+        default_value=(0, 0),
+        # Sum up both the total transcription length and the transcription count
+        update_value=lambda a, b: (a[0] + b[0], a[1] + b[1]),
+        # Divide total transcription length by the number of transcriptions
+        final_update_value=lambda x: int(x[0] / x[1]),
+        aggregate_rest=lambda values: int(sum(values) / len(values)),
+        title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the longest average transcriptions",
+        x_label="Transcription length",
+        y_label="Volunteer",
+        rest_label="Other volunteers",
+    )
+
+
+def generate_sub_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate average transcription length stats per subreddit."""
+    return _generate_aggregated_bar_chart(
+        posts=completed_posts,
+        get_key=_get_subreddit_name,
+        get_value=lambda post: (_get_transcription_length(post), 1),
+        default_value=(0, 0),
+        # Sum up both the total transcription length and the transcription count
+        update_value=lambda a, b: (a[0] + b[0], a[1] + b[1]),
+        # Divide total transcription length by the number of transcriptions
+        final_update_value=lambda x: int(x[0] / x[1]),
+        aggregate_rest=lambda values: int(sum(values) / len(values)),
+        title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest average transcriptions",
         x_label="Transcription length",
         y_label="Subreddit",
         rest_label="Other subreddits",
@@ -168,4 +205,6 @@ def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
         generate_sub_gamma_stats(completed_posts),
         generate_user_max_length_stats(completed_posts),
         generate_sub_max_length_stats(completed_posts),
+        generate_user_avg_length_stats(completed_posts),
+        generate_sub_avg_length_stats(completed_posts),
     ]
