@@ -31,7 +31,7 @@ bubbles-bot = "bubbles.cli:main"
 minversion = "6.0"
 
 [tool.coverage.run]
-branch = true
+# branch = true
 omit = [
 	"test/",
 ]
@@ -57,7 +57,7 @@ exclude_lines = [
 	"@(abc\\.)?abstract(class|static)?(method|property)",
 ]
 show_missing = true
-fail_under = 30
+fail_under = 70
 skip_covered = true
 skip_empty = true
 
