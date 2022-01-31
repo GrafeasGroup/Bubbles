@@ -1,5 +1,6 @@
 """Generation of graphs for the !ctqstats command."""
 import os
+import re
 from typing import Dict, List, Any
 
 from matplotlib import pyplot as plt
@@ -7,6 +8,30 @@ from matplotlib import pyplot as plt
 
 # The maximum number of entries to display per chart
 MAX_GRAPH_ENTRIES = int(os.getenv("MAX_GRAPH_ENTRIES", "10"))
+
+header_regex = re.compile(
+    r"^\s*\*(?P<format>\w+)\s*Transcription:?(?:\s*(?P<type>[^\n*]+))?\*", re.IGNORECASE
+)
+
+# If one of the words on the right is included in the post type,
+# take the word on the left as post type.
+post_type_simplification_map = {
+    "Twitter": ["Twitter"],
+    "Facebook": ["Facebook"],
+    "Tumblr": ["Tumblr"],
+    "Reddit": ["Reddit"],
+    "Picture": ["Picture", "Photo"],
+    "Review": ["Review"],
+    "YouTube": ["YouTube", "You Tube"],
+    "Code": ["Code", "Program"],
+    "Chat": ["Chat", "Message", "Discord", "Email", "E-Mail"],
+    "Meme": ["Meme"],
+    "Comic": ["Comic"],
+    "Social Media": ["Social Media"],
+    "Image": ["Image"],
+    "Video": ["Video"],
+    "Text": ["Text"],
+}
 
 
 def _get_username(post: Dict) -> str:
@@ -22,6 +47,39 @@ def _get_subreddit_name(post: Dict) -> str:
 def _get_transcription_length(post: Dict) -> int:
     """Get the length of the transcription for the given post."""
     return len(post["transcription"]["text"])
+
+
+def _get_post_type(post: Dict) -> str:
+    """Determine the type of the post."""
+    text: str = post["transcription"]["text"]
+    header = text.split("---")[0]
+
+    match = header_regex.search(header)
+    if match is None:
+        print(f"Unrecognized post type: {header}")
+        return "Post"
+
+    tr_format = match.group("format")
+    if tr_format:
+        tr_format = tr_format.strip()
+    tr_type = match.group("type")
+    if tr_type:
+        tr_type = tr_type.strip()
+
+    return tr_type or tr_format
+
+
+def _get_simplified_post_type(post: Dict) -> str:
+    """Get a simplified post type, grouping together multiple types."""
+    post_type = _get_post_type(post)
+
+    # Simplify the post type into common groups
+    for simple_type, words in post_type_simplification_map.items():
+        for word in words:
+            if word.casefold() in post_type.casefold():
+                return simple_type
+
+    return post_type
 
 
 def _generate_aggregated_bar_chart(
@@ -194,6 +252,19 @@ def generate_sub_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
+def generate_post_type_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate stats per post type."""
+    return _generate_aggregated_bar_chart(
+        posts=completed_posts,
+        get_key=_get_simplified_post_type,
+        get_value=lambda _post: 1,
+        title=f"Top {MAX_GRAPH_ENTRIES} post types with the most transcriptions",
+        x_label="Transcriptions",
+        y_label="Post type",
+        rest_label="Other types",
+    )
+
+
 def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
     """Generate the graphs for the CtQ event."""
     completed_posts = [
@@ -207,4 +278,5 @@ def generate_ctq_graphs(submissions: List[Dict]) -> List[plt.Figure]:
         generate_sub_max_length_stats(completed_posts),
         generate_user_avg_length_stats(completed_posts),
         generate_sub_avg_length_stats(completed_posts),
+        generate_post_type_stats(completed_posts),
     ]
