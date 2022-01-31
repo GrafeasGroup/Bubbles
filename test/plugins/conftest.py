@@ -5,6 +5,7 @@ from typing import Callable, Dict, Type
 
 from bubbles.plugins.__base_command__ import BaseCommand
 from bubbles.plugins.__base__ import BasePeriodicJob
+from bubbles.slack.utils import SlackUtils
 
 
 _index = 0
@@ -58,7 +59,7 @@ def helpers():
 
 @pytest.fixture
 def slack_utils():
-    mock_utils = MagicMock()
+    mock_utils = MagicMock(spec=SlackUtils)
     mock_utils.bot_username = "Bubbles"
     return mock_utils
 

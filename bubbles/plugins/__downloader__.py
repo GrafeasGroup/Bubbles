@@ -58,5 +58,3 @@ class PictureDownloader:
                     f.flush()
 
         return filename
-    pass
-

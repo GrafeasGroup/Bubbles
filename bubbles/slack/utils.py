@@ -150,8 +150,6 @@ class SlackContextActions(SlackPayloadInterpreter):
             as_user=True,
         )
 
-    pass
-
 
 @dataclass
 class SlackUtils(SlackContextActions):
