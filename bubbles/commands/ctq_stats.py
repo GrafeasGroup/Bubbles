@@ -2,6 +2,8 @@ import os
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional, TypeVar
 
+from matplotlib import pyplot as plt
+
 from bubbles.config import PluginManager, blossom
 
 
@@ -127,7 +129,9 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         if _is_submission_in_queue(submission, start_date, end_date)
     ]
 
-    say(f"Fetched {len(submissions)} queue submissions from Blossom ({_get_elapsed(start)})")
+    say(
+        f"Fetched {len(submissions)} queue submissions from Blossom ({_get_elapsed(start)})"
+    )
 
     return submissions
 
@@ -215,6 +219,7 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
             # Try to get the user from the cache, if available
             if user := user_cache.get(user_id):
                 updated_submission["user"] = user
+                updated_submissions.append(updated_submission)
                 continue
 
             # Try to get the user from Blossom
@@ -246,6 +251,60 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
     return updated_submissions
 
 
+def generate_user_gamma_stats(submissions: List[Dict], say) -> plt.Figure:
+    """Generate gamma stats per user."""
+    max_users = 10
+    count_dir = {}
+
+    # Count the transcriptions per user
+    for submission in submissions:
+        if user := submission["user"]:
+            username = user["username"]
+        else:
+            continue
+
+        print(username)
+        cur_count = count_dir.get(username, 0)
+        count_dir[username] = cur_count + 1
+
+    # Sort the users by completed transcriptions
+    count_list = [item for item in count_dir.items()]
+    count_list.sort(key=lambda entry: entry[1], reverse=True)
+
+    plot_entries = count_list[:max_users]
+    if len(count_list) > max_users:
+        # Aggregate the rest of the users
+        other_count = sum([entry[1] for entry in count_list[max_users:]])
+        plot_entries.append(("Other Volunteers", other_count))
+
+    # We want to display the entries top to bottom
+    plot_entries.reverse()
+
+    labels = [entry[0] for entry in plot_entries]
+    data = [entry[1] for entry in plot_entries]
+
+    fig: plt.Figure = plt.Figure()
+    ax: plt.Axes = fig.gca()
+
+    ax.barh(labels, data)
+    ax.set_ylabel("User")
+    ax.set_xlabel("Transcriptions")
+    ax.set_title(f"Top {max_users} Contributors with the Most Transcriptions")
+
+    # Annotate data
+    for x, y in zip(data, labels):
+        ax.annotate(
+            x,  # label with gamma
+            (x, y),
+            textcoords="offset points",
+            xytext=(3, 0),
+            ha="left",
+            va="center",
+        )
+
+    return fig
+
+
 def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     """Generate the stats for the CtQ event."""
     start = datetime.now()
@@ -254,7 +313,9 @@ def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     submissions = get_ctq_submissions(start_date, end_date, say)
     submissions = attach_transcriptions(submissions, say)
     submissions = attach_users(submissions, say)
+    user_gamma_fig = generate_user_gamma_stats(submissions, say)
 
+    say("Here are the CtQ stats!", figures=[user_gamma_fig])
     say(f"Generated the CtQ stats in {_get_elapsed(start)}.")
 
 
