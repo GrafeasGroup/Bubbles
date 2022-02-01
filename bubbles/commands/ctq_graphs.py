@@ -277,6 +277,42 @@ def post_types(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
+def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate a plot of the transcription count vs. length per user."""
+    user_dir = {}
+
+    # Aggregate the values for each user
+    for post in completed_posts:
+        username = _get_username(post)
+        cur_value = user_dir.get(
+            username, {"gamma": post["user"]["gamma"], "count": 0, "length": 0},
+        )
+        user_dir[username] = {
+            "gamma": cur_value["gamma"],
+            "count": cur_value["count"] + 1,
+            "length": cur_value["length"] + _get_transcription_length(post),
+        }
+
+    # Average transcription length
+    x = [int(user["length"] / user["count"]) for user in user_dir.values()]
+    # Transcription count
+    y = [user["count"] for user in user_dir.values()]
+    # Colors
+    colors = [PRIMARY_COLOR for _ in range(0, len(user_dir))]
+
+    fig: plt.Figure = plt.Figure()
+    ax: plt.Axes = fig.gca()
+
+    ax.scatter(x, y, color=colors)
+
+    ax.set_xlabel("Average transcription length")
+    ax.set_ylabel("Transcription count")
+    ax.set_title("Transcription count vs. length")
+
+    _reformat_figure(fig)
+    return fig
+
+
 def post_timeline(
     submissions: List[Dict], start_time: datetime, end_time: datetime
 ) -> plt.Figure:
@@ -382,5 +418,6 @@ def generate_ctq_graphs(
         user_avg_transcription_length(completed_posts),
         sub_avg_transcription_length(completed_posts),
         post_types(completed_posts),
+        user_transcription_length_vs_count(completed_posts),
         post_timeline(submissions, start_time, end_time),
     ]
