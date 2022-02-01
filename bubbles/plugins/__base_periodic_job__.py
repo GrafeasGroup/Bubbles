@@ -1,14 +1,14 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from threading import Event, Thread
-from typing import Any, Set, cast
+from typing import Set, cast
 
 from bubbles.plugins.__base__ import BasePlugin, BaseRegistry, import_subclasses
 
 from praw.reddit import Reddit
 
 
-class BasePeriodicJob(BasePlugin, ABC, Thread):  # pragma: no cover
+class BasePeriodicJob(BasePlugin, ABC, Thread):
     _subclasses = []
 
     # These should be filled out in subclasses
@@ -22,15 +22,16 @@ class BasePeriodicJob(BasePlugin, ABC, Thread):  # pragma: no cover
         self.stopped = Event()
 
     @abstractmethod
-    def job(self) -> Any:
+    def job(self) -> None:
         """
         This is where the meat of the backgrounded, periodically executed
         job is defined.
         """
         ...
 
-    def run(self):
-        while not self.stopped.wait((self.start_at if self.first_run else self.interval).total_seconds()):
+    def run(self):  # pragma: no cover
+        start_at = self.start_at if hasattr(self, 'start_at') else self.interval
+        while not self.stopped.wait((start_at if self.first_run else self.interval).total_seconds()):
             self.job()
             self.first_run = False
 
@@ -84,11 +85,9 @@ class EventLoop(BaseRegistry):  # pragma: no cover
     def load(self) -> 'EventLoop':
         import_subclasses()
 
-        i = 0
         for job in BasePeriodicJob._subclasses:
-            i += 1
             self.jobs.add(cast(BasePeriodicJob, job))
 
-        self.log.info(f'Registered {i} periodic jobs')
+        self.log.info(f'Registered {len(BasePeriodicJob._subclasses)} periodic jobs')
 
         return self

@@ -114,12 +114,10 @@ class ChatPluginManager(BaseRegistry):
     def load(self) -> 'ChatPluginManager':
         import_subclasses()
 
-        i = 0
         for cmd in BaseCommand._subclasses:
-            i += 1
             self.commands.add(cmd())
 
-        self.log.info(f'Registered {i} chat commands')
+        self.log.info(f'Registered {len(BaseCommand._subclasses)} chat commands')
 
         return self
 
