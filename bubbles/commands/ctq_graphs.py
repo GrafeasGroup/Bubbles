@@ -1,7 +1,7 @@
 """Generation of graphs for the !ctqstats command."""
 import re
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
 from matplotlib import pyplot as plt
 
@@ -16,6 +16,8 @@ from bubbles.commands.ctq_utils import (
     SECONDARY_COLOR,
     _get_rank,
     TEXT_COLOR,
+    _format_hour_duration,
+    FIGURE_DPI,
 )
 
 header_regex = re.compile(
@@ -94,6 +96,36 @@ def _get_simplified_post_type(post: Dict) -> str:
                 return simple_type
 
     return post_type
+
+
+def _get_event_stream(submissions: List[Dict]) -> List[Tuple[str, datetime]]:
+    """Get a list of events from the submissions.
+
+    Each event is a tuple (<type>, <time>) where type is one of:
+    - created: A new submissions has been created
+    - claimed: A submission has been claimed
+    - completed: A submission has been completed
+
+    The events are sorted by date, ascending.
+    """
+    events = []
+
+    # Generate events for creation, claim and done
+    for post in submissions:
+        # Created
+        events.append(("created", _convert_blossom_date(post["create_time"])))
+        if post["claim_time"]:
+            # Claimed
+            events.append(("claimed", _convert_blossom_date(post["claim_time"])))
+
+            if post["complete_time"]:
+                events.append(
+                    ("completed", _convert_blossom_date(post["complete_time"]))
+                )
+
+    # Sort by event date
+    events.sort(key=lambda evt: evt[1])
+    return events
 
 
 def _generate_aggregated_bar_chart(
@@ -355,23 +387,7 @@ def post_timeline(
     submissions: List[Dict], start_time: datetime, end_time: datetime
 ) -> plt.Figure:
     """Generate a timeline of posts."""
-    events = []
-
-    # Generate events for creation, claim and done
-    for post in submissions:
-        # Created
-        events.append(("created", _convert_blossom_date(post["create_time"])))
-        if post["claim_time"]:
-            # Claimed
-            events.append(("claimed", _convert_blossom_date(post["claim_time"])))
-
-            if post["complete_time"]:
-                events.append(
-                    ("completed", _convert_blossom_date(post["complete_time"]))
-                )
-
-    # Sort by event date
-    events.sort(key=lambda evt: evt[1])
+    events = _get_event_stream(submissions)
 
     unclaimed_count = 0
     claimed_count = 0
@@ -418,17 +434,17 @@ def post_timeline(
             claimed.append(claimed_count)
             completed.append(completed_count)
 
-        # Add a vertical line if the queue is ALMOST cleared
-        # (No unclaimed posts remaining)
-        if not queue_almost_cleared and unclaimed_count == 0:
-            queue_almost_cleared = True
-            ax.axvline(time, color=CLAIMED_COLOR)
+            # Add a vertical line if the queue is ALMOST cleared
+            # (No unclaimed posts remaining)
+            if not queue_almost_cleared and unclaimed_count == 0:
+                queue_almost_cleared = True
+                ax.axvline(time, color=CLAIMED_COLOR)
 
-        # Add a vertical line if the queue is cleared
-        # (All posts completed)
-        if not queue_cleared and (unclaimed_count + claimed_count) == 0:
-            queue_cleared = True
-            ax.axvline(time, color=COMPLETED_COLOR)
+            # Add a vertical line if the queue is cleared
+            # (All posts completed)
+            if not queue_cleared and (unclaimed_count + claimed_count) == 0:
+                queue_cleared = True
+                ax.axvline(time, color=COMPLETED_COLOR)
 
     ax.plot(dates, unclaimed, color=UNCLAIMED_COLOR)
     ax.plot(dates, claimed, color=CLAIMED_COLOR)
@@ -440,7 +456,12 @@ def post_timeline(
     return fig
 
 
-def general_stats(completed_posts: List[Dict]) -> plt.Figure:
+def general_stats(
+    submissions: List[Dict],
+    completed_posts: List[Dict],
+    start_time: datetime,
+    end_time: datetime,
+) -> plt.Figure:
     """Generate general stats for the event."""
     users = set()
     subs = set()
@@ -456,6 +477,36 @@ def general_stats(completed_posts: List[Dict]) -> plt.Figure:
         characters += _get_transcription_characters(post)
         words += _get_transcription_words(post)
 
+    events = _get_event_stream(submissions)
+
+    unclaimed_count = 0
+    claimed_count = 0
+    completed_count = 0
+
+    all_claimed_time = None
+    all_completed_time = None
+
+    # Determine when the queue has been cleared
+    for (event, time) in events:
+        # Process the change
+        if event == "created":
+            unclaimed_count += 1
+        elif event == "claimed":
+            unclaimed_count -= 1
+            claimed_count += 1
+        elif event == "completed":
+            claimed_count -= 1
+            completed_count += 1
+
+        if start_time <= time <= end_time:
+            # Check if there are no unclaimed posts left
+            if not all_claimed_time and unclaimed_count == 0:
+                all_claimed_time = time - start_time
+
+            # Check if all posts have been completed
+            if not all_completed_time and (unclaimed_count + claimed_count) == 0:
+                all_completed_time = time - start_time
+
     stats = {
         "Participants": len(users),
         "Subreddits": len(subs),
@@ -464,6 +515,11 @@ def general_stats(completed_posts: List[Dict]) -> plt.Figure:
         "Words written": words,
         "Characters typed": characters,
     }
+
+    if all_claimed_time:
+        stats["All claimed"] = _format_hour_duration(all_claimed_time)
+    if all_completed_time:
+        stats["All completed"] = _format_hour_duration(all_completed_time)
 
     title = "CtQ in Numbers"
 
@@ -474,21 +530,47 @@ def general_stats(completed_posts: List[Dict]) -> plt.Figure:
     ax.set_axis_off()
     fig.add_axes(ax)
 
+    # Font sizes
+    title_size_f = 25
+    number_size_f = 23
+    text_size_f = 12
+    outer_margin_f = 17
+    line_margin_f = 3
+
+    height_f = (
+        outer_margin_f * 2
+        + title_size_f
+        + line_margin_f
+        + len(stats) * (number_size_f + line_margin_f)
+    )
+
+    # Sizes in percentages
+    title_size_perc = title_size_f / height_f
+    number_size_perc = number_size_f / height_f
+    line_margin_perc = line_margin_f / height_f
+    outer_margin_perc = outer_margin_f / height_f
+
     # Add the title
     fig.text(
         0.5,
-        0.90,
+        1 - outer_margin_perc,
         title,
         horizontalalignment="center",
         verticalalignment="center",
-        fontsize="25",
+        fontsize=str(title_size_f),
         color=TEXT_COLOR,
     )
 
     # For every stat, add the number on the left side in one of the colors
     # On the right side, add the name of the stat in normal text
     for i, key in enumerate(stats):
-        height = 0.76 - i * 0.11
+        height = (
+            1
+            - outer_margin_perc
+            - title_size_perc
+            - line_margin_perc
+            - i * (number_size_perc + line_margin_perc)
+        )
         color = PRIMARY_COLOR if i % 2 == 0 else SECONDARY_COLOR
 
         # Add thousand separators
@@ -503,7 +585,7 @@ def general_stats(completed_posts: List[Dict]) -> plt.Figure:
             f"{formatted_stat} ",
             horizontalalignment="right",
             verticalalignment="center",
-            fontsize="23",
+            fontsize=str(number_size_f),
             color=color,
         )
         # The name of the stat
@@ -513,11 +595,14 @@ def general_stats(completed_posts: List[Dict]) -> plt.Figure:
             key,
             horizontalalignment="left",
             verticalalignment="center",
-            fontsize="12",
+            fontsize=str(text_size_f),
             color=TEXT_COLOR,
         )
 
-    _reformat_figure(fig, width=5, height=4.2)
+    # No idea what units the font size is in, but it's not in pixels
+    font_adjustment_factor = 3.2
+    height_px = height_f * font_adjustment_factor
+    _reformat_figure(fig, width=5, height=height_px / FIGURE_DPI)
     return fig
 
 
@@ -540,5 +625,5 @@ def generate_ctq_graphs(
         user_transcription_length_vs_count(completed_posts),
         sub_transcription_length_vs_count(completed_posts),
         post_timeline(submissions, start_time, end_time),
-        general_stats(completed_posts),
+        general_stats(submissions, completed_posts, start_time, end_time),
     ]

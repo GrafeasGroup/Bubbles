@@ -29,6 +29,7 @@ UNCLAIMED_COLOR = "#ffc033"
 CLAIMED_COLOR = "#0eebd0"
 COMPLETED_COLOR = "#94e044"
 
+FIGURE_DPI = 200.0
 FIGURE_WIDTH = 10
 FIGURE_HEIGHT = 4.2
 
@@ -42,7 +43,7 @@ plt.rcParams["xtick.color"] = LINE_COLOR
 plt.rcParams["ytick.color"] = LINE_COLOR
 plt.rcParams["grid.color"] = LINE_COLOR
 plt.rcParams["grid.alpha"] = 0.8
-plt.rcParams["figure.dpi"] = 200.0
+plt.rcParams["figure.dpi"] = FIGURE_DPI
 
 FLAIR_RANKS = [
     {"name": "Initiate", "threshold": 1, "color": "#ffffff"},
@@ -109,3 +110,11 @@ def _get_rank(gamma: int) -> Dict:
             return rank
 
     return FLAIR_RANKS[0]
+
+
+def _format_hour_duration(duration: timedelta) -> str:
+    """Format a duration in the HH:MM h format."""
+    hours, rem = divmod(duration.seconds, 3600)
+    minutes, _ = divmod(rem, 60)
+
+    return f"{hours:02d}:{minutes:02d} h"
