@@ -27,7 +27,6 @@ class EventHandlers:
         """
         context.ack()
 
-
     def message(self, payload: SlackPayload, context: BoltContext):
         context.ack()
 
@@ -42,7 +41,6 @@ class EventHandlers:
         except:
             context.say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
 
-
     def reaction_added(self, payload: SlackPayload, context: BoltContext):
         util = SlackUtils(payload=payload, context=context)
         util.ack()
@@ -54,6 +52,16 @@ class EventHandlers:
             f"{user_who_reacted} has replied to one of {user_receiving_reaction}'s"
             f" messages with a :{reaction}:."
         )
+
+    def reaction_removed(self, context: BoltContext):
+        """
+        Gracefully handle reactions being removed so that Slack is okay with it.
+
+        Unfortunately, if we don't handle this event, slack-bolt spams our logs
+        with "Unhandled request!!!" for `reaction_removed`. So... we'll just
+        accept `reaction_removed` events and sinkhole them.
+        """
+        context.ack()
 
 def register_event_handlers(app: SlackApp, chat_manager: ChatPluginManager):
     """
@@ -95,3 +103,4 @@ def register_event_handlers(app: SlackApp, chat_manager: ChatPluginManager):
     app.event("app_mention")(handlers.mention)
     app.event("message")(handlers.message)
     app.event("reaction_added")(handlers.reaction_added)
+    app.event("reaction_removed")(handlers.reaction_removed)
