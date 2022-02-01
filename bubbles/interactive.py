@@ -33,8 +33,8 @@ class InteractiveSession:
             attachments = []
             for fig in figures:
                 # Save the figure to a file in the temp folder
-                file = NamedTemporaryFile(delete=False, suffix=".jpg")
-                fig.savefig(file, format="jpg")
+                file = NamedTemporaryFile(delete=False, suffix=".png")
+                fig.savefig(file, format="png")
                 attachments.append(file)
                 plt.close(fig)
                 file.close()
