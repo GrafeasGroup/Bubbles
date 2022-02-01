@@ -14,6 +14,7 @@ from bubbles.commands.ctq_utils import (
     COMPLETED_COLOR,
     PRIMARY_COLOR,
     SECONDARY_COLOR,
+    _get_rank,
 )
 
 header_regex = re.compile(
@@ -297,8 +298,8 @@ def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figur
     x = [int(user["length"] / user["count"]) for user in user_dir.values()]
     # Transcription count
     y = [user["count"] for user in user_dir.values()]
-    # Colors
-    colors = [PRIMARY_COLOR for _ in range(0, len(user_dir))]
+    # Rank colors
+    colors = [_get_rank(user["gamma"])["color"] for user in user_dir.values()]
 
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()

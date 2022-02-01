@@ -3,7 +3,7 @@ import os
 from datetime import timedelta, datetime
 
 # The time for which posts remain in the queue until they are removed
-from typing import TypeVar, List, Optional
+from typing import TypeVar, List, Optional, Dict
 
 from matplotlib import pyplot as plt
 
@@ -43,6 +43,20 @@ plt.rcParams["ytick.color"] = LINE_COLOR
 plt.rcParams["grid.color"] = LINE_COLOR
 plt.rcParams["grid.alpha"] = 0.8
 plt.rcParams["figure.dpi"] = 200.0
+
+FLAIR_RANKS = [
+    {"name": "Initiate", "threshold": 1, "color": "#ffffff"},
+    {"name": "Pink", "threshold": 25, "color": "#e696be"},
+    {"name": "Green", "threshold": 50, "color": "#00ff00"},
+    {"name": "Teal", "threshold": 100, "color": "#00cccc"},
+    {"name": "Purple", "threshold": 250, "color": "#ff67ff"},
+    {"name": "Gold", "threshold": 500, "color": "#ffd700"},
+    {"name": "Diamond", "threshold": 1000, "color": "#add8e6"},
+    {"name": "Ruby", "threshold": 2500, "color": "#ff7ac2"},
+    {"name": "Topaz", "threshold": 5000, "color": "#ff7d4d"},
+    {"name": "Jade", "threshold": 10000, "color": "#31c831"},
+    {"name": "Sapphire", "threshold": 20000, "color": "#99afef"},
+]
 
 T = TypeVar("T")
 
@@ -84,3 +98,12 @@ def _reformat_figure(fig: plt.Figure):
     """Reformat the given figure to the default size."""
     fig.set_size_inches(FIGURE_WIDTH, FIGURE_HEIGHT)
     fig.tight_layout()
+
+
+def _get_rank(gamma: int) -> Dict:
+    """Get the rank matching the gamma score."""
+    for rank in reversed(FLAIR_RANKS):
+        if gamma >= rank["threshold"]:
+            return rank
+
+    return FLAIR_RANKS[0]
