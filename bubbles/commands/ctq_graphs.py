@@ -514,6 +514,7 @@ def general_stats(
         "Transcriptions": len(completed_posts),
         "Words written": words,
         "Characters typed": characters,
+        "Start date": start_time.strftime("%Y-%m-%d"),
     }
 
     if all_claimed_time:
