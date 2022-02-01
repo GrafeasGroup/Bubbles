@@ -15,6 +15,7 @@ from bubbles.commands.ctq_utils import (
     PRIMARY_COLOR,
     SECONDARY_COLOR,
     _get_rank,
+    TEXT_COLOR,
 )
 
 header_regex = re.compile(
@@ -52,9 +53,14 @@ def _get_subreddit_name(post: Dict) -> str:
     return "r/" + post["url"].split("/")[4]
 
 
-def _get_transcription_length(post: Dict) -> int:
-    """Get the length of the transcription for the given post."""
+def _get_transcription_characters(post: Dict) -> int:
+    """Get the number of characters in the transcription for the given post."""
     return len(post["transcription"]["text"])
+
+
+def _get_transcription_words(post: Dict) -> int:
+    """Get the number of words in the transcription for the given post."""
+    return len(post["transcription"]["text"].split())
 
 
 def _get_post_type(post: Dict) -> str:
@@ -202,7 +208,7 @@ def user_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_username,
-        get_value=_get_transcription_length,
+        get_value=_get_transcription_characters,
         update_value=lambda a, b: max(a, b),
         aggregate_rest=max,
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the longest transcriptions",
@@ -217,7 +223,7 @@ def sub_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_subreddit_name,
-        get_value=_get_transcription_length,
+        get_value=_get_transcription_characters,
         update_value=lambda a, b: max(a, b),
         aggregate_rest=max,
         title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest transcriptions",
@@ -232,7 +238,7 @@ def user_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_username,
-        get_value=lambda post: (_get_transcription_length(post), 1),
+        get_value=lambda post: (_get_transcription_characters(post), 1),
         default_value=(0, 0),
         # Sum up both the total transcription length and the transcription count
         update_value=lambda a, b: (a[0] + b[0], a[1] + b[1]),
@@ -251,7 +257,7 @@ def sub_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_subreddit_name,
-        get_value=lambda post: (_get_transcription_length(post), 1),
+        get_value=lambda post: (_get_transcription_characters(post), 1),
         default_value=(0, 0),
         # Sum up both the total transcription length and the transcription count
         update_value=lambda a, b: (a[0] + b[0], a[1] + b[1]),
@@ -291,7 +297,7 @@ def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figur
         user_dir[username] = {
             "gamma": cur_value["gamma"],
             "count": cur_value["count"] + 1,
-            "length": cur_value["length"] + _get_transcription_length(post),
+            "length": cur_value["length"] + _get_transcription_characters(post),
         }
 
     # Average transcription length
@@ -324,7 +330,7 @@ def sub_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure
         cur_value = sub_dir.get(sub, {"count": 0, "length": 0},)
         sub_dir[sub] = {
             "count": cur_value["count"] + 1,
-            "length": cur_value["length"] + _get_transcription_length(post),
+            "length": cur_value["length"] + _get_transcription_characters(post),
         }
 
     # Average transcription length
@@ -434,6 +440,87 @@ def post_timeline(
     return fig
 
 
+def general_stats(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate general stats for the event."""
+    users = set()
+    subs = set()
+    types = set()
+    characters = 0
+    words = 0
+
+    # Aggregate the stats from the posts
+    for post in completed_posts:
+        users.add(_get_username(post))
+        subs.add(_get_subreddit_name(post))
+        types.add(_get_simplified_post_type(post))
+        characters += _get_transcription_characters(post)
+        words += _get_transcription_words(post)
+
+    stats = {
+        "Participants": len(users),
+        "Subreddits": len(subs),
+        "Post types": len(types),
+        "Transcriptions": len(completed_posts),
+        "Words written": words,
+        "Characters typed": characters,
+    }
+
+    title = "CtQ in Numbers"
+
+    # Generate the chart
+    fig: plt.Figure = plt.Figure()
+    # Disable the axes https://stackoverflow.com/a/9295367
+    ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
+    ax.set_axis_off()
+    fig.add_axes(ax)
+
+    # Add the title
+    fig.text(
+        0.5,
+        0.90,
+        title,
+        horizontalalignment="center",
+        verticalalignment="center",
+        fontsize="25",
+        color=TEXT_COLOR,
+    )
+
+    # For every stat, add the number on the left side in one of the colors
+    # On the right side, add the name of the stat in normal text
+    for i, key in enumerate(stats):
+        height = 0.76 - i * 0.11
+        color = PRIMARY_COLOR if i % 2 == 0 else SECONDARY_COLOR
+
+        # Add thousand separators
+        formatted_stat = (
+            "{:,}".format(stats[key]) if isinstance(stats[key], int) else stats[key]
+        )
+
+        # The number part of the stat
+        fig.text(
+            0.5,
+            height,
+            f"{formatted_stat} ",
+            horizontalalignment="right",
+            verticalalignment="center",
+            fontsize="23",
+            color=color,
+        )
+        # The name of the stat
+        fig.text(
+            0.5,
+            height,
+            key,
+            horizontalalignment="left",
+            verticalalignment="center",
+            fontsize="12",
+            color=TEXT_COLOR,
+        )
+
+    _reformat_figure(fig, width=5, height=4.2)
+    return fig
+
+
 def generate_ctq_graphs(
     submissions: List[Dict], start_time: datetime, end_time: datetime
 ) -> List[plt.Figure]:
@@ -453,4 +540,5 @@ def generate_ctq_graphs(
         user_transcription_length_vs_count(completed_posts),
         sub_transcription_length_vs_count(completed_posts),
         post_timeline(submissions, start_time, end_time),
+        general_stats(completed_posts),
     ]

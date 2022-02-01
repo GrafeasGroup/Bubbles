@@ -94,9 +94,11 @@ def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
     )
 
 
-def _reformat_figure(fig: plt.Figure):
+def _reformat_figure(
+    fig: plt.Figure, width: float = FIGURE_WIDTH, height: float = FIGURE_HEIGHT
+):
     """Reformat the given figure to the default size."""
-    fig.set_size_inches(FIGURE_WIDTH, FIGURE_HEIGHT)
+    fig.set_size_inches(width, height)
     fig.tight_layout()
 
 
