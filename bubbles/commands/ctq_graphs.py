@@ -309,6 +309,7 @@ def generate_post_timeline(
 
     dates = []
 
+    queue_almost_cleared = False
     queue_cleared = False
 
     fig: plt.Figure = plt.Figure()
@@ -343,14 +344,23 @@ def generate_post_timeline(
             claimed.append(claimed_count)
             completed.append(completed_count)
 
-        # Add a vertical line if the queue is clear
-        if not queue_cleared and (unclaimed_count + claimed_count == 0):
+        # Add a vertical line if the queue is ALMOST cleared
+        # (No unclaimed posts remaining)
+        if not queue_almost_cleared and unclaimed_count == 0:
+            queue_almost_cleared = True
+            ax.axvline(time, color=CLAIMED_COLOR)
+
+        # Add a vertical line if the queue is cleared
+        # (All posts completed)
+        if not queue_cleared and (unclaimed_count + claimed_count) == 0:
             queue_cleared = True
             ax.axvline(time, color=COMPLETED_COLOR)
 
     ax.plot(dates, unclaimed, color=UNCLAIMED_COLOR)
     ax.plot(dates, claimed, color=CLAIMED_COLOR)
     ax.plot(dates, completed, color=COMPLETED_COLOR)
+
+    ax.legend(["Unclaimed", "Claimed", "Completed"])
 
     _reformat_figure(fig)
     return fig
