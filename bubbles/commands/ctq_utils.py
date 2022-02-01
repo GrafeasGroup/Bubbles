@@ -89,7 +89,8 @@ def _extract_blossom_id(blossom_url: str) -> str:
 def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
     """Convert a Blossom date string to a datetime object."""
     return (
-        datetime.strptime(blossom_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        # Python doesn't like Z for UTC
+        datetime.fromisoformat(blossom_date.replace("Z", "+00:00"))
         if blossom_date
         else None
     )
