@@ -22,7 +22,7 @@ def clean_links(text):
 
 class EchoCommand(BaseCommand):
     trigger_words = ['echo']
-    help_text = f'echo [phrase] - Repeats back whatever you pass in. Mostly for debugging.'
+    help_text = f'!echo [phrase] - Repeats back whatever you pass in. Mostly for debugging.'
 
     def process(self, msg: str, utils: SlackUtils) -> None:
         utils.respond(clean_links(msg))

@@ -41,7 +41,7 @@ class GitHub:
 
 class WishlistCommand(BaseCommand):
     trigger_words = ['wish']
-    help_text = f'wish [suggestion] - adds a note to the dev suggestion box'
+    help_text = f'!wish [suggestion] - adds a note to the dev suggestion box'
 
     def process(self, msg: str, utils: SlackUtils) -> None:
         GitHub().new_project_note(msg)

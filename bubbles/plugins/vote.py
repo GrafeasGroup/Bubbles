@@ -4,7 +4,7 @@ from bubbles.slack.utils import SlackUtils
 
 class VoteCommand(BaseCommand):
     trigger_words = ['vote', 'poll']
-    help_text = '!vote [subject] - Collect Yay or Nay voting on a given subject, facilitated by bubbles'
+    help_text = '!vote <subject> - Collect Yay or Nay voting on a given subject, facilitated by bubbles'
 
     def process(self, msg: str, utils: SlackUtils) -> None:
         if not msg:

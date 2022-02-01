@@ -3,7 +3,6 @@ import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import List
 
 from bubbles.plugins.__base_command__ import BaseCommand
 from bubbles.slack.utils import SlackUtils
@@ -11,7 +10,7 @@ from bubbles.slack.utils import SlackUtils
 
 class BackupPostgresCommand(BaseCommand):
     trigger_words = ['backup']
-    help_text = 'backup - creates and uploads a full backup of our postgres db.'
+    help_text = '!backup - creates and uploads a full backup of our postgres db.'
 
     def process(self, _: str, utils: SlackUtils) -> None:
         utils.respond('Starting DB export. This may take a moment.')

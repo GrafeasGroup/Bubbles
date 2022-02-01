@@ -9,7 +9,7 @@ from bubbles.slack.utils import SlackUtils
 class IsUpCommand(BaseCommand):
     trigger_words = ['isup']
     help_text = (
-        'isup [<service-name> [<service-name> [...]]] - does a basic'
+        '!isup [<service-name> [<service-name> [...]]] - does a basic'
         ' check if the specified services are online and running. If'
         ' no services specified, it checks every service.'
     )
