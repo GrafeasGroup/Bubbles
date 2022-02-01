@@ -170,8 +170,8 @@ def _generate_aggregated_bar_chart(
     return fig
 
 
-def generate_user_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
-    """Generate gamma stats per user."""
+def user_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate stats for transcriptions per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_username,
@@ -183,8 +183,8 @@ def generate_user_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_sub_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
-    """Generate gamma stats per subreddit."""
+def sub_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate stats for transcriptions per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
         get_key=_get_subreddit_name,
@@ -196,7 +196,7 @@ def generate_sub_gamma_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_user_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+def user_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     """Generate max transcription length stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -211,7 +211,7 @@ def generate_user_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_sub_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+def sub_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     """Generate max transcription length stats per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -226,7 +226,7 @@ def generate_sub_max_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_user_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+def user_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     """Generate average transcription length stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -245,7 +245,7 @@ def generate_user_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_sub_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
+def sub_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     """Generate average transcription length stats per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -264,7 +264,7 @@ def generate_sub_avg_length_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_post_type_stats(completed_posts: List[Dict]) -> plt.Figure:
+def post_types(completed_posts: List[Dict]) -> plt.Figure:
     """Generate stats per post type."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -277,7 +277,7 @@ def generate_post_type_stats(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def generate_post_timeline(
+def post_timeline(
     submissions: List[Dict], start_time: datetime, end_time: datetime
 ) -> plt.Figure:
     """Generate a timeline of posts."""
@@ -375,12 +375,12 @@ def generate_ctq_graphs(
     ]
 
     return [
-        generate_user_gamma_stats(completed_posts),
-        generate_sub_gamma_stats(completed_posts),
-        generate_user_max_length_stats(completed_posts),
-        generate_sub_max_length_stats(completed_posts),
-        generate_user_avg_length_stats(completed_posts),
-        generate_sub_avg_length_stats(completed_posts),
-        generate_post_type_stats(completed_posts),
-        generate_post_timeline(submissions, start_time, end_time),
+        user_transcription_count(completed_posts),
+        sub_transcription_count(completed_posts),
+        user_max_transcription_length(completed_posts),
+        sub_max_transcription_length(completed_posts),
+        user_avg_transcription_length(completed_posts),
+        sub_avg_transcription_length(completed_posts),
+        post_types(completed_posts),
+        post_timeline(submissions, start_time, end_time),
     ]
