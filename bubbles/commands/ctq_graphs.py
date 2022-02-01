@@ -308,7 +308,38 @@ def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figur
 
     ax.set_xlabel("Average transcription length")
     ax.set_ylabel("Transcription count")
-    ax.set_title("Transcription count vs. length")
+    ax.set_title("Transcription count vs. length per user")
+
+    _reformat_figure(fig)
+    return fig
+
+
+def sub_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate a plot of the transcription count vs. length per user."""
+    sub_dir = {}
+
+    # Aggregate the values for each subreddit
+    for post in completed_posts:
+        sub = _get_subreddit_name(post)
+        cur_value = sub_dir.get(sub, {"count": 0, "length": 0},)
+        sub_dir[sub] = {
+            "count": cur_value["count"] + 1,
+            "length": cur_value["length"] + _get_transcription_length(post),
+        }
+
+    # Average transcription length
+    x = [int(sub["length"] / sub["count"]) for sub in sub_dir.values()]
+    # Transcription count
+    y = [sub["count"] for sub in sub_dir.values()]
+
+    fig: plt.Figure = plt.Figure()
+    ax: plt.Axes = fig.gca()
+
+    ax.scatter(x, y, color=PRIMARY_COLOR)
+
+    ax.set_xlabel("Average transcription length")
+    ax.set_ylabel("Transcription count")
+    ax.set_title("Transcription count vs. length per subreddit")
 
     _reformat_figure(fig)
     return fig
@@ -420,5 +451,6 @@ def generate_ctq_graphs(
         sub_avg_transcription_length(completed_posts),
         post_types(completed_posts),
         user_transcription_length_vs_count(completed_posts),
+        sub_transcription_length_vs_count(completed_posts),
         post_timeline(submissions, start_time, end_time),
     ]
