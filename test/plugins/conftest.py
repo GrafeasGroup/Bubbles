@@ -59,8 +59,61 @@ def helpers():
 
 @pytest.fixture
 def slack_utils():
-    mock_utils = MagicMock(spec=SlackUtils)
+    mock_utils = MagicMock(spec_set=SlackUtils)
     mock_utils.bot_username = "Bubbles"
+    mock_utils.bot_user_id = "U061F7AUR"  # example from slack docs
+    mock_utils.client.conversations_history.return_value = {
+        'messages': [
+            {
+                'type': 'message',
+                'user': 'U061F7AUR',
+                'text': 'Message 1 -- By the bot user',
+                'ts': '1512104434.000490',
+            },
+            {
+                'type': 'file',
+                'user': 'U012AB3CBE',
+                'text': 'Message 2',
+                'ts': '1512085950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U012AB3CCE',
+                'text': 'Message 3',
+                'ts': '1512005950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U012AB3CDE',
+                'text': 'Message 4',
+                'ts': '1510085950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U012AB3CEE',
+                'text': 'Message 5',
+                'ts': '1509085950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U061F7AUR',
+                'text': 'Message 6 -- By the bot user',
+                'ts': '1507085950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U012AB3DAE',
+                'text': 'Message 7',
+                'ts': '1502085950.000216',
+            },
+            {
+                'type': 'message',
+                'user': 'U012AB3DBE',
+                'text': 'Message 8',
+                'ts': '1501085950.000216',
+            },
+        ],
+    }
     return mock_utils
 
 
