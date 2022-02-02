@@ -407,8 +407,8 @@ def post_timeline(
 
     dates = []
 
-    queue_almost_cleared = False
-    queue_cleared = False
+    all_claimed_time: Optional[datetime] = None
+    all_completed_time: Optional[datetime] = None
 
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
@@ -446,21 +446,51 @@ def post_timeline(
 
             # Add a vertical line if the queue is ALMOST cleared
             # (No unclaimed posts remaining)
-            if not queue_almost_cleared and unclaimed_count == 0:
-                queue_almost_cleared = True
-                ax.axvline(time, color=CLAIMED_COLOR)
+            if not all_claimed_time and unclaimed_count == 0:
+                all_claimed_time = time
 
             # Add a vertical line if the queue is cleared
             # (All posts completed)
-            if not queue_cleared and (unclaimed_count + claimed_count) == 0:
-                queue_cleared = True
-                ax.axvline(time, color=COMPLETED_COLOR)
+            if not all_completed_time and (unclaimed_count + claimed_count) == 0:
+                all_completed_time = time
 
-    ax.plot(dates, unclaimed, color=UNCLAIMED_COLOR)
-    ax.plot(dates, claimed, color=CLAIMED_COLOR)
-    ax.plot(dates, completed, color=COMPLETED_COLOR)
+    max_count = max(max(unclaimed), max(claimed), max(completed))
 
-    ax.legend(["Unclaimed", "Claimed", "Completed"])
+    # Posts over time
+    ax.plot(dates, unclaimed, color=UNCLAIMED_COLOR, label="Unclaimed")
+    ax.plot(dates, claimed, color=CLAIMED_COLOR, label="Claimed")
+    ax.plot(dates, completed, color=COMPLETED_COLOR, label="Completed")
+
+    # Vertical lines to indicate when the queue has been cleared
+    if all_claimed_time:
+        ax.axvline(
+            all_claimed_time,
+            color=CLAIMED_COLOR,
+            linestyle="dashed",
+            label="All posts claimed",
+        )
+        ax.annotate(
+            all_claimed_time.strftime("%H:%M"),
+            (all_claimed_time, max_count),
+            ha="right",
+            va="center",
+            fontsize="13",
+        )
+    if all_completed_time:
+        ax.axvline(
+            all_completed_time,
+            color=COMPLETED_COLOR,
+            linestyle="dashed",
+            label="All posts completed",
+        )
+        ax.annotate(
+            all_completed_time.strftime("%H:%M"),
+            (all_completed_time, max_count * 0.8),
+            ha="right",
+            va="center",
+            fontsize="13",
+        )
+    ax.legend()
 
     _reformat_figure(fig)
     return fig
@@ -526,7 +556,6 @@ def general_stats(
         "Transcriptions": len(completed_posts),
         "Words written": words,
         "Characters typed": characters,
-        "Start date": start_time.strftime("%Y-%m-%d"),
     }
 
     if all_claimed_time:
