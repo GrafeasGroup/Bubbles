@@ -1,7 +1,7 @@
 """Generation of graphs for the !ctqstats command."""
 import re
 from datetime import datetime
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 
 from matplotlib import pyplot as plt
 
@@ -149,7 +149,7 @@ def _generate_aggregated_bar_chart(
     title: str,
     x_label: str,
     y_label: str,
-    rest_label: str,
+    rest_label: Optional[str] = None,
 ) -> plt.Figure:
     """A helper function to generate a generic plot of aggregated data.
 
@@ -163,7 +163,8 @@ def _generate_aggregated_bar_chart(
     :param title: The title of the chart.
     :param x_label: The label of the x-axis.
     :param y_label: The label of the y_axis.
-    :param rest_label: The label of the aggregated rest values.
+    :param rest_label: The label of the aggregated rest values. If this is None, the rest
+    values will not be aggregated.
     """
     count_dir = {}
 
@@ -180,7 +181,7 @@ def _generate_aggregated_bar_chart(
     plot_entries = count_list[:MAX_GRAPH_ENTRIES]
     colors = [PRIMARY_COLOR for _ in range(0, len(plot_entries))]
 
-    if len(count_list) > MAX_GRAPH_ENTRIES:
+    if rest_label is not None and len(count_list) > MAX_GRAPH_ENTRIES:
         # Aggregate the rest of the entries
         other_count = aggregate_rest(
             [entry[1] for entry in count_list[MAX_GRAPH_ENTRIES:]]
@@ -255,7 +256,6 @@ def user_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the longest transcriptions",
         x_label="Transcription length",
         y_label="Volunteer",
-        rest_label="Other volunteers",
     )
 
 
@@ -270,7 +270,6 @@ def sub_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
         title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest transcriptions",
         x_label="Transcription length",
         y_label="Subreddit",
-        rest_label="Other subreddits",
     )
 
 
