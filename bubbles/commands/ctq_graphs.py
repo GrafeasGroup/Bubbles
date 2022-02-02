@@ -66,7 +66,7 @@ def _get_transcription_words(post: Dict) -> int:
     return len(post["transcription"]["text"].split())
 
 
-def _get_post_type(post: Dict) -> str:
+def _get_post_format_and_type(post: Dict) -> Tuple[str, Optional[str]]:
     """Determine the type of the post."""
     text: str = post["transcription"]["text"]
     header = text.split("---")[0]
@@ -74,7 +74,7 @@ def _get_post_type(post: Dict) -> str:
     match = header_regex.search(header)
     if match is None:
         print(f"Unrecognized post type: {header}")
-        return "Post"
+        return "Post", "Post"
 
     tr_format = match.group("format")
     if tr_format:
@@ -83,12 +83,13 @@ def _get_post_type(post: Dict) -> str:
     if tr_type:
         tr_type = tr_type.strip()
 
-    return tr_type or tr_format
+    return tr_format, tr_type
 
 
 def _get_simplified_post_type(post: Dict) -> str:
     """Get a simplified post type, grouping together multiple types."""
-    post_type = _get_post_type(post)
+    post_format, post_type = _get_post_format_and_type(post)
+    post_type = post_type or post_format
 
     # Simplify the post type into common groups
     for simple_type, words in post_type_simplification_map.items():
@@ -227,6 +228,25 @@ def user_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
         get_value=lambda _post: 1,
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the most transcriptions",
         x_label="Transcriptions",
+        y_label="Volunteer",
+        rest_label="Other volunteers",
+    )
+
+
+def user_video_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+    """Generate stats for transcriptions per user."""
+    video_posts = [
+        post
+        for post in completed_posts
+        if _get_post_format_and_type(post)[0].lower() == "video"
+    ]
+
+    return _generate_aggregated_bar_chart(
+        posts=video_posts,
+        get_key=_get_username,
+        get_value=lambda _post: 1,
+        title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the most video transcriptions",
+        x_label="Video transcriptions",
         y_label="Volunteer",
         rest_label="Other volunteers",
     )
@@ -658,6 +678,7 @@ def generate_ctq_graphs(
 
     return [
         user_transcription_count(completed_posts),
+        user_video_transcription_count(completed_posts),
         sub_transcription_count(completed_posts),
         user_max_transcription_length(completed_posts),
         sub_max_transcription_length(completed_posts),
