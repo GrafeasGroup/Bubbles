@@ -105,7 +105,7 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
 
     tr_count = 0
 
-    chunks = _get_list_chunks(submissions, 10)
+    chunks = _get_list_chunks(submissions, 25)
 
     # Try to get the transcriptions for the submissions
     for idx, chunk in enumerate(chunks):

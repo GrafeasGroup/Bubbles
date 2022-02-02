@@ -18,6 +18,7 @@ from bubbles.commands.ctq_utils import (
     TEXT_COLOR,
     _format_hour_duration,
     FIGURE_DPI,
+    QUEUE_POST_TIMEOUT,
 )
 
 header_regex = re.compile(
@@ -122,6 +123,14 @@ def _get_event_stream(submissions: List[Dict]) -> List[Tuple[str, datetime]]:
                 events.append(
                     ("completed", _convert_blossom_date(post["complete_time"]))
                 )
+        else:
+            # Expired (dropped off the queue)
+            events.append(
+                (
+                    "expired",
+                    _convert_blossom_date(post["create_time"]) + QUEUE_POST_TIMEOUT,
+                )
+            )
 
     # Sort by event date
     events.sort(key=lambda evt: evt[1])
@@ -278,7 +287,7 @@ def user_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
         final_update_value=lambda x: int(x[0] / x[1]),
         aggregate_rest=lambda values: int(sum(values) / len(values)),
         title=f"Top {MAX_GRAPH_ENTRIES} volunteers with the longest average transcriptions",
-        x_label="Transcription length",
+        x_label="Average transcription length",
         y_label="Volunteer",
         rest_label="Other volunteers",
     )
@@ -297,7 +306,7 @@ def sub_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
         final_update_value=lambda x: int(x[0] / x[1]),
         aggregate_rest=lambda values: int(sum(values) / len(values)),
         title=f"Top {MAX_GRAPH_ENTRIES} subreddits with the longest average transcriptions",
-        x_label="Transcription length",
+        x_label="Average transcription length",
         y_label="Subreddit",
         rest_label="Other subreddits",
     )
@@ -420,6 +429,8 @@ def post_timeline(
         # Process the change
         if event == "created":
             unclaimed_count += 1
+        if event == "expired":
+            unclaimed_count -= 1
         elif event == "claimed":
             unclaimed_count -= 1
             claimed_count += 1
@@ -491,6 +502,8 @@ def general_stats(
         # Process the change
         if event == "created":
             unclaimed_count += 1
+        if event == "expired":
+            unclaimed_count -= 1
         elif event == "claimed":
             unclaimed_count -= 1
             claimed_count += 1
