@@ -1,3 +1,4 @@
+import tempfile
 from datetime import datetime
 from typing import List, Dict
 
@@ -5,7 +6,11 @@ from bubbles.commands.ctq_graphs import generate_ctq_graphs
 from bubbles.commands.ctq_utils import (
     QUEUE_POST_TIMEOUT,
     DEFAULT_CTQ_START,
-    DEFAULT_CTQ_DURATION, _get_list_chunks, _get_elapsed, _extract_blossom_id, _convert_blossom_date,
+    DEFAULT_CTQ_DURATION,
+    _get_list_chunks,
+    _get_elapsed,
+    _extract_blossom_id,
+    _convert_blossom_date,
 )
 from bubbles.config import PluginManager, blossom
 
@@ -220,7 +225,13 @@ def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
     submissions = attach_transcriptions(submissions, say)
     submissions = attach_users(submissions, say)
 
-    figures = generate_ctq_graphs(submissions, start_date, end_date)
+    figures, transcription = generate_ctq_graphs(submissions, start_date, end_date)
+
+    with tempfile.NamedTemporaryFile(
+        delete=False, mode="w", encoding="utf-8", suffix=".txt"
+    ) as fp:
+        fp.write(transcription)
+        say(f"Transcription: file://{fp.name}")
 
     say(f"Here are the CtQ stats! ({_get_elapsed(start)})", figures=figures)
 

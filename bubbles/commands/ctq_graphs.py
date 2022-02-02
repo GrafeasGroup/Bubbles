@@ -46,6 +46,25 @@ post_type_simplification_map = {
 }
 
 
+# Transcription template for a bar chart
+BAR_CHART_TRANSCRIPTION = """### {title}
+
+\\[*A horizontal bar chart, showing "{x_label}" on the x-axis in {primary_color} \
+bars for each "{y_label}" on the y-axis:*]
+
+{entry_list}"""
+
+BAR_CHART_ENTRY = "- **{label}**: {value}"
+BAR_CHART_SPECIAL_ENTRY = "- **{label}** \\[*in {secondary_color}*]: {value}"
+
+# Transcription template for a scatter plot
+SCATTER_PLOT_TRANSCRIPTION = """### {title}
+
+\\[*A scatter plot, showing "{x_label}" on the x axis and "{y_label}" on the y axis.*]
+
+<bla bla bla>"""
+
+
 def _get_username(post: Dict) -> str:
     """Get the username for the given post."""
     return "u/" + post["user"]["username"]
@@ -64,6 +83,17 @@ def _get_transcription_characters(post: Dict) -> int:
 def _get_transcription_words(post: Dict) -> int:
     """Get the number of words in the transcription for the given post."""
     return len(post["transcription"]["text"].split())
+
+
+def _escape_reddit_formatting(text: Any) -> str:
+    """Escape Reddit formatting."""
+    return (
+        str(text)
+        .replace("u/", r"u\/")
+        .replace("r/", r"r\/")
+        .replace("_", r"\_")
+        .replace("*", r"\*")
+    )
 
 
 def _get_post_format_and_type(post: Dict) -> Tuple[str, Optional[str]]:
@@ -151,7 +181,7 @@ def _generate_aggregated_bar_chart(
     x_label: str,
     y_label: str,
     rest_label: Optional[str] = None,
-) -> plt.Figure:
+) -> Tuple[plt.Figure, str]:
     """A helper function to generate a generic plot of aggregated data.
 
     :param posts: The posts to generate the bar chart for.
@@ -182,7 +212,8 @@ def _generate_aggregated_bar_chart(
     plot_entries = count_list[:MAX_GRAPH_ENTRIES]
     colors = [PRIMARY_COLOR for _ in range(0, len(plot_entries))]
 
-    if rest_label is not None and len(count_list) > MAX_GRAPH_ENTRIES:
+    has_other_entry = rest_label is not None and len(count_list) > MAX_GRAPH_ENTRIES
+    if has_other_entry:
         # Aggregate the rest of the entries
         other_count = aggregate_rest(
             [entry[1] for entry in count_list[MAX_GRAPH_ENTRIES:]]
@@ -190,12 +221,9 @@ def _generate_aggregated_bar_chart(
         plot_entries.append((rest_label, other_count))
         colors.append(SECONDARY_COLOR)
 
-    # We want to display the entries top to bottom
-    plot_entries.reverse()
-    colors.reverse()
-
-    labels = [entry[0] for entry in plot_entries]
-    data = [entry[1] for entry in plot_entries]
+    # We want to display the entries top to bottom, so we need to reverse them
+    labels = [entry[0] for entry in reversed(plot_entries)]
+    data = [entry[1] for entry in reversed(plot_entries)]
 
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
@@ -215,12 +243,45 @@ def _generate_aggregated_bar_chart(
             ha="left",
             va="center",
         )
-
     _reformat_figure(fig)
-    return fig
+
+    # Automatically create a transcription
+    if has_other_entry:
+        entries = [
+            BAR_CHART_ENTRY.format(
+                label=_escape_reddit_formatting(label),
+                value=_escape_reddit_formatting(value),
+            )
+            for label, value in plot_entries[:-1]
+        ]
+        other = plot_entries[-1]
+        entries.append(
+            BAR_CHART_SPECIAL_ENTRY.format(
+                label=other[0], value=other[1], secondary_color="violet"
+            )
+        )
+    else:
+        entries = [
+            BAR_CHART_ENTRY.format(
+                label=_escape_reddit_formatting(label),
+                value=_escape_reddit_formatting(value),
+            )
+            for label, value in plot_entries
+        ]
+    entry_list = "\n".join(entries)
+
+    transcription = BAR_CHART_TRANSCRIPTION.format(
+        title=_escape_reddit_formatting(title),
+        x_label=_escape_reddit_formatting(x_label),
+        y_label=_escape_reddit_formatting(y_label),
+        entry_list=entry_list,
+        primary_color="green",
+    )
+
+    return fig, transcription
 
 
-def user_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+def user_transcription_count(completed_posts: List[Dict]) -> Tuple[plt.Figure, str]:
     """Generate stats for transcriptions per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -233,7 +294,9 @@ def user_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def user_video_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+def user_video_transcription_count(
+    completed_posts: List[Dict],
+) -> Tuple[plt.Figure, str]:
     """Generate stats for transcriptions per user."""
     video_posts = [
         post
@@ -252,7 +315,7 @@ def user_video_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def sub_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
+def sub_transcription_count(completed_posts: List[Dict]) -> Tuple[plt.Figure, str]:
     """Generate stats for transcriptions per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -265,7 +328,9 @@ def sub_transcription_count(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def user_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
+def user_max_transcription_length(
+    completed_posts: List[Dict],
+) -> Tuple[plt.Figure, str]:
     """Generate max transcription length stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -279,7 +344,7 @@ def user_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def sub_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
+def sub_max_transcription_length(completed_posts: List[Dict]) -> Tuple[plt.Figure, str]:
     """Generate max transcription length stats per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -293,7 +358,9 @@ def sub_max_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def user_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
+def user_avg_transcription_length(
+    completed_posts: List[Dict],
+) -> Tuple[plt.Figure, str]:
     """Generate average transcription length stats per user."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -312,7 +379,7 @@ def user_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def sub_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
+def sub_avg_transcription_length(completed_posts: List[Dict]) -> Tuple[plt.Figure, str]:
     """Generate average transcription length stats per subreddit."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -331,7 +398,7 @@ def sub_avg_transcription_length(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def post_types(completed_posts: List[Dict]) -> plt.Figure:
+def post_types(completed_posts: List[Dict]) -> Tuple[plt.Figure, str]:
     """Generate stats per post type."""
     return _generate_aggregated_bar_chart(
         posts=completed_posts,
@@ -344,7 +411,9 @@ def post_types(completed_posts: List[Dict]) -> plt.Figure:
     )
 
 
-def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure:
+def user_transcription_length_vs_count(
+    completed_posts: List[Dict],
+) -> Tuple[plt.Figure, str]:
     """Generate a plot of the transcription count vs. length per user."""
     user_dir = {}
 
@@ -367,20 +436,27 @@ def user_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figur
     # Rank colors
     colors = [_get_rank(user["gamma"])["color"] for user in user_dir.values()]
 
+    x_label = "Average transcription length"
+    y_label = "Transcription count"
+    title = "Transcription count vs. length per user"
+
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
 
     ax.scatter(x, y, color=colors)
 
-    ax.set_xlabel("Average transcription length")
-    ax.set_ylabel("Transcription count")
-    ax.set_title("Transcription count vs. length per user")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
 
     _reformat_figure(fig)
-    return fig
+
+    return fig, f"### {title}"
 
 
-def sub_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure:
+def sub_transcription_length_vs_count(
+    completed_posts: List[Dict],
+) -> Tuple[plt.Figure, str]:
     """Generate a plot of the transcription count vs. length per user."""
     sub_dir = {}
 
@@ -403,17 +479,21 @@ def sub_transcription_length_vs_count(completed_posts: List[Dict]) -> plt.Figure
 
     ax.scatter(x, y, color=PRIMARY_COLOR)
 
-    ax.set_xlabel("Average transcription length")
-    ax.set_ylabel("Transcription count")
-    ax.set_title("Transcription count vs. length per subreddit")
+    title = "Average transcription length"
+    x_label = "Transcription count"
+    y_label = "Transcription count vs. length per subreddit"
+
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
 
     _reformat_figure(fig)
-    return fig
+    return fig, f"### {title}"
 
 
 def post_timeline(
     submissions: List[Dict], start_time: datetime, end_time: datetime
-) -> plt.Figure:
+) -> Tuple[plt.Figure, str]:
     """Generate a timeline of posts."""
     events = _get_event_stream(submissions)
 
@@ -433,9 +513,11 @@ def post_timeline(
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
 
+    title = "Posts over time"
+
     ax.set_ylabel("Posts")
     ax.set_xlabel("Time")
-    ax.set_title("Posts over time")
+    ax.set_title(title)
 
     for (event, time) in events:
         if start_time <= time <= end_time:
@@ -513,7 +595,7 @@ def post_timeline(
     ax.legend()
 
     _reformat_figure(fig)
-    return fig
+    return fig, f"### {title}"
 
 
 def general_stats(
@@ -521,7 +603,7 @@ def general_stats(
     completed_posts: List[Dict],
     start_time: datetime,
     end_time: datetime,
-) -> plt.Figure:
+) -> Tuple[plt.Figure, str]:
     """Generate general stats for the event."""
     users = set()
     subs = set()
@@ -665,28 +747,35 @@ def general_stats(
     font_adjustment_factor = 3.2
     height_px = height_f * font_adjustment_factor
     _reformat_figure(fig, width=5, height=height_px / FIGURE_DPI)
-    return fig
+    return fig, f"### {title}"
 
 
 def generate_ctq_graphs(
     submissions: List[Dict], start_time: datetime, end_time: datetime
-) -> List[plt.Figure]:
-    """Generate the graphs for the CtQ event."""
+) -> Tuple[List[plt.Figure], str]:
+    """Generate the graphs for the CtQ event and their transcriptions."""
     completed_posts = [
         post for post in submissions if post["transcription"] and post["user"]
     ]
 
-    return [
-        user_transcription_count(completed_posts),
-        user_video_transcription_count(completed_posts),
-        sub_transcription_count(completed_posts),
-        user_max_transcription_length(completed_posts),
-        sub_max_transcription_length(completed_posts),
-        user_avg_transcription_length(completed_posts),
-        sub_avg_transcription_length(completed_posts),
-        post_types(completed_posts),
-        user_transcription_length_vs_count(completed_posts),
-        sub_transcription_length_vs_count(completed_posts),
-        post_timeline(submissions, start_time, end_time),
-        general_stats(submissions, completed_posts, start_time, end_time),
-    ]
+    # We got a list of tuples, we make it a tuple of lists
+    # https://stackoverflow.com/a/13635074
+    figures, transcriptions = zip(
+        *[
+            user_transcription_count(completed_posts),
+            user_video_transcription_count(completed_posts),
+            sub_transcription_count(completed_posts),
+            user_max_transcription_length(completed_posts),
+            sub_max_transcription_length(completed_posts),
+            user_avg_transcription_length(completed_posts),
+            sub_avg_transcription_length(completed_posts),
+            post_types(completed_posts),
+            user_transcription_length_vs_count(completed_posts),
+            sub_transcription_length_vs_count(completed_posts),
+            post_timeline(submissions, start_time, end_time),
+            general_stats(submissions, completed_posts, start_time, end_time),
+        ]
+    )
+
+    transcription = "\n\n---\n\n".join(transcriptions)
+    return figures, transcription
