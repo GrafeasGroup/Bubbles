@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from bubbles.commands.periodic import (
     TRANSCRIPTION_CHECK_CHANNEL,
@@ -10,17 +11,13 @@ import time
 import urllib
 
 
+USERNAME_REGEX = re.compile("u/(?P<username>[^ ]+)")
+
+
 def get_username_and_permalink(message):
-    # Remove :rotating_light: (messages for new volunteers)
-    # print(message["text"])
-    username = (
-        message["text"]
-        .split(":rotating_light:")[-1]
-        .split(":")[0]
-        .split("u/")[-1]
-        .strip()
-    )
-    username = "u/" + username
+    username_match = USERNAME_REGEX.search(message["text"])
+    username = username_match[0] if username_match else "[UNKNOWN]"
+
     try:
         response = app.client.chat_getPermalink(
             channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL], message_ts=message["ts"]
