@@ -11,7 +11,7 @@ import time
 import urllib
 
 
-USERNAME_REGEX = re.compile("u/(?P<username>[^ ]+)")
+USERNAME_REGEX = re.compile("u/(?P<username>[^ *:]+)")
 
 
 def get_username_and_permalink(message):
