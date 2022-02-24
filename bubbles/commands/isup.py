@@ -1,6 +1,6 @@
 import subprocess
 
-from bubbles.commands import SERVICES, get_service_name
+from bubbles.service_utils import SERVICES, get_service_name
 from bubbles.config import PluginManager
 
 

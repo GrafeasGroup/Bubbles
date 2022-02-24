@@ -2,12 +2,13 @@ import os
 import subprocess
 from typing import Callable
 
-from bubbles.commands import (
+from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.service_utils import (
+    verify_service_up,
+    say_code,
     SERVICES,
     get_service_name,
 )
-from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import verify_service_up, say_code
 from bubbles.utils import get_branch_head
 
 
