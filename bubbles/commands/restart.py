@@ -32,7 +32,7 @@ def _restart_service(service: str, say: Callable) -> None:
     restart_service(service)
 
 
-def deploy(payload):
+def restart(payload):
     args = payload.get("text").split()
     say = payload["extras"]["say"]
 
@@ -63,7 +63,7 @@ def deploy(payload):
 
 
 PluginManager.register_plugin(
-    deploy,
+    restart,
     r"restart ?(.+)",
     help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
     interactive_friendly=False,
