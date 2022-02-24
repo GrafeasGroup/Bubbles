@@ -6,7 +6,7 @@ from bubbles.commands import (
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import say_code
+from bubbles.service_utils import say_code, verify_service_up
 
 
 def _start_service(service: str, say: Callable) -> None:
@@ -18,8 +18,14 @@ def _start_service(service: str, say: Callable) -> None:
     if systemctl_response.decode().strip() != "":
         say("Something went wrong and could not start.")
         say_code(say, systemctl_response)
-
-    say(f"Started {service}.")
+    else:
+        if verify_service_up(say, service):
+            say("Started successfully!")
+        else:
+            say(
+                f"{service} is not responding. Cannot recover from here -- please check the"
+                f" logs for more information."
+            )
 
 
 def start(payload):
