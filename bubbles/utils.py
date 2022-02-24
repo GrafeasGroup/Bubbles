@@ -39,3 +39,8 @@ def break_large_message(text: str, break_at: int = 4000) -> List:
     # tack on any leftovers
     chunks.append("\n".join(temp))
     return chunks
+
+
+def say_code(say, message: bytes):
+    """Format a byte message as code and send it."""
+    say(f"```{message.decode().strip()}```")

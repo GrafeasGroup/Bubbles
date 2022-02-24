@@ -1,16 +1,38 @@
 import subprocess
+import time
 from typing import Callable
 
 from bubbles.commands import (
+    PROCESS_CHECK_COUNT,
+    PROCESS_CHECK_SLEEP_TIME,
     SERVICES,
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import say_code, verify_service_up
+from bubbles.utils import say_code
 
 
 def _restart_service(service: str, say: Callable) -> None:
     say(f"Restarting {service} in production. This may take a moment...")
+
+    def verify_service_up(loc):
+        say(
+            f"Pausing for {PROCESS_CHECK_SLEEP_TIME}s to verify that {loc} restarted"
+            f" correctly..."
+        )
+        try:
+            for attempt in range(PROCESS_CHECK_COUNT):
+                time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
+                subprocess.check_call(
+                    ["systemctl", "is-active", "--quiet", get_service_name(loc)]
+                )
+                say(f"Check {attempt + 1}/{PROCESS_CHECK_COUNT} complete!")
+            say("Restarted successfully!")
+        except subprocess.CalledProcessError:
+            say(
+                f"{loc} is not responding. Cannot recover from here -- please check the"
+                f" logs for more information."
+            )
 
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
@@ -21,18 +43,12 @@ def _restart_service(service: str, say: Callable) -> None:
             say("Something went wrong and could not restart.")
             say_code(say, systemctl_response)
         else:
-            if verify_service_up(say, loc):
-                say("Restarted successfully!")
-            else:
-                say(
-                    f"{loc} is not responding. Cannot recover from here -- please check the"
-                    f" logs for more information."
-                )
+            verify_service_up(loc)
 
     restart_service(service)
 
 
-def restart(payload):
+def deploy(payload):
     args = payload.get("text").split()
     say = payload["extras"]["say"]
 
@@ -63,7 +79,7 @@ def restart(payload):
 
 
 PluginManager.register_plugin(
-    restart,
+    deploy,
     r"restart ?(.+)",
     help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
     interactive_friendly=False,
