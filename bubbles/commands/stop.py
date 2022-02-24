@@ -1,12 +1,8 @@
 import subprocess
 from typing import Callable
 
-from bubbles.commands import (
-    SERVICES,
-    get_service_name,
-)
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import say_code
+from bubbles.service_utils import SERVICES, get_service_name, say_code
 
 
 def _stop_service(service: str, say: Callable) -> None:

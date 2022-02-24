@@ -1,12 +1,13 @@
 import subprocess
 from typing import Callable
 
-from bubbles.commands import (
+from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.service_utils import (
+    say_code,
+    verify_service_up,
     SERVICES,
     get_service_name,
 )
-from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import say_code, verify_service_up
 
 
 def _restart_service(service: str, say: Callable) -> None:

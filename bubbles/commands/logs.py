@@ -1,7 +1,7 @@
 import subprocess
 from datetime import datetime
 
-from bubbles.commands import SERVICES, get_service_name
+from bubbles.service_utils import SERVICES, get_service_name
 from bubbles.config import PluginManager
 
 # note: this command requires setting up sudoers access
