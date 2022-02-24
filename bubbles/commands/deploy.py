@@ -10,27 +10,26 @@ from bubbles.commands import (
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.utils import get_branch_head
+from bubbles.utils import get_branch_head, say_code
 
 
 def _deploy_service(service: str, say: Callable) -> None:
     say(f"Deploying {service} to production. This may take a moment...")
     os.chdir(f"/data/{service}")
 
-    def saycode(command):
-        say(f"```{command.decode().strip()}```")
-
     def migrate():
         say("Migrating models...")
-        saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
+        say_code(say, subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
     def pull_from_git():
         say("Pulling latest code...")
-        saycode(subprocess.check_output(f"git pull origin {get_branch_head()}".split()))
+        say_code(
+            say, subprocess.check_output(f"git pull origin {get_branch_head()}".split())
+        )
 
     def install_deps():
         say("Installing dependencies...")
-        saycode(subprocess.check_output(["poetry", "install", "--no-dev"]))
+        say_code(say, subprocess.check_output(["poetry", "install", "--no-dev"]))
 
     def bootstrap_site():
         say("Verifying that initial data is present...")
@@ -42,7 +41,7 @@ def _deploy_service(service: str, say: Callable) -> None:
             [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
         )
         if result:
-            saycode(result)
+            say_code(say, result)
 
     def revert_and_recover(loc):
         git_response = (
@@ -78,7 +77,7 @@ def _deploy_service(service: str, say: Callable) -> None:
         )
         if systemctl_response.decode().strip() != "":
             say("Something went wrong and could not restart.")
-            saycode(systemctl_response)
+            say_code(say, systemctl_response)
         else:
             verify_service_up(loc)
 

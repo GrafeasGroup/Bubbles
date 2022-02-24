@@ -9,13 +9,11 @@ from bubbles.commands import (
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.utils import say_code
 
 
 def _restart_service(service: str, say: Callable) -> None:
     say(f"Restarting {service} in production. This may take a moment...")
-
-    def saycode(command):
-        say(f"```{command.decode().strip()}```")
 
     def verify_service_up(loc):
         say(
@@ -43,7 +41,7 @@ def _restart_service(service: str, say: Callable) -> None:
         )
         if systemctl_response.decode().strip() != "":
             say("Something went wrong and could not restart.")
-            saycode(systemctl_response)
+            say_code(say, systemctl_response)
         else:
             verify_service_up(loc)
 
