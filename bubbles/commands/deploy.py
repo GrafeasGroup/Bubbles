@@ -1,15 +1,13 @@
 import os
 import subprocess
-import time
 from typing import Callable
 
 from bubbles.commands import (
-    PROCESS_CHECK_COUNT,
-    PROCESS_CHECK_SLEEP_TIME,
     SERVICES,
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.service_utils import verify_service_up, say_code
 from bubbles.utils import get_branch_head
 
 
@@ -17,20 +15,19 @@ def _deploy_service(service: str, say: Callable) -> None:
     say(f"Deploying {service} to production. This may take a moment...")
     os.chdir(f"/data/{service}")
 
-    def saycode(command):
-        say(f"```{command.decode().strip()}```")
-
     def migrate():
         say("Migrating models...")
-        saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
+        say_code(say, subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
     def pull_from_git():
         say("Pulling latest code...")
-        saycode(subprocess.check_output(f"git pull origin {get_branch_head()}".split()))
+        say_code(
+            say, subprocess.check_output(f"git pull origin {get_branch_head()}".split())
+        )
 
     def install_deps():
         say("Installing dependencies...")
-        saycode(subprocess.check_output(["poetry", "install", "--no-dev"]))
+        say_code(say, subprocess.check_output(["poetry", "install", "--no-dev"]))
 
     def bootstrap_site():
         say("Verifying that initial data is present...")
@@ -42,7 +39,7 @@ def _deploy_service(service: str, say: Callable) -> None:
             [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
         )
         if result:
-            saycode(result)
+            say_code(say, result)
 
     def revert_and_recover(loc):
         git_response = (
@@ -55,22 +52,6 @@ def _deploy_service(service: str, say: Callable) -> None:
         say(f"Rolling back to previous state:\n```\n{git_response}```")
         subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(loc)])
 
-    def verify_service_up(loc):
-        say(
-            f"Pausing for {PROCESS_CHECK_SLEEP_TIME}s to verify that {loc} restarted"
-            f" correctly..."
-        )
-        try:
-            for attempt in range(PROCESS_CHECK_COUNT):
-                time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
-                subprocess.check_call(
-                    ["systemctl", "is-active", "--quiet", get_service_name(loc)]
-                )
-                say(f"Check {attempt + 1}/{PROCESS_CHECK_COUNT} complete!")
-            say("Restarted successfully!")
-        except subprocess.CalledProcessError:
-            revert_and_recover(loc)
-
     def restart_service(loc):
         say(f"Restarting service for {loc}...")
         systemctl_response = subprocess.check_output(
@@ -78,9 +59,12 @@ def _deploy_service(service: str, say: Callable) -> None:
         )
         if systemctl_response.decode().strip() != "":
             say("Something went wrong and could not restart.")
-            saycode(systemctl_response)
+            say_code(say, systemctl_response)
         else:
-            verify_service_up(loc)
+            if verify_service_up(say, loc):
+                say("Restarted successfully!")
+            else:
+                revert_and_recover(loc)
 
     pull_from_git()
     try:
