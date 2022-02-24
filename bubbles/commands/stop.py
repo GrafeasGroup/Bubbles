@@ -6,7 +6,7 @@ from bubbles.commands import (
     get_service_name,
 )
 from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.service_utils import say_code
+from bubbles.utils import say_code
 
 
 def _stop_service(service: str, say: Callable) -> None:
