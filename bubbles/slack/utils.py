@@ -16,7 +16,7 @@ major versions.
 from abc import ABC
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Any, Dict, Union
+from typing import Dict
 
 from bubbles.slack.users import user_map
 from bubbles.slack.types import (
@@ -38,6 +38,7 @@ class SlackPayloadInterpreter(ABC):
     """
     payload: SlackPayload
     client: SlackWebClient
+    _channels: Dict[str, str]
 
     @cached_property
     def bot_user_id(self) -> str:
@@ -72,6 +73,17 @@ class SlackPayloadInterpreter(ABC):
     @property
     def timestamp(self):
         return self.payload['ts']
+
+    def channel_id_from_name(self, channel_name: str) -> str:
+        if not hasattr(self, '_channels'):
+            self._channels = {}
+
+        if len(self._channels.keys()) == 0:
+            resp = self.client.conversations_list()
+            for room in resp['channels']:
+                self._channels[room['name']] = room['id']
+
+        return self._channels[channel_name]
 
 
 class SlackContextActions(SlackPayloadInterpreter):

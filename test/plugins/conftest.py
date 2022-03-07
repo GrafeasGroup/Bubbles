@@ -6,6 +6,7 @@ from typing import Callable, Dict, Type
 from bubbles.plugins.__base_command__ import BaseCommand
 from bubbles.plugins.__base_periodic_job__ import BasePeriodicJob
 from bubbles.slack.utils import SlackUtils
+from bubbles.services.interfaces import Reddit
 
 
 _index = 0
@@ -35,9 +36,67 @@ class Helpers:
         attached_methods = {
             '__init__': lambda *_: None,
             'job': lambda *_: None,
+
+            # Overrides to make Thread subclass testable:
+            'start': lambda *_: None,
+            'run': lambda *_: None,
+            'join': lambda *_: None,
+            'is_alive': lambda *_: True,
         }
         attached_methods.update(methods)
         return type(name, (BasePeriodicJob,), attached_methods)
+
+    @staticmethod
+    def make_job_class_testable(base: Type[BasePeriodicJob]) -> BasePeriodicJob:
+        stub_methods = {
+            # Overrides to make Thread subclass testable:
+            # '__init__': lambda *_: None,
+            'start': lambda *_: None,
+            'run': lambda *_: None,
+            'join': lambda *_: None,
+            'is_alive': lambda *_: True,
+        }
+        # out = type(f'{base.name}-stub', (base, ), stub_methods)
+        out = MagicMock(base.name, spec_set=base)
+
+        # These are a list of methods we should _never_ override because it
+        # messes with how python internals actually operate
+        python_sensitive_internal_methods = {
+            '__new__',
+            '__slots__',
+            '__module__',
+            '__annotations__',
+            '__class__', 'class',
+            '__dict__', # this would be a ref to the parent class' dict. Just don't.
+
+            # These don't work with mocks, so it should mostly be fine to skip
+            '__setattr__',
+            '__getattr__',
+            '__weakref__',
+            '__init__',
+        }
+
+        for attr in dir(base):
+            if attr in python_sensitive_internal_methods:
+                continue
+            if attr in stub_methods.keys():
+                # skip it now so we don't set and then override later
+                continue
+
+            val = getattr(base, attr)
+            m = MagicMock()
+
+            if callable(val):
+                m.side_effect = val
+            else:
+                m.return_value = val
+
+            setattr(out, attr, m)
+
+        for method_name, method in stub_methods.items():
+            setattr(out, method_name, method)
+
+        return out
 
     @staticmethod
     def new_command_class(name: str = None, methods: Dict[str, Callable] = {}) -> Type:
@@ -115,6 +174,23 @@ def slack_utils():
         ],
     }
     return mock_utils
+
+
+@pytest.fixture
+def reddit() -> Reddit:
+    def mod_factory(name: str) -> MagicMock:
+        mod = MagicMock()
+        mod.name = name
+        return mod
+
+    def subreddit_info(*_) -> MagicMock:
+        sub = MagicMock()
+        sub.moderator.return_value = list([mod_factory(str(i)) for i in range(1, 20)])
+        return sub
+
+    out = MagicMock(name='Reddit')
+    out.subreddit.side_effect = subreddit_info
+    return out
 
 
 @pytest.fixture(autouse=True)

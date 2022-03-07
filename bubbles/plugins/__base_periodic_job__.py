@@ -75,8 +75,12 @@ class EventLoop(BaseRegistry):  # pragma: no cover
         self.stop()
 
     def start(self):
+        services = {
+            'reddit': self.reddit,
+        }
+
         for job in self.jobs:
-            job.start()
+            job.start(**services)
 
     def stop(self):
         for job in self.jobs:
@@ -86,7 +90,7 @@ class EventLoop(BaseRegistry):  # pragma: no cover
         import_subclasses()
 
         for job in BasePeriodicJob._subclasses:
-            self.jobs.add(cast(BasePeriodicJob, job))
+            self.jobs.add(cast(BasePeriodicJob, job()))
 
         self.log.info(f'Registered {len(BasePeriodicJob._subclasses)} periodic jobs')
 
