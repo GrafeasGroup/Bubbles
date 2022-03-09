@@ -100,7 +100,7 @@ def _get_check_username(message: Dict) -> Optional[str]:
     """
     text = _extract_check_text(message)
     username_match = USERNAME_REGEX.search(text)
-    return username_match[0] if username_match else None
+    return username_match.group("username") if username_match else None
 
 
 def _get_check_status(message: Dict) -> Tuple[CheckStatus, Optional[str]]:
@@ -253,7 +253,7 @@ def _get_check_fragment(check: CheckData) -> str:
     user = check.get("user") or "[UNKNOWN]"
     link = check["link"] or None
 
-    return f"<{link}|{user}" if link else f"{user} (LINK NOT FOUND)"
+    return f"<{link}|u/{user}" if link else f"{user} (LINK NOT FOUND)"
 
 
 def _get_check_reminder(aggregate: List) -> str:
@@ -272,7 +272,7 @@ def _get_check_reminder(aggregate: List) -> str:
 
         # Add claimed checks
         for mod, claimed in mod_aggregate["claimed"].items():
-            reminder += f"- *{mod}*: "
+            reminder += f"- *u/{mod}*: "
             fragments = [_get_check_fragment(check) for check in claimed]
             reminder += ",".join(fragments) + "\n"
 
@@ -285,24 +285,24 @@ def transcription_check_ping_callback() -> None:
     start_time = now - CHECK_SEARCH_START_DELTA
     end_time = now - CHECK_SEARCH_END_DELTA
 
-    response = app.client.conversations_history(
+    messages_response = app.client.conversations_history(
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
         oldest=end_time,
         latest=start_time,
         limit=200,
     )
-    if not response.get("ok"):
-        logging.error("Failed to get check messages!")
+    if not messages_response.get("ok"):
+        logging.error(f"Failed to get check messages!\n{messages_response}")
         return
 
     # Get the reminder for the checks
-    messages = response["messages"]
+    messages = messages_response["messages"]
     checks = _extract_open_checks(messages)
     aggregate = _aggregate_checks_by_time(checks)
     reminder = _get_check_reminder(aggregate)
 
     # Post the reminder in Slack
-    app.client.chat_postMessage(
+    reminder_response = app.client.chat_postMessage(
         channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
         link_names=1,
         text=reminder,
@@ -310,3 +310,5 @@ def transcription_check_ping_callback() -> None:
         unfurl_media=False,
         as_user=True,
     )
+    if not reminder_response.get("ok"):
+        logging.error(f"Failed to send reminder message!\n{reminder_response}")
