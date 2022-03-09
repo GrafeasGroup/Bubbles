@@ -100,17 +100,22 @@ ME: str = app.client.auth_test().data["user_id"]  # type: ignore
 # per workspace, so it can't be hardcoded.
 COMMAND_PREFIXES = ("!", USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
 
-# Define the list of users (conversion ID <-> name)
+# Define the list of users (conversion ID <-> username)
 # 'Any' here is either a list or a str; mypy can't handle that.
 # See https://stackoverflow.com/a/62862029
 users_list: Dict[str, Any] = {"ids_only": []}
 users = app.client.users_list()
 for user in users["members"]:
     if not user["deleted"]:
-        if "real_name" in user.keys():
-            users_list[user["id"]] = user["real_name"]
-            users_list[user["real_name"]] = user["id"]
-            users_list["ids_only"].append(user["id"])
+        # Extract the display name if available
+        name = (
+            user.get("profile", {}).get("display_name")
+            or user.get("real_name")
+            or user["id"]
+        )
+        users_list[user["id"]] = name
+        users_list[name] = user["id"]
+        users_list["ids_only"].append(user["id"])
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}

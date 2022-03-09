@@ -13,7 +13,7 @@ from bubbles.commands.helper_functions_history.extract_author import extract_aut
 
 
 USERNAME_REGEX = re.compile("u/(?P<username>[^ *:]+)")
-STATUS_REGEX = re.compile(r"Status: \*(?P<status>[^*]+)\*(?: by u\/(?P<mod>\S+))?")
+STATUS_REGEX = re.compile(r"Status: \*(?P<status>[^*]+)\*(?: by u/(?P<mod>\S+))?")
 
 RESOLVED_REACTIONS = [
     "heavy_tick",
