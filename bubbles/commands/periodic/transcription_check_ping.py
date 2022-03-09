@@ -215,7 +215,7 @@ def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
     """Aggregate the given checks by the elapsed time."""
     now = datetime.now()
     # Sort the checks by their time
-    checks.sort(key=lambda x: x["time"])
+    checks.sort(key=lambda x: x["time"], reverse=True)
 
     aggregate = []
 
@@ -244,6 +244,10 @@ def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
             # Further aggregate by moderators
             mod_aggregate = _aggregate_checks_by_mod(time_checks)
             aggregate.append((time_str, mod_aggregate))
+
+    # Add the remaining checks
+    rest_aggregate = _aggregate_checks_by_mod(checks[index:])
+    aggregate.append((CHECK_TIME_FALLBACK, rest_aggregate))
 
     return aggregate
 
