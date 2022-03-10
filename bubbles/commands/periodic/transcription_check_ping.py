@@ -156,7 +156,7 @@ def _get_check_time(message: Dict) -> datetime:
 def _get_check_data(message: Dict) -> CheckData:
     """Extract the data from a given check message."""
     user = _get_check_username(message)
-    status, mod = _get_check_link(message)
+    status, mod = _get_check_status(message)
     link = _get_check_link(message)
     time = _get_check_time(message)
 
@@ -246,8 +246,10 @@ def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
             aggregate.append((time_str, mod_aggregate))
 
     # Add the remaining checks
-    rest_aggregate = _aggregate_checks_by_mod(checks[index:])
-    aggregate.append((CHECK_TIME_FALLBACK, rest_aggregate))
+    remaining_checks = checks[index:]
+    if len(remaining_checks) > 0:
+        rest_aggregate = _aggregate_checks_by_mod(remaining_checks)
+        aggregate.append((CHECK_TIME_FALLBACK, rest_aggregate))
 
     return aggregate
 
@@ -257,7 +259,7 @@ def _get_check_fragment(check: CheckData) -> str:
     user = check.get("user") or "[UNKNOWN]"
     link = check["link"] or None
 
-    return f"<{link}|u/{user}" if link else f"{user} (LINK NOT FOUND)"
+    return f"<{link}|u/{user}>" if link else f"{user} (LINK NOT FOUND)"
 
 
 def _get_check_reminder(aggregate: List) -> str:
