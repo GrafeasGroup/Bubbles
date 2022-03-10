@@ -246,8 +246,10 @@ def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
             aggregate.append((time_str, mod_aggregate))
 
     # Add the remaining checks
-    rest_aggregate = _aggregate_checks_by_mod(checks[index:])
-    aggregate.append((CHECK_TIME_FALLBACK, rest_aggregate))
+    remaining_checks = checks[index:]
+    if len(remaining_checks) > 0:
+        rest_aggregate = _aggregate_checks_by_mod(remaining_checks)
+        aggregate.append((CHECK_TIME_FALLBACK, rest_aggregate))
 
     return aggregate
 
