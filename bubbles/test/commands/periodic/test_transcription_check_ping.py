@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Dict, Tuple
+from datetime import datetime, timedelta
+from typing import Dict, Tuple, List
 from unittest.mock import patch
 
 import pytest
@@ -12,6 +12,8 @@ from bubbles.commands.periodic.transcription_check_ping import (
     _get_check_status,
     CheckData,
     _get_check_data,
+    _aggregate_checks_by_mod,
+    _aggregate_checks_by_time,
 )
 
 EXAMPLE_USER_LIST = {
@@ -158,4 +160,179 @@ def test_get_check_data(message: Dict) -> None:
     ):
         actual = _get_check_data(message)
 
+    assert actual == expected
+
+
+def test_aggregate_checks_by_mod() -> None:
+    """Test whether the checks are aggregated correctly."""
+    checks: List[CheckData] = [
+        {
+            "time": datetime(2022, 3, 10),
+            "status": CheckStatus.UNCLAIMED,
+            "user": "user123",
+            "mod": None,
+            "link": "https://example.com",
+        },
+        {
+            "time": datetime(2022, 3, 10),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod974",
+            "link": "https://example.com",
+        },
+        {
+            "time": datetime(2022, 3, 10),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod974",
+            "link": "https://example.com",
+        },
+        {
+            "time": datetime(2022, 3, 10),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod556",
+            "link": "https://example.com",
+        },
+    ]
+    expected = {
+        "unclaimed": [
+            {
+                "time": datetime(2022, 3, 10),
+                "status": CheckStatus.UNCLAIMED,
+                "user": "user123",
+                "mod": None,
+                "link": "https://example.com",
+            }
+        ],
+        "claimed": {
+            "mod974": [
+                {
+                    "time": datetime(2022, 3, 10),
+                    "status": CheckStatus.PENDING,
+                    "user": "user123",
+                    "mod": "mod974",
+                    "link": "https://example.com",
+                },
+                {
+                    "time": datetime(2022, 3, 10),
+                    "status": CheckStatus.PENDING,
+                    "user": "user123",
+                    "mod": "mod974",
+                    "link": "https://example.com",
+                },
+            ],
+            "mod556": [
+                {
+                    "time": datetime(2022, 3, 10),
+                    "status": CheckStatus.PENDING,
+                    "user": "user123",
+                    "mod": "mod556",
+                    "link": "https://example.com",
+                }
+            ],
+        },
+    }
+
+    actual = _aggregate_checks_by_mod(checks)
+    assert actual == expected
+
+
+def test_aggregate_checks_by_time() -> None:
+    """Test whether the checks are aggregated correctly."""
+    now = datetime.now()
+
+    checks: List[CheckData] = [
+        {
+            "time": now - timedelta(days=5),
+            "status": CheckStatus.UNCLAIMED,
+            "user": "user123",
+            "mod": None,
+            "link": "https://example.com",
+        },
+        {
+            "time": now - timedelta(days=9),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod123",
+            "link": "https://example.com",
+        },
+        {
+            "time": now - timedelta(days=6),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod974",
+            "link": "https://example.com",
+        },
+        {
+            "time": now - timedelta(days=1),
+            "status": CheckStatus.PENDING,
+            "user": "user123",
+            "mod": "mod556",
+            "link": "https://example.com",
+        },
+    ]
+    expected = [
+        (
+            "12-48 hours",
+            {
+                "unclaimed": [],
+                "claimed": {
+                    "mod556": [
+                        {
+                            "time": now - timedelta(days=1),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod556",
+                            "link": "https://example.com",
+                        }
+                    ]
+                },
+            },
+        ),
+        (
+            "4-7 days",
+            {
+                "unclaimed": [
+                    {
+                        "time": now - timedelta(days=5),
+                        "status": CheckStatus.UNCLAIMED,
+                        "user": "user123",
+                        "mod": None,
+                        "link": "https://example.com",
+                    }
+                ],
+                "claimed": {
+                    "mod974": [
+                        {
+                            "time": now - timedelta(days=6),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod974",
+                            "link": "https://example.com",
+                        },
+                    ]
+                },
+            },
+        ),
+        (
+            "7+ days :rotating_light:",
+            {
+                "unclaimed": [],
+                "claimed": {
+                    "mod123": [
+                        {
+                            "time": now - timedelta(days=9),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod123",
+                            "link": "https://example.com",
+                        },
+                    ]
+                },
+            },
+        ),
+    ]
+
+    actual = _aggregate_checks_by_time(checks)
     assert actual == expected
