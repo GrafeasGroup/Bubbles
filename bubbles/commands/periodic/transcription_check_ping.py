@@ -62,8 +62,6 @@ class CheckData(TypedDict):
 
 def _is_check_message(message: Dict) -> bool:
     """Determine if the given message is a check."""
-    # FIXME: Remove this if it works
-    print(message)
     return message["user"] == users_list["Blossom"]
 
 
@@ -292,8 +290,6 @@ def transcription_check_ping_callback() -> None:
 
     start_time = now - CHECK_SEARCH_START_DELTA
     end_time = now - CHECK_SEARCH_END_DELTA
-    # FIXME: Remove this
-    print(f"Start: {start_time}, end: {end_time}")
 
     messages_response = app.client.conversations_history(
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
@@ -307,11 +303,7 @@ def transcription_check_ping_callback() -> None:
 
     # Get the reminder for the checks
     messages = messages_response["messages"]
-    # FIXME: Remove this
-    print(f"Processing {len(messages)} messages")
     checks = _extract_open_checks(messages)
-    # FIXME: Remove this
-    print(f"{len(checks)} checks are open")
     aggregate = _aggregate_checks_by_time(checks)
     reminder = _get_check_reminder(aggregate)
 

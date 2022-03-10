@@ -118,8 +118,5 @@ def enable_tl_jobs() -> None:
 
     print(f"Enabling {len(all_jobs)} periodic jobs.")
 
-    # FIXME: Remove this if it works
-    transcription_check_ping_callback()
-
     for job in all_jobs:
         job()
