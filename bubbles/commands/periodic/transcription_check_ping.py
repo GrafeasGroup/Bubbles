@@ -62,6 +62,8 @@ class CheckData(TypedDict):
 
 def _is_check_message(message: Dict) -> bool:
     """Determine if the given message is a check."""
+    # FIXME: Remove this if it works
+    logging.info(message)
     return message["user"] == users_list["Blossom"]
 
 
