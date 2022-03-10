@@ -13,12 +13,16 @@ from bubbles.commands.periodic.transcription_check_ping import (
     CheckData,
     _get_check_data,
     _aggregate_checks_by_mod,
-    _aggregate_checks_by_time, _get_check_reminder,
+    _aggregate_checks_by_time,
+    _get_check_reminder,
+    _is_check_message,
 )
 
 EXAMPLE_USER_LIST = {
     "UEEMDNC0K": "mod974",
     "mod974": "UEEMDNC0K",
+    "ADDBAS9A": "Blossom",
+    "Blossom": "ADDBAS9A",
 }
 
 EXAMPLE_OLD_CHECK = {
@@ -71,6 +75,20 @@ EXAMPLE_NEW_CHECK = {
         },
     ]
 }
+
+
+@pytest.mark.parametrize(
+    "message,expected", [({"user": "ADDBAS9A"}, True), ({"user": "UEEMDNC0K"}, False)],
+)
+def test_is_check_message(message: Dict, expected: bool) -> None:
+    """Test whether checks are detected correctly."""
+    with patch(
+        "bubbles.commands.periodic.transcription_check_ping.users_list",
+        EXAMPLE_USER_LIST,
+    ):
+        actual = _is_check_message(message)
+
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -132,6 +150,7 @@ def test_get_check_status(message: Dict, expected: Tuple[CheckStatus, str]) -> N
         EXAMPLE_USER_LIST,
     ):
         actual = _get_check_status(message)
+
     assert actual == expected
 
 
