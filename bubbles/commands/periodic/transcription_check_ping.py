@@ -292,11 +292,13 @@ def transcription_check_ping_callback() -> None:
 
     start_time = now - CHECK_SEARCH_START_DELTA
     end_time = now - CHECK_SEARCH_END_DELTA
+    # FIXME: Remove this
+    print(f"Start: {start_time}, end: {end_time}")
 
     messages_response = app.client.conversations_history(
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
-        oldest=end_time,
-        latest=start_time,
+        oldest=end_time.timestamp(),
+        latest=start_time.timestamp(),
         limit=200,
     )
     if not messages_response.get("ok"):
