@@ -13,7 +13,7 @@ from bubbles.commands.periodic.transcription_check_ping import (
     CheckData,
     _get_check_data,
     _aggregate_checks_by_mod,
-    _aggregate_checks_by_time,
+    _aggregate_checks_by_time, _get_check_reminder,
 )
 
 EXAMPLE_USER_LIST = {
@@ -335,4 +335,85 @@ def test_aggregate_checks_by_time() -> None:
     ]
 
     actual = _aggregate_checks_by_time(checks)
+    assert actual == expected
+
+
+def test_get_check_reminder() -> None:
+    """Test that the check reminders are assembled correctly."""
+    now = datetime.now()
+
+    aggregate = [
+        (
+            "12-48 hours",
+            {
+                "unclaimed": [],
+                "claimed": {
+                    "mod556": [
+                        {
+                            "time": now - timedelta(days=1),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod556",
+                            "link": "https://example.com",
+                        }
+                    ]
+                },
+            },
+        ),
+        (
+            "4-7 days",
+            {
+                "unclaimed": [
+                    {
+                        "time": now - timedelta(days=5),
+                        "status": CheckStatus.UNCLAIMED,
+                        "user": "user123",
+                        "mod": None,
+                        "link": "https://example.com",
+                    }
+                ],
+                "claimed": {
+                    "mod974": [
+                        {
+                            "time": now - timedelta(days=6),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod974",
+                            "link": "https://example.com",
+                        },
+                    ]
+                },
+            },
+        ),
+        (
+            "7+ days :rotating_light:",
+            {
+                "unclaimed": [],
+                "claimed": {
+                    "mod123": [
+                        {
+                            "time": now - timedelta(days=9),
+                            "status": CheckStatus.PENDING,
+                            "user": "user123",
+                            "mod": "mod123",
+                            "link": "https://example.com",
+                        },
+                    ]
+                },
+            },
+        ),
+    ]
+
+    expected = """*Pending Transcription Checks:*
+
+*12-48 hours*:
+- *u/mod556*: <https://example.com|u/user123>
+*4-7 days*:
+- *[UNCLAIMED]*: <https://example.com|u/user123>
+- *u/mod974*: <https://example.com|u/user123>
+*7+ days :rotating_light:*:
+- *u/mod123*: <https://example.com|u/user123>
+"""
+
+    actual = _get_check_reminder(aggregate)
     assert actual == expected

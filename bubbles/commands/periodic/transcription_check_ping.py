@@ -257,7 +257,7 @@ def _get_check_fragment(check: CheckData) -> str:
     user = check.get("user") or "[UNKNOWN]"
     link = check["link"] or None
 
-    return f"<{link}|u/{user}" if link else f"{user} (LINK NOT FOUND)"
+    return f"<{link}|u/{user}>" if link else f"{user} (LINK NOT FOUND)"
 
 
 def _get_check_reminder(aggregate: List) -> str:
