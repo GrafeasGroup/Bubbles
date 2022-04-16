@@ -36,7 +36,12 @@ def process_message(payload):
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
-        plugin(payload)
+        if not plugin["ignore_prefix"]:
+            # Strip the prefix from the message
+            cmd_text = PluginManager.try_get_command_text(message)
+            payload.update({"text": cmd_text})
+
+        plugin["callable"](payload)
     elif plugin is False:
         # we're in interactive mode and hit a locked plugin, so we just need
         # to skip the else block
@@ -46,8 +51,8 @@ def process_message(payload):
         # Let's only limit responses to things that look like they're trying
         # to use regular command syntax, though.
         # For example, trigger on "!hello" but not for "isn't bubbles great".
-        if PluginManager.message_is_for_us(message):
-            payload["extras"]["say"](f"Unknown command: `{message}`")
+        if command_text := PluginManager.try_get_command_text(message):
+            payload["extras"]["say"](f"Unknown command: `{command_text}`")
 
     # If a command needs to be able to see all traffic for historical reasons,
     # register a separate callback function in a class for the command. See
