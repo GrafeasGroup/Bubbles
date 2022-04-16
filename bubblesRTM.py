@@ -89,7 +89,12 @@ def message_received(ack, payload, client, context, say):
     payload.update(
         {
             "cleaned_text": clean_text(payload.get("text")),
-            "extras": {"client": client, "context": context, "say": say, "utils": utils},
+            "extras": {
+                "client": client,
+                "context": context,
+                "say": say,
+                "utils": utils,
+            },
         }
     )
     try:
@@ -99,10 +104,17 @@ def message_received(ack, payload, client, context, say):
 
 
 @app.event("message")
-def handle_message(ack, payload, client, context, say):
+def handle_message(ack, payload, client, context, say, body: dict):
+    # Extract the thread that the message was posted in (if any)
+    thread_ts = body["event"].get("thread_ts")
+
+    def thread_say(*args, **kwargs):
+        """Reply in the thread if the message was sent in a thread."""
+        say(*args, thread_ts=thread_ts, **kwargs)
+
     # Actually put the slack event handler on this one so that we can dual-wield
     # `message_received` for interactive mode and normal interaction.
-    message_received(ack, payload, client, context, say)
+    message_received(ack, payload, client, context, say=thread_say)
 
 
 @app.event("reaction_added")
