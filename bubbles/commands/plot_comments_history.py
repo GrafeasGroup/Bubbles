@@ -108,7 +108,7 @@ def plot_comments_history(payload: Dict) -> None:
 
 PluginManager.register_plugin(
     plot_comments_history,
-    r"(?!.*who)history([0-9 ]+)?",
+    r"^history([0-9 ]+)?",
     help=(
         "!history [number of posts] - shows the number of new comments in"
         " #new-volunteers in function of their day. `number of posts` must"

@@ -11,4 +11,4 @@ def exclamation(payload):
     pass
 
 
-PluginManager.register_plugin(exclamation, r"!")
+PluginManager.register_plugin(exclamation, r"^!")

@@ -20,7 +20,7 @@ def update(payload) -> None:
 
 PluginManager.register_plugin(
     update,
-    r"update$",
+    r"^update$",
     help="!update - pull changes from github and restart!",
     interactive_friendly=False,
 )

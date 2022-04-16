@@ -121,7 +121,7 @@ def deploy(payload):
 
 PluginManager.register_plugin(
     deploy,
-    r"deploy ?(.+)",
+    r"^deploy ?(.+)",
     help=(
         f"!deploy [{', '.join(SERVICES)}] - deploys the code currently on github to"
         f" production."

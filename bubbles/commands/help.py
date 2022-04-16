@@ -32,5 +32,5 @@ def help(payload):
 
 
 PluginManager.register_plugin(
-    help, r"help$", help="!help - Lists out all available commands!"
+    help, r"^help$", help="!help - Lists out all available commands!"
 )

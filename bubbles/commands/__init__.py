@@ -8,8 +8,7 @@ from typing import List, Union
 import glob
 from os.path import dirname, basename, isfile, join
 
-from bubbles.config import COMMAND_PREFIXES
-
+from bubbles.config import PluginManager
 
 modules = glob.glob(join(dirname(__file__), "*.py"))
 __all__ = [
@@ -27,8 +26,7 @@ def clean_text(text: Union[str, List]) -> str:
         @bubbles test -> test
         @bubbles test one -> test one
     """
-    if not isinstance(text, list):
-        text = text.split()
-    if text[0] in COMMAND_PREFIXES:
-        text.pop(0)
-    return " ".join(text)
+    if isinstance(text, list):
+        text = " ".join(text)
+
+    return PluginManager.try_get_command_text(text) or text

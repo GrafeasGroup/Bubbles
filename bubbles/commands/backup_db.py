@@ -41,6 +41,6 @@ def backup_db(payload):
 
 PluginManager.register_plugin(
     backup_db,
-    r"backup",
+    r"^backup",
     help="!backup - creates and uploads a full backup of our postgres db.",
 )

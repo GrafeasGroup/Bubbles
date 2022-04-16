@@ -69,7 +69,7 @@ def plot_comments_historylist(payload: Dict) -> None:
 
 PluginManager.register_plugin(
     plot_comments_historylist,
-    r"(?!.*who)listmodsTEST ([0-9 ]+)?",
+    r"^listmodsTEST ([0-9 ]+)?",
     help=(
         "!historylist [number of posts] - shows the number of new comments in"
         " #new-volunteers in function of the mod having welcomed them. `number"

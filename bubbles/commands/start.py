@@ -61,7 +61,7 @@ def start(payload):
 
 PluginManager.register_plugin(
     start,
-    r"start ?(.+)",
+    r"^start ?(.+)",
     help=f"!start [{', '.join(SERVICES)}] - starts the requested bot.",
     interactive_friendly=False,
 )
