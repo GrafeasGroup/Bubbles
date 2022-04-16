@@ -163,5 +163,5 @@ def plot_comments_historywho(payload: Dict) -> None:
 
 
 PluginManager.register_plugin(
-    plot_comments_historywho, r"historywho([ \"a-zA-Z]+)?", help=HELP_MESSAGE,
+    plot_comments_historywho, r"^historywho([ \"a-zA-Z]+)?", help=HELP_MESSAGE,
 )

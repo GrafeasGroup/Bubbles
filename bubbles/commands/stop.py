@@ -50,7 +50,7 @@ def stop(payload):
 
 PluginManager.register_plugin(
     stop,
-    r"stop ?(.+)",
+    r"^stop ?(.+)",
     help=f"!stop [{', '.join(SERVICES)}] - stops the requested bot.",
     interactive_friendly=False,
 )

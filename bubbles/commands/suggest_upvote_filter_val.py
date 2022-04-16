@@ -6,7 +6,7 @@ from typing import List
 
 from bubbles.config import PluginManager, reddit
 
-SUGGEST_FILTER_RE = r"suggest filter (r\/|\/r\/)?([a-z_-]+)$"
+SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
 
 def avg(mylist: List) -> int:

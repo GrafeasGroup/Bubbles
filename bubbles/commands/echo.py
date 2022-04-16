@@ -24,5 +24,5 @@ def echo(payload):
 
 
 PluginManager.register_plugin(
-    echo, r"echo", help="Repeats back whatever you pass in. Mostly for debugging."
+    echo, r"^echo", help="Repeats back whatever you pass in. Mostly for debugging."
 )

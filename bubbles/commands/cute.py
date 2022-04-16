@@ -116,7 +116,7 @@ def cute(data):
 
 PluginManager.register_plugin(
     cute,
-    r"cute",
+    r"^cute",
     help=(
         f"!cute [{', '.join([k for k in animals.keys()])}] - Specify an animal"
         f" for a cute picture! Or just !cute for a random one."

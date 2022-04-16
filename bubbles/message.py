@@ -36,11 +36,6 @@ def process_message(payload):
     # search all the loaded plugins to see if any of the regex's match
     plugin = PluginManager.get_plugin(message)
     if plugin:
-        if not plugin["ignore_prefix"]:
-            # Strip the prefix from the message
-            cmd_text = PluginManager.try_get_command_text(message)
-            payload.update({"text": cmd_text})
-
         plugin["callable"](payload)
     elif plugin is False:
         # we're in interactive mode and hit a locked plugin, so we just need

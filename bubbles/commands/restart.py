@@ -65,7 +65,7 @@ def restart(payload):
 
 PluginManager.register_plugin(
     restart,
-    r"restart ?(.+)",
+    r"^restart ?(.+)",
     help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
     interactive_friendly=False,
 )
