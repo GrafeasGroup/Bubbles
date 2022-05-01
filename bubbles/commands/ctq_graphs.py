@@ -224,6 +224,7 @@ def _generate_aggregated_bar_chart(
     # We want to display the entries top to bottom, so we need to reverse them
     labels = [entry[0] for entry in reversed(plot_entries)]
     data = [entry[1] for entry in reversed(plot_entries)]
+    colors.reverse()
 
     fig: plt.Figure = plt.Figure()
     ax: plt.Axes = fig.gca()
