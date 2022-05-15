@@ -12,7 +12,7 @@ from bubbles.config import app, users_list, rooms_list
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 
-USERNAME_REGEX = re.compile("u/(?P<username>[^ *:]+)")
+USERNAME_REGEX = re.compile(r"u/(?P<username>[^ *:\[\]()?!<>]+)")
 STATUS_REGEX = re.compile(r"Status: \*(?P<status>[^*]+)\*(?: by u/(?P<mod>\S+))?")
 
 RESOLVED_REACTIONS = [
