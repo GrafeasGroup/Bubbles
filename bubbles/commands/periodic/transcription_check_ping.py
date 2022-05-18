@@ -272,15 +272,15 @@ def _get_check_reminder(aggregate: List) -> str:
         # Add unclaimed checks
         unclaimed = mod_aggregate["unclaimed"]
         if len(unclaimed) > 0:
-            reminder += "- *[UNCLAIMED]*: "
+            reminder += "- [UNCLAIMED]: "
             fragments = [_get_check_fragment(check) for check in unclaimed]
-            reminder += ",".join(fragments) + "\n"
+            reminder += ", ".join(fragments) + "\n"
 
         # Add claimed checks
         for mod, claimed in mod_aggregate["claimed"].items():
-            reminder += f"- *u/{mod}*: "
+            reminder += f"- u/{mod}: "
             fragments = [_get_check_fragment(check) for check in claimed]
-            reminder += ",".join(fragments) + "\n"
+            reminder += ", ".join(fragments) + "\n"
 
     return reminder
 
