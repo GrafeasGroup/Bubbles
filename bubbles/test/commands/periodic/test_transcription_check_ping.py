@@ -426,12 +426,12 @@ def test_get_check_reminder() -> None:
     expected = """*Pending Transcription Checks:*
 
 *12-48 hours*:
-- *u/mod556*: <https://example.com|u/user123>
+- u/mod556: <https://example.com|u/user123>
 *4-7 days*:
-- *[UNCLAIMED]*: <https://example.com|u/user123>
-- *u/mod974*: <https://example.com|u/user123>
+- [UNCLAIMED]: <https://example.com|u/user123>
+- u/mod974: <https://example.com|u/user123>
 *7+ days :rotating_light:*:
-- *u/mod123*: <https://example.com|u/user123>
+- u/mod123: <https://example.com|u/user123>
 """
 
     actual = _get_check_reminder(aggregate)
