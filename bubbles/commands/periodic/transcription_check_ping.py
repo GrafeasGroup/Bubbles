@@ -295,7 +295,7 @@ def transcription_check_ping_callback() -> None:
         channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL],
         oldest=end_time.timestamp(),
         latest=start_time.timestamp(),
-        limit=200,
+        limit=1000,
     )
     if not messages_response.get("ok"):
         logging.error(f"Failed to get check messages!\n{messages_response}")
