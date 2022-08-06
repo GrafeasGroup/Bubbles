@@ -6,8 +6,8 @@ from bubbles.config import rooms_list
 def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
     """
     Function that fetches the number of messages required by the input argument.
-    
-    
+
+
     """
     client = payload["extras"]["client"]
     channel = rooms_list[channel_name]

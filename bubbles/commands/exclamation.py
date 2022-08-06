@@ -1,4 +1,4 @@
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def exclamation(payload):
@@ -11,4 +11,4 @@ def exclamation(payload):
     pass
 
 
-PluginManager.register_plugin(exclamation, r"^!")
+PLUGIN = Plugin(callable=exclamation, regex=r"^!")

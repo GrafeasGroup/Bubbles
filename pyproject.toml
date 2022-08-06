@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "bubbles-v2"
+name = "bubbles"
 version = "0.1.0"
 description = "A very chatty chatbot."
 authors = ["Joe Kaufeld <joe@grafeas.org>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 wheel = "^0.36.2"
 blossom-wrapper = { git = "https://github.com/GrafeasGroup/blossom-wrapper.git", branch = "master" }
 matplotlib = "^3.3.0"
@@ -18,10 +18,16 @@ aiohttp = "^3.7.3"
 slack-bolt = "^1.2.1"
 poetry = "^1.1.6"
 etsy2 = {git = "https://github.com/simpassi/etsy-python2"}
+shiv = "^1.0.1"
+pytest = "^7.1.2"
+click = "^8.1.3"
+
+[tool.poetry.plugins."console_scripts"]
+"bubbles" = "bubbles.main:main"
 
 [tool.poetry.dev-dependencies]
-black = "^19.10b0"
-pytest = "^7.0.1"
+black = "^22.6.0"
+poetry2setup = "^1.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]

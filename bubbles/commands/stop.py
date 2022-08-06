@@ -1,7 +1,8 @@
 import subprocess
 from typing import Callable
 
-from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.config import COMMAND_PREFIXES
+from bubbles.commands import Plugin
 from bubbles.service_utils import SERVICES, get_service_name, say_code
 
 
@@ -48,9 +49,9 @@ def stop(payload):
         _stop_service(service, say)
 
 
-PluginManager.register_plugin(
-    stop,
-    r"^stop ?(.+)",
+PLUGIN = Plugin(
+    callable=stop,
+    regex=r"^stop ?(.+)",
     help=f"!stop [{', '.join(SERVICES)}] - stops the requested bot.",
     interactive_friendly=False,
 )

@@ -25,7 +25,7 @@ You may need a .env file for secrets -- copy `.env-example` to `.env` and fill i
 If you're testing commands locally that do not need to access to advanced functionality (external services, mostly), you can invoke the interactive terminal by running:
 
 ```shell script
-python bubblesRTM.py --interactive
+python bubbles/main.py --interactive
 ```
 
 This will create a shell session where you can test commands without needing to be hooked up to anything special.
@@ -37,7 +37,7 @@ Bubbles uses a plugin manager to register commands. Each command is registered i
 ### Example Command
 
 ```python
-from bubbles.config import PluginManager
+from bubbles.main import PluginManager
 
 
 def hello_world(rtmclient, client, user_list, data):
@@ -76,5 +76,5 @@ PluginManager.register_plugin(hello_world, r"hello", flags=re.IGNORECASE | re.MU
 ## Running the bot
 
 ```shell script
-python bubblesRTM.py
+python bubbles/main.py
 ```

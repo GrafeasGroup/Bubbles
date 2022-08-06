@@ -1,7 +1,8 @@
 import subprocess
 from typing import Callable
 
-from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.commands import Plugin
+from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import (
     say_code,
     verify_service_up,
@@ -63,9 +64,9 @@ def restart(payload):
         _restart_service(service, say)
 
 
-PluginManager.register_plugin(
-    restart,
-    r"^restart ?(.+)",
+PLUGIN = Plugin(
+    callable=restart,
+    regex=r"^restart ?(.+)",
     help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
     interactive_friendly=False,
 )

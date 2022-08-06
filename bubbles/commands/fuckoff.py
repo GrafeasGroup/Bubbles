@@ -1,7 +1,9 @@
 import random
 import re
 
-from bubbles.config import PluginManager, USERNAME
+from bubbles.config import USERNAME
+from bubbles.commands import Plugin
+
 
 pattern = r"""
 f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{0}
@@ -24,6 +26,6 @@ def fuck_off(payload):
     payload["extras"]["say"](random.choice(responses))
 
 
-PluginManager.register_plugin(
-    fuck_off, pattern, flags=re.IGNORECASE, ignore_prefix=True
+PLUGIN = Plugin(
+    callable=fuck_off, regex=pattern, flags=re.IGNORECASE, ignore_prefix=True
 )

@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def update(payload) -> None:
@@ -18,9 +18,9 @@ def update(payload) -> None:
     )
 
 
-PluginManager.register_plugin(
-    update,
-    r"^update$",
+PLUGIN = Plugin(
+    callable=update,
+    regex=r"^update$",
     help="!update - pull changes from github and restart!",
     interactive_friendly=False,
 )

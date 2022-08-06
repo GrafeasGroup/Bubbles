@@ -1,8 +1,8 @@
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def ping(payload):
     payload["extras"]["say"]("PONG!")
 
 
-PluginManager.register_plugin(ping, r"^ping$", help="!ping - PONG")
+PLUGIN = Plugin(callable=ping, regex=r"^ping$", help="!ping - PONG")

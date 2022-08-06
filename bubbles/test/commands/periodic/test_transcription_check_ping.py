@@ -78,7 +78,8 @@ EXAMPLE_NEW_CHECK = {
 
 
 @pytest.mark.parametrize(
-    "message,expected", [({"user": "ADDBAS9A"}, True), ({"user": "UEEMDNC0K"}, False)],
+    "message,expected",
+    [({"user": "ADDBAS9A"}, True), ({"user": "UEEMDNC0K"}, False)],
 )
 def test_is_check_message(message: Dict, expected: bool) -> None:
     """Test whether checks are detected correctly."""
@@ -92,7 +93,8 @@ def test_is_check_message(message: Dict, expected: bool) -> None:
 
 
 @pytest.mark.parametrize(
-    "message,expected", [(EXAMPLE_OLD_CHECK, True), (EXAMPLE_NEW_CHECK, False)],
+    "message,expected",
+    [(EXAMPLE_OLD_CHECK, True), (EXAMPLE_NEW_CHECK, False)],
 )
 def test_is_old_check(message: Dict, expected: bool) -> None:
     """Test whether old checks are detected correctly."""
@@ -155,7 +157,8 @@ def test_get_check_status(message: Dict, expected: Tuple[CheckStatus, str]) -> N
 
 
 @pytest.mark.parametrize(
-    "message", [EXAMPLE_OLD_CHECK, EXAMPLE_NEW_CHECK],
+    "message",
+    [EXAMPLE_OLD_CHECK, EXAMPLE_NEW_CHECK],
 )
 def test_get_check_data(message: Dict) -> None:
     """Test whether the check data is extracted correctly."""

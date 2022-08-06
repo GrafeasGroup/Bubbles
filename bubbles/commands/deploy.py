@@ -2,7 +2,8 @@ import os
 import subprocess
 from typing import Callable
 
-from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.config import COMMAND_PREFIXES
+from bubbles.commands import Plugin
 from bubbles.service_utils import (
     verify_service_up,
     say_code,
@@ -119,9 +120,9 @@ def deploy(payload):
         _deploy_service(service, say)
 
 
-PluginManager.register_plugin(
-    deploy,
-    r"^deploy ?(.+)",
+PLUGIN = Plugin(
+    callable=deploy,
+    regex=r"^deploy ?(.+)",
     help=(
         f"!deploy [{', '.join(SERVICES)}] - deploys the code currently on github to"
         f" production."
