@@ -16,7 +16,6 @@ Plugin = Dict[str, Any]
 
 
 class PluginManager:
-    # don't import this directly -- import from bubbles.config
     def __init__(self, command_prefixes: Tuple, interactive_mode: bool = False) -> None:
         self.plugins: List[Plugin] = list()
         self.callbacks: List[Callable] = list()
@@ -178,22 +177,22 @@ class PluginManager:
         # bubbles.commands.yell for an example implementation.
         self.process_plugin_callbacks(payload)
 
+    def clean_text(self, text: Union[str, list]) -> str:
+        """
+        Take the trigger word out of the text.
+
+        Examples:
+            !test -> !test
+            !test one -> !test one
+            @bubbles test -> test
+            @bubbles test one -> test one
+        """
+        if isinstance(text, list):
+            text = " ".join(text)
+
+        return self.try_get_command_text(text) or text
+
     def message_received(self, ack, payload, client, context, say):
-        def clean_text(text: Union[str, list]) -> str:
-            """
-            Take the trigger word out of the text.
-
-            Examples:
-                !test -> !test
-                !test one -> !test one
-                @bubbles test -> test
-                @bubbles test one -> test one
-            """
-            if isinstance(text, list):
-                text = " ".join(text)
-
-            return self.try_get_command_text(text) or text
-
         ack()
         if not payload.get("text"):
             # we got a message that is not really a message for some reason.
@@ -201,7 +200,7 @@ class PluginManager:
         utils = MessageUtils(client, payload)
         payload.update(
             {
-                "cleaned_text": clean_text(payload.get("text")),
+                "cleaned_text": self.clean_text(payload.get("text")),
                 "extras": {
                     "client": client,
                     "context": context,
