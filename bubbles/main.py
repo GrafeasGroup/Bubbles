@@ -160,6 +160,8 @@ def selfcheck(verbose: bool) -> None:
         tl.start()
         # If any of the commands have a syntax error, it will explode here.
         tl.stop()
+        PluginManager = PM(COMMAND_PREFIXES)
+        PluginManager.load_all_plugins()
     except Exception as e:
         log.error(e)
         sys.exit(1)

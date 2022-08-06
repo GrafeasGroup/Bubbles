@@ -27,7 +27,6 @@ with current_zipfile() as archive:
         dotenv_path = str(Path(archive.filename).parent / ".env")
     else:
         dotenv_path = None
-log.error(dotenv_path)
 load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(

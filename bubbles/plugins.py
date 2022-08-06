@@ -17,7 +17,7 @@ Plugin = Dict[str, Any]
 
 class PluginManager:
     # don't import this directly -- import from bubbles.config
-    def __init__(self, command_prefixes: Tuple, interactive_mode: bool) -> None:
+    def __init__(self, command_prefixes: Tuple, interactive_mode: bool = False) -> None:
         self.plugins: List[Plugin] = list()
         self.callbacks: List[Callable] = list()
         self.command_prefixes = command_prefixes
