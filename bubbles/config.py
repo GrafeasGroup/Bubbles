@@ -1,9 +1,9 @@
-import argparse
+import logging
 import os
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List
 from unittest import mock
-import logging
 from unittest.mock import MagicMock
 
 import matplotlib as mpl  # type: ignore
@@ -14,18 +14,20 @@ from dotenv import load_dotenv
 from etsy2 import Etsy
 from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
+from shiv.bootstrap import current_zipfile
 from slack_bolt import App
 
-from bubbles.plugins import PluginManager as PM
-
-parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
-parser.add_argument("--startup-check", action="store_true")
-parser.add_argument("--interactive", action="store_true")
-CHECK_MODE = parser.parse_args().startup_check
-INTERACTIVE_MODE = parser.parse_args().interactive
-
 log = logging.getLogger(__name__)
-load_dotenv()
+
+
+with current_zipfile() as archive:
+    if archive:
+        # if archive is none, we're not in the zipfile and are probably
+        # in development mode right now.
+        dotenv_path = str(Path(archive.filename).parent / ".env")
+    else:
+        dotenv_path = None
+load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -134,9 +136,6 @@ DEFAULT_CHANNEL = rooms_list[DEFAULT_CHANNEL]
 mods_array: List = []
 for i in range(0, 24):
     mods_array.append(None)
-
-# Import PluginManager from here
-PluginManager = PM(COMMAND_PREFIXES, INTERACTIVE_MODE)
 
 mpl.rcParams["figure.figsize"] = [20, 10]
 

@@ -1,4 +1,4 @@
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def vote(payload):
@@ -18,8 +18,8 @@ def vote(payload):
         utils.reaction_add(response, vote)
 
 
-PluginManager.register_plugin(
-    vote,
-    r"^vote([ \S]+)?|poll([ \S]+)?",
+PLUGIN = Plugin(
+    callable=vote,
+    regex=r"^vote([ \S]+)?|poll([ \S]+)?",
     help="!vote [your vote!] Example: `!vote Is this cool or what?`",
 )

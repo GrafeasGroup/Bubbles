@@ -6,8 +6,7 @@ from typing import Dict
 import matplotlib.pyplot as plt
 from numpy import flip
 
-from bubbles.config import PluginManager
-
+from bubbles.commands import Plugin
 from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
@@ -106,12 +105,13 @@ def plot_comments_history(payload: Dict) -> None:
     plt.close()
 
 
-PluginManager.register_plugin(
-    plot_comments_history,
-    r"^history([0-9 ]+)?",
+PLUGIN = Plugin(
+    callable=plot_comments_history,
+    regex=r"^history([0-9 ]+)?",
     help=(
         "!history [number of posts] - shows the number of new comments in"
         " #new-volunteers in function of their day. `number of posts` must"
         " be an integer between 1 and 1000 inclusive."
     ),
+    interactive_friendly=False,
 )

@@ -1,6 +1,7 @@
 import random
 
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
+
 
 F = """
 ⠀⠀⢀⡤⢶⣶⣶⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ 
@@ -23,4 +24,4 @@ def fancy_f(payload):
         payload["extras"]["say"](F)
 
 
-PluginManager.register_plugin(fancy_f, r"^[fF]$", ignore_prefix=True)
+PLUGIN = Plugin(callable=fancy_f, regex=r"^[fF]$", ignore_prefix=True)

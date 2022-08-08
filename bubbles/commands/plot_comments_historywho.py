@@ -6,12 +6,13 @@ from typing import Dict
 import matplotlib.pyplot as plt
 from numpy import zeros, flip, cumsum
 
+from bubbles.commands import Plugin
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
-from bubbles.config import PluginManager, users_list
+from bubbles.config import users_list
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
@@ -162,6 +163,8 @@ def plot_comments_historywho(payload: Dict) -> None:
     utils.upload_file(file="plotHourMods.png")
 
 
-PluginManager.register_plugin(
-    plot_comments_historywho, r"^historywho([ \"a-zA-Z]+)?", help=HELP_MESSAGE,
+PLUGIN = Plugin(
+    callable=plot_comments_historywho,
+    regex=r"^historywho([ \"a-zA-Z]+)?",
+    help=HELP_MESSAGE,
 )

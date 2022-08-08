@@ -4,7 +4,8 @@ import time
 from datetime import datetime, timedelta
 from typing import List
 
-from bubbles.config import PluginManager, reddit
+from bubbles.config import reddit
+from bubbles.commands import Plugin
 
 SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
@@ -178,9 +179,9 @@ def suggest_filter(payload) -> None:
     )
 
 
-PluginManager.register_plugin(
-    suggest_filter,
-    SUGGEST_FILTER_RE,
+PLUGIN = Plugin(
+    callable=suggest_filter,
+    regex=SUGGEST_FILTER_RE,
     help=(
         "!suggest filter {subreddit} - have me guess at an appropriate filter value"
         " for a given subreddit. Usage: @bubbles suggest filter r/thathappened"

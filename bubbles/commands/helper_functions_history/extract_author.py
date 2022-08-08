@@ -8,19 +8,19 @@ def extract_author(message: Dict, good_reactions: List[str]) -> str:
     Function that determines the user that has reacted to a new user message. The
     reaction list is stored in message_data["reactions"]
     Example of the retrieved reaction list:
-        [{'name': 'think-rotate', 'users': ['U4QEPLK6D', 'UE3VDJ002', 'U7T7G5GT0', 
-        'UK98SNKCK', 'U01AL41499D'], 'count': 5}, {'name': 'discord', 'users': 
-        ['UE3VDJ002'], 'count': 1}, {'name': 'heavy_check_mark', 'users': 
+        [{'name': 'think-rotate', 'users': ['U4QEPLK6D', 'UE3VDJ002', 'U7T7G5GT0',
+        'UK98SNKCK', 'U01AL41499D'], 'count': 5}, {'name': 'discord', 'users':
+        ['UE3VDJ002'], 'count': 1}, {'name': 'heavy_check_mark', 'users':
         ['UEEMDNC0K'], 'count': 1}]
-    
+
     good_reactions is a list containing the names of the reactions to test.
-    
+
     If message["reactions"] does not exist (or if message["reactions"] does not
-    contain any of the good_reactions reactions), then the output is "Nobody". 
+    contain any of the good_reactions reactions), then the output is "Nobody".
     If only one person has reacted with only one of the good_reactions reactions,
     then the function returns the name stored in the 'users' key. Otherwise, the
     function returns "Conflict".
-    
+
     OVERRIDE CASES: the function will return "Abandoned" if :x: is stored as reaction,
     and "Banned" if :banhammer: is stored as reaction.
     """

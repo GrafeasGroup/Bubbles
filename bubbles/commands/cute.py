@@ -2,8 +2,8 @@ import random
 
 import requests
 
-from bubbles.config import PluginManager
 from bubbles.config import COMMAND_PREFIXES
+from bubbles.commands import Plugin
 
 # Pulled a bunch of these URLs from https://github.com/treboryx/animalsAPI -- many thanks
 
@@ -14,7 +14,6 @@ dog_api = "https://dog.ceo/api/breeds/image/random"
 bunny_api = "https://api.bunnies.io/v2/loop/random/?media=gif"
 duck_url = "https://random-d.uk/api/v1/random?type=png"
 lizard_api = "https://nekos.life/api/v2/img/lizard"
-owl_api = "http://pics.floofybot.moe/owl"
 shibe_api = "http://shibe.online/api/shibes"
 error_img = "https://www.pinclipart.com/picdir/middle/168-1688957_powerpuff-girls-cry-bubbles-clipart.png"
 
@@ -58,10 +57,6 @@ def get_fox():
     return "fox", requests.get(fox_api).json()["image"]
 
 
-def get_owl():
-    return "owl", requests.get(owl_api).json()["image"]
-
-
 def get_duck():
     return "duck", requests.get(duck_url).json()["url"]
 
@@ -76,7 +71,6 @@ animals = {
     "bunny": [get_bunny],
     "lizard": [get_lizard],
     "fox": [get_fox],
-    "owl": [get_owl],
     "duck": [get_duck],
     "shibe": [get_shibe],
 }
@@ -114,9 +108,9 @@ def cute(data):
     say(pic)
 
 
-PluginManager.register_plugin(
-    cute,
-    r"^cute",
+PLUGIN = Plugin(
+    callable=cute,
+    regex=r"^cute",
     help=(
         f"!cute [{', '.join([k for k in animals.keys()])}] - Specify an animal"
         f" for a cute picture! Or just !cute for a random one."

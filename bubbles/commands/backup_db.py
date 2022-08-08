@@ -4,7 +4,7 @@ import os
 import shlex
 from pathlib import Path
 
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def backup_db(payload):
@@ -39,8 +39,9 @@ def backup_db(payload):
         os.remove(previous_backups[0])
 
 
-PluginManager.register_plugin(
-    backup_db,
-    r"^backup",
+PLUGIN = Plugin(
+    callable=backup_db,
+    regex=r"^backup",
     help="!backup - creates and uploads a full backup of our postgres db.",
+    interactive_friendly=False,
 )

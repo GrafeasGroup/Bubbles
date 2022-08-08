@@ -1,7 +1,7 @@
 import subprocess
 
+from bubbles.commands import Plugin
 from bubbles.service_utils import SERVICES, get_service_name
-from bubbles.config import PluginManager
 
 
 def isup(payload):
@@ -32,6 +32,9 @@ def isup(payload):
         _check(service)
 
 
-PluginManager.register_plugin(
-    isup, r"^isup([ a-zA-Z]+)?", help="!isup [service_name]", interactive_friendly=False
+PLUGIN = Plugin(
+    callable=isup,
+    regex=r"^isup([ a-zA-Z]+)?",
+    help="!isup [service_name]",
+    interactive_friendly=False,
 )

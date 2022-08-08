@@ -114,3 +114,7 @@ presence_log.json
 
 asdf.py
 test.py
+
+# build artifacts
+bubbles.pyz
+setup.py

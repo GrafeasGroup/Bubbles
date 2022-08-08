@@ -2,12 +2,12 @@ import warnings
 import re
 from typing import Dict
 
+from bubbles.commands import Plugin
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
-from bubbles.config import PluginManager
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
@@ -67,9 +67,9 @@ def plot_comments_historylist(payload: Dict) -> None:
         say(f"Volunteers welcomed by {key}: {list_volunteers_per_person[key]}")
 
 
-PluginManager.register_plugin(
-    plot_comments_historylist,
-    r"^listmodsTEST ([0-9 ]+)?",
+PLUGIN = Plugin(
+    callable=plot_comments_historylist,
+    regex=r"^listmodsTEST ([0-9 ]+)?",
     help=(
         "!historylist [number of posts] - shows the number of new comments in"
         " #new-volunteers in function of the mod having welcomed them. `number"

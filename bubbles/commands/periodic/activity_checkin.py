@@ -80,7 +80,7 @@ def presence_update_callback(*args, **kwargs):
 #     # with slack to get the timing right) we just schedule the force update as its
 #     # own thing and carry on.
 #     # This function is only responsible for triggering the request; the result is
-#     # returned via a RTM event captured in bubblesRTM.py.
+#     # returned via a RTM event captured in main.py.
 #     rtm_client.send_over_websocket(
 #         payload={"type": "presence_query", "ids": USER_IDS,}
 #     )
