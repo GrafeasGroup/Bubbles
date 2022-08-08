@@ -14,12 +14,12 @@ from bubbles.config import (
     DEFAULT_CHANNEL,
 )
 from bubbles.interactive import InteractiveSession
-from bubbles.plugins import PluginManager as PM
+from bubbles.plugins import PluginManager
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.tl_commands import enable_tl_jobs
 from bubbles.tl_utils import tl
 
-PluginManager: PM
+plugin_manager: PluginManager
 log = logging.getLogger(__name__)
 
 """
@@ -77,7 +77,7 @@ def handle_message(ack, payload, client, context, say, body: dict):
 
     # Actually put the slack event handler on this one so that we can dual-wield
     # `message_received` for interactive mode and normal interaction.
-    PluginManager.message_received(ack, payload, client, context, say=thread_say)
+    plugin_manager.message_received(ack, payload, client, context, say=thread_say)
 
 
 @app.event("reaction_added")
@@ -108,7 +108,7 @@ def reaction_added(ack, payload):
 @click.version_option(version=__version__, prog_name="BubblesV2")
 def main(ctx: Context, command: str, interactive: bool) -> None:
     """Run Bubbles."""
-    global PluginManager
+    global plugin_manager
     if ctx.invoked_subcommand:
         # If we asked for a specific command, don't run the bot. Instead, pass control
         # directly to the subcommand.
@@ -117,11 +117,11 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
     if command:
         raise NotImplementedError("Sorry, that functionality is coming!")
 
-    PluginManager = PM(COMMAND_PREFIXES, interactive)
-    PluginManager.load_all_plugins()
+    plugin_manager = PluginManager(COMMAND_PREFIXES, interactive)
+    plugin_manager.load_all_plugins()
 
     if interactive:
-        InteractiveSession(PluginManager.message_received).repl()
+        InteractiveSession(plugin_manager.message_received).repl()
         sys.exit(0)
     enable_tl_jobs()
     tl.start()
@@ -160,8 +160,8 @@ def selfcheck(verbose: bool) -> None:
         tl.start()
         # If any of the commands have a syntax error, it will explode here.
         tl.stop()
-        PluginManager = PM(COMMAND_PREFIXES)
-        PluginManager.load_all_plugins()
+        plugin_manager = PluginManager(COMMAND_PREFIXES)
+        plugin_manager.load_all_plugins()
     except Exception as e:
         log.error(e)
         sys.exit(1)

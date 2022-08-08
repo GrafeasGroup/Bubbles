@@ -137,10 +137,6 @@ mods_array: List = []
 for i in range(0, 24):
     mods_array.append(None)
 
-# Import PluginManager from here
-# PluginManager = PM(COMMAND_PREFIXES, INTERACTIVE_MODE)
-# PluginManager = None
-
 mpl.rcParams["figure.figsize"] = [20, 10]
 
 try:

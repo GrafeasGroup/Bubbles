@@ -37,7 +37,7 @@ Bubbles uses a plugin manager to register commands. Each command is registered i
 ### Example Command
 
 ```python
-from bubbles.main import PluginManager
+from bubbles.commands import Plugin
 
 
 def hello_world(rtmclient, client, user_list, data):
@@ -46,7 +46,7 @@ def hello_world(rtmclient, client, user_list, data):
     )
 
 
-PluginManager.register_plugin(hello_world, r"hello")
+PLUGIN = Plugin(callable=hello_world, regex=r"hello")
 ```
 
 The above plugin will post "Hello, world!" to the channel you message Bubbles from with the following any of the following syntax:
@@ -60,7 +60,7 @@ bubbles hello
 If you want to write a command that doesn't need the prefix to trigger, just add the `ignore_prefix=True` into the register command.
 
 ```python
-PluginManager.register_plugin(hello_world, r"hello", ignore_prefix=True)
+PLUGIN = Plugin(callable=hello_world, regex=r"hello", ignore_prefix=True)
 ```
 
 Now it will trigger any time that the word "hello" is put into chat. `register_plugin` can handle a few more edge cases as well:
@@ -68,7 +68,7 @@ Now it will trigger any time that the word "hello" is put into chat. `register_p
 `flags`: used for combining `re` compilation flags for regex. For example:
 
 ```python
-PluginManager.register_plugin(hello_world, r"hello", flags=re.IGNORECASE | re.MULTILINE)
+PLUGIN = Plugin(callable=hello_world, regex=r"hello", flags=re.IGNORECASE | re.MULTILINE)
 ```
 
 `callback`: if you need to keep track of messages, a command callback can be called on every message. To see an example of this in action (and using a class structure for a plugin), take a look at `bubbles/commands/yell.py`.
