@@ -5,7 +5,6 @@ from pathlib import Path
 
 import requests
 from shiv.bootstrap import current_zipfile
-from requests_toolbelt.downloadutils.stream import stream_response_to_file
 
 from bubbles import __version__
 from bubbles.commands import Plugin
@@ -51,7 +50,9 @@ def update(payload) -> None:
     # write the new archive to disk
     resp = requests.get(url, stream=True)
     new_archive = folder / "temp.pyz"
-    stream_response_to_file(resp, path=new_archive)
+    with open(new_archive, 'wb') as new:
+        for line in resp.iter_lines():
+            new.write(line)
 
     # make sure the new archive passes the internal tests
     result = subprocess.run(
