@@ -8,4 +8,4 @@ clean:
 
 shiv:
 	mkdir -p build
-	shiv -c bubbles -o build/bubbles.pyz . --compressed
+	shiv -c bubbles -o build/bubbles.pyz . --compressed -p "python3.10"

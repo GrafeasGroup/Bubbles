@@ -17,7 +17,7 @@ def update(payload) -> None:
     say = payload["extras"]["say"]
     say("Preparing update...")
     response = requests.get(
-        "https://api.github.com/repos/itsthejoker/utils/releases/latest"
+        "https://api.github.com/repos/grafeasgroup/bubbles-v2/releases/latest"
     )
     if response.status_code != 200:
         print(f"GITHUB RESPONSE CONTENT: {response.content}")
@@ -46,7 +46,7 @@ def update(payload) -> None:
     with open(backup_archive, "wb") as backup, open(archive_path, "rb") as original:
         backup.write(original.read())
 
-    subprocess.check_output(shlex.split(f"chmod +x {backup}"))
+    subprocess.check_output(shlex.split(f"chmod +x {str(backup_archive)}"))
 
     # write the new archive to disk
     resp = requests.get(url, stream=True)
@@ -55,7 +55,7 @@ def update(payload) -> None:
 
     # make sure the new archive passes the internal tests
     result = subprocess.run(
-        shlex.split(f"sh -c '{new_archive} selfcheck'"), stdout=subprocess.DEVNULL
+        shlex.split(f"sh -c '{str(new_archive)} selfcheck'"), stdout=subprocess.DEVNULL
     )
     if result.returncode != 0:
         say(f"Selfcheck failed! Stopping update.")
@@ -72,7 +72,7 @@ def update(payload) -> None:
 
     try:
         # if this command succeeds, the process dies here
-        subprocess.check_output(["sudo", "systemctl", "restart", USERNAME])
+        subprocess.check_output(shlex.split(f"sudo systemctl restart {USERNAME}"))
     except subprocess.CalledProcessError:
         say(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
         with current_zipfile() as archive:
@@ -81,7 +81,7 @@ def update(payload) -> None:
             ) as backup:
                 current.write(backup.read())
         say(f"Rolled back to {__version__}. Trying restart again...")
-        subprocess.check_output(["sudo", "systemctl", "restart", USERNAME])
+        subprocess.check_output(shlex.split(f"sudo systemctl restart {USERNAME}"))
 
 
 PLUGIN = Plugin(
