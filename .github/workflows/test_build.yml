@@ -1,4 +1,4 @@
-name: Build blossom.pyz and test
+name: Build bubbles.pyz and test
 
 on: [pull_request]
 
