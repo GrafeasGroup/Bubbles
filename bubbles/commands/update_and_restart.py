@@ -54,6 +54,8 @@ def update(payload) -> None:
         for line in resp.iter_lines():
             new.write(line)
 
+    subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
+
     # make sure the new archive passes the internal tests
     result = subprocess.run(
         shlex.split(f"sh -c '{str(new_archive)} selfcheck'"), stdout=subprocess.DEVNULL
