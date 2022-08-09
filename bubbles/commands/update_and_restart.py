@@ -1,3 +1,4 @@
+import os
 import shlex
 import subprocess
 import traceback
@@ -50,7 +51,7 @@ def update(payload) -> None:
     # write the new archive to disk
     resp = requests.get(url, stream=True)
     new_archive = folder / "temp.pyz"
-    with open(new_archive, 'wb') as new:
+    with open(new_archive, "wb") as new:
         for chunk in resp.iter_content(chunk_size=8192):
             new.write(chunk)
 
@@ -58,7 +59,8 @@ def update(payload) -> None:
 
     # make sure the new archive passes the internal tests
     result = subprocess.run(
-        shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"), stdout=subprocess.DEVNULL
+        shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
+        stdout=subprocess.DEVNULL,
     )
     if result.returncode != 0:
         say(f"Selfcheck failed! Stopping update.")
@@ -73,18 +75,15 @@ def update(payload) -> None:
 
     say(f"Update to {release_data['name']} complete. Restarting...")
 
-    try:
-        # if this command succeeds, the process dies here
-        subprocess.check_output(shlex.split(f"sudo systemctl restart {USERNAME}"))
-    except subprocess.CalledProcessError:
-        say(f"Update failed, could not restart: \n```\n{traceback.format_exc()}```")
-        with current_zipfile() as archive:
-            with open(archive.filename, "wb") as current, open(
-                backup_archive, "rb"
-            ) as backup:
-                current.write(backup.read())
-        say(f"Rolled back to {__version__}. Trying restart again...")
-        subprocess.check_output(shlex.split(f"sudo systemctl restart {USERNAME}"))
+    # spawn a new child that is separate from the parent process so that it doesn't
+    # die immediately as we respawn the parent
+    # https://stackoverflow.com/a/16928558
+    subprocess.Popen(
+        shlex.split(f"sudo systemctl restart {USERNAME}"),
+        stdout=open("/dev/null", "w"),
+        stderr=open("logfile.log", "a"),
+        preexec_fn=os.setpgrp,
+    )
 
 
 PLUGIN = Plugin(
