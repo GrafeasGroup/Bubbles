@@ -1,7 +1,6 @@
 import os
 import shlex
 import subprocess
-import traceback
 from pathlib import Path
 
 import requests
