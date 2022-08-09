@@ -114,11 +114,21 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
         # directly to the subcommand.
         return
 
-    if command:
-        raise NotImplementedError("Sorry, that functionality is coming!")
-
     plugin_manager = PluginManager(COMMAND_PREFIXES, interactive)
     plugin_manager.load_all_plugins()
+
+    if command:
+        plugin_manager.process_message(
+            {
+                'user': 'bubbles_console',
+                'text': f'!{command}',
+                'channel': 'console',
+                'extras': {
+                    'say': click.echo
+                }
+            }
+        )
+        return
 
     if interactive:
         InteractiveSession(plugin_manager.message_received).repl()

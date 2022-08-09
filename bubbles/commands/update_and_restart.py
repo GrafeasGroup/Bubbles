@@ -30,6 +30,8 @@ def update(payload) -> None:
     if release_data["name"] == __version__:
         say("Server version is the same as current version; nothing to update.")
         return
+    else:
+        say(f"Updating to {release_data['name']}...")
 
     url = release_data["assets"][0]["browser_download_url"]
     with current_zipfile() as archive:
@@ -57,6 +59,7 @@ def update(payload) -> None:
     subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
 
     # make sure the new archive passes the internal tests
+    say("Testing downloaded archive...")
     result = subprocess.run(
         shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
         stdout=subprocess.DEVNULL,
