@@ -51,14 +51,14 @@ def update(payload) -> None:
     resp = requests.get(url, stream=True)
     new_archive = folder / "temp.pyz"
     with open(new_archive, 'wb') as new:
-        for line in resp.iter_lines():
-            new.write(line)
+        for chunk in resp.iter_content(chunk_size=8192):
+            new.write(chunk)
 
     subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
 
     # make sure the new archive passes the internal tests
     result = subprocess.run(
-        shlex.split(f"sh -c '{str(new_archive)} selfcheck'"), stdout=subprocess.DEVNULL
+        shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"), stdout=subprocess.DEVNULL
     )
     if result.returncode != 0:
         say(f"Selfcheck failed! Stopping update.")
