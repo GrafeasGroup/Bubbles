@@ -94,6 +94,13 @@ def deploy(payload):
     args = payload.get("text").split()
     say = payload["extras"]["say"]
 
+    # Temporarily disable this command until we get Blossom fixed on the server
+    say(
+        "Sorry, this command is temporarily disabled. If you need to do a deploy"
+        " that cannot wait, please ping Joe."
+    )
+    return
+
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
