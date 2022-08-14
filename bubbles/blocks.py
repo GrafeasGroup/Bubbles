@@ -15,6 +15,8 @@ class StatusContextBlock(blocks.ContextBlock):
     >>> my_step.failure()
     ...{'elements': [{'emoji': True, 'text': ':x: Feeding penguins...'}]
     """
+    # this should be inherited but the API is throwing errors saying it's missing.
+    type = "context"
 
     def __init__(
         self,
