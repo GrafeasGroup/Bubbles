@@ -15,7 +15,7 @@ class MessageUtils:
     def update_message(self, response: Dict, *args, **kwargs) -> Any:
         """Pass the result of `say` into this."""
         return self.client.chat_update(
-            channel=response["channel"], timestamp=response['ts'], *args, **kwargs
+            channel=response["channel"], ts=response['ts'], *args, **kwargs
         )
 
     def upload_file(
