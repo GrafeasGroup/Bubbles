@@ -12,6 +12,11 @@ class MessageUtils:
             channel=message["channel"], timestamp=message["ts"], name=name
         )
 
+    def update_message(self, message: Dict, *args, **kwargs) -> Any:
+        return self.client.chat_update(
+            channel=message["channel"], timestamp=message["ts"], *args, **kwargs
+        )
+
     def upload_file(
         self,
         file: str = None,

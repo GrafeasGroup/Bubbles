@@ -1,90 +1,193 @@
 import os
 import subprocess
-from typing import Callable
+from pathlib import Path
+import shlex
 
+import requests
+from slack_sdk.models import blocks
+
+from bubbles.blocks import StatusContextBlock, StatusContainer
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
 from bubbles.service_utils import (
     verify_service_up,
-    say_code,
     SERVICES,
     get_service_name,
 )
-from bubbles.utils import get_branch_head
 
 
-def _deploy_service(service: str, say: Callable) -> None:
-    say(f"Deploying {service} to production. This may take a moment...")
-    os.chdir(f"/data/{service}")
+class DeployError(Exception):
+    pass
 
-    def migrate():
-        say("Migrating models...")
-        say_code(say, subprocess.check_output([PYTHON, "manage.py", "migrate"]))
 
-    def pull_from_git():
-        say("Pulling latest code...")
-        say_code(
-            say, subprocess.check_output(f"git pull origin {get_branch_head()}".split())
-        )
+def _deploy_service(service: str, payload: dict) -> None:
+    def add_new_context_step(description: str) -> None:
+        status_container.append(StatusContextBlock(text=description))
+        update_message()
 
-    def install_deps():
-        say("Installing dependencies...")
-        say_code(say, subprocess.check_output(["poetry", "install", "--no-dev"]))
+    def context_step_failed(**kwargs) -> None:
+        status_container.get_latest().failure()
+        update_message(**kwargs)
 
-    def bootstrap_site():
-        say("Verifying that initial data is present...")
-        subprocess.check_output([PYTHON, "manage.py", "bootstrap_site"])
+    def context_step_succeeded(**kwargs) -> None:
+        status_container.get_latest().success()
+        update_message(**kwargs)
 
-    def collect_static():
-        say("Gathering staticfiles...")
-        result = subprocess.check_output(
-            [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
-        )
-        if result:
-            say_code(say, result)
-
-    def revert_and_recover(loc):
-        git_response = (
-            subprocess.check_output(
-                ["git", "reset", "--hard", f"{get_branch_head()}@{{'30 seconds ago'}}"]
-            )
-            .decode()
-            .strip()
-        )
-        say(f"Rolling back to previous state:\n```\n{git_response}```")
-        subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(loc)])
-
-    def restart_service(loc):
-        say(f"Restarting service for {loc}...")
-        systemctl_response = subprocess.check_output(
-            ["sudo", "systemctl", "restart", get_service_name(loc)]
-        )
-        if systemctl_response.decode().strip() != "":
-            say("Something went wrong and could not restart.")
-            say_code(say, systemctl_response)
+    def build_blocks(error: bool = False, end_text: str = None) -> list[blocks.Block]:
+        if error:
+            display_message = "Update stopped; see below."
         else:
-            if verify_service_up(say, loc):
-                say("Restarted successfully!")
-            else:
-                revert_and_recover(loc)
+            display_message = "This may take a minute. Please be patient."
+        if end_text:
+            end_section = [blocks.DividerBlock(), blocks.SectionBlock(text=end_text)]
+        else:
+            end_section = []
 
-    pull_from_git()
+        return (
+            [
+                blocks.HeaderBlock(text=f"Deploying {service}"),
+                blocks.SectionBlock(text=display_message),
+                blocks.DividerBlock(),
+            ]
+            + status_container
+            + end_section
+        )
+
+    def update_message(**kwargs) -> None:
+        """Generic helper function because I'm tired of writing this out."""
+        utils.update_message(response, blocks=build_blocks(**kwargs))
+
+    def check_for_new_version() -> dict:
+        add_new_context_step("Checking for new release...")
+
+        output = subprocess.check_output(shlex.split(f"./{service}.pyz --version"))
+        # starting from something like b'BubblesV2, version ?????\n'
+        current_version = output.decode().strip().split(", ")[-1].split()[-1]
+        github_response = requests.get(
+            f"https://api.github.com/repos/grafeasgroup/{service}/releases/latest"
+        )
+        if github_response.status_code != 200:
+            print(f"GITHUB RESPONSE CONTENT: {github_response.content}")
+            raise DeployError("Cannot reach GitHub releases!")
+
+        release_data = github_response.json()
+        if release_data["name"] == current_version:
+            raise DeployError("We are running the most recent release already.")
+
+        context_step_succeeded()
+        return release_data
+
+    def download_new_release(release_data: dict):
+        add_new_context_step("Downloading new release...")
+
+        url = release_data["assets"][0]["browser_download_url"]
+        backup_archive = service_path / "backup.pyz"
+        with open(backup_archive, "wb") as backup, open(
+            service_path / f"{service}.pyz", "rb"
+        ) as original:
+            backup.write(original.read())
+
+        subprocess.check_output(shlex.split(f"chmod +x {str(backup_archive)}"))
+        # write the new archive to disk
+        resp = requests.get(url, stream=True)
+        new_archive = service_path / "temp.pyz"
+        with open(new_archive, "wb") as new:
+            for chunk in resp.iter_content(chunk_size=8192):
+                new.write(chunk)
+
+        subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
+        context_step_succeeded()
+        return backup_archive, new_archive
+
+    def test_new_archive(new_archive):
+        add_new_context_step("Validating new release...")
+
+        result = subprocess.run(
+            shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
+            stdout=subprocess.DEVNULL,
+        )
+        if result.returncode != 0:
+            raise DeployError("The selfcheck failed. Aborting deploy.")
+
+        context_step_succeeded()
+
+    def send_error_end(exception=None):
+        message = "Hit an error I couldn't recover from. Check logs for more context."
+        if exception:
+            if exception.args:
+                message = exception.args[0]
+
+        context_step_failed(error=True, end_text=message)
+
+    def replace_running_service(new_archive):
+        add_new_context_step(f"Updating {service}...")
+
+        # copy the new archive on top of the running one
+        with open(service_path / f"{service}.pyz", "wb") as current, open(
+                new_archive, "rb"
+        ) as tempfile:
+            current.write(tempfile.read())
+
+        context_step_succeeded()
+
+    def _restart_service() -> str:
+        return subprocess.check_output(
+            ["sudo", "systemctl", "restart", get_service_name(service)]
+        ).decode().strip()
+
+    def revert_and_recover():
+        add_new_context_step(f"Reverting {service}...")
+
+        with open(service_path / f"{service}.pyz", "wb") as current, open(
+                backup_archive, "rb"
+        ) as tempfile:
+            current.write(tempfile.read())
+
+        systemctl_response = _restart_service()
+        if systemctl_response != "":
+            raise DeployError
+
+        context_step_succeeded()
+
+    def restart_service():
+        add_new_context_step(f"Restarting {service}...")
+        systemctl_response = _restart_service()
+        if systemctl_response != "":
+            status_container.get_latest().failure()
+            update_message()
+            revert_and_recover()
+            raise DeployError(
+                "Could not deploy due to system error. Reverted to previous release."
+            )
+
+        if verify_service_up(service):
+            context_step_succeeded()
+        else:
+            revert_and_recover()
+            raise DeployError(
+                "Could not deploy due to service failure after launch."
+                " Reverted to previous release."
+            )
+
+    say = payload["extras"]["say"]
+    utils = payload["extras"]["utils"]
+
+    status_container: StatusContainer = StatusContainer()
+    response = say(blocks=build_blocks())
+
+    service_path = Path(f"/data/{service}")
+    os.chdir(service_path)
+
     try:
-        install_deps()
-
-        PYTHON = f"/data/{service}/.venv/bin/python"
-
-        if service == "blossom":
-            say("Running commands specific to Blossom.\n")
-            migrate()
-            bootstrap_site()
-            collect_static()
-    except Exception as e:
-        say(f"Something went wrong! {e}")
-        revert_and_recover(service)
+        release_data = check_for_new_version()
+        backup_archive, new_archive = download_new_release(release_data)
+        test_new_archive(new_archive)
+        replace_running_service(new_archive)
+        restart_service()
+    except (DeployError, subprocess.CalledProcessError) as e:
+        print(e)  # make available in logs
+        send_error_end(e)
         return
-
-    restart_service(service)
 
     # reset back to our primary directory
     os.chdir("/data/bubbles")
@@ -93,13 +196,6 @@ def _deploy_service(service: str, say: Callable) -> None:
 def deploy(payload):
     args = payload.get("text").split()
     say = payload["extras"]["say"]
-
-    # Temporarily disable this command until we get Blossom fixed on the server
-    say(
-        "Sorry, this command is temporarily disabled. If you need to do a deploy"
-        " that cannot wait, please ping Joe."
-    )
-    return
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
@@ -120,11 +216,20 @@ def deploy(payload):
         )
         return
 
+    if service == "blossom":
+        say(
+            "Sorry, deployments for Blossom are temporarily on hold. Please ping Joe"
+            " if it's important."
+        )
+        return
+
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _deploy_service(system, say)
+            if system == "blossom":
+                continue
+            _deploy_service(system, payload)
     else:
-        _deploy_service(service, say)
+        _deploy_service(service, payload)
 
 
 PLUGIN = Plugin(

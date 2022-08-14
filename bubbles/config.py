@@ -119,7 +119,9 @@ for user in users["members"]:
         users_list[name] = user["id"]
         users_list["ids_only"].append(user["id"])
 
-users_list['bubbles_console'] = 'bubbles_console'  # support for running commands through CLI
+users_list[
+    "bubbles_console"
+] = "bubbles_console"  # support for running commands through CLI
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}

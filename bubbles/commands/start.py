@@ -21,7 +21,7 @@ def _start_service(service: str, say: Callable) -> None:
         say("Something went wrong and could not start.")
         say_code(say, systemctl_response)
     else:
-        if verify_service_up(say, service):
+        if verify_service_up(service):
             say("Started successfully!")
         else:
             say(

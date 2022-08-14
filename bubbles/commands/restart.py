@@ -23,7 +23,7 @@ def _restart_service(service: str, say: Callable) -> None:
             say("Something went wrong and could not restart.")
             say_code(say, systemctl_response)
         else:
-            if verify_service_up(say, loc):
+            if verify_service_up(loc):
                 say("Restarted successfully!")
             else:
                 say(

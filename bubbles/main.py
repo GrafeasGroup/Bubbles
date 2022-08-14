@@ -120,12 +120,10 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
     if command:
         plugin_manager.process_message(
             {
-                'user': 'bubbles_console',
-                'text': f'!{command}',
-                'channel': 'console',
-                'extras': {
-                    'say': click.echo
-                }
+                "user": "bubbles_console",
+                "text": f"!{command}",
+                "channel": "console",
+                "extras": {"say": click.echo},
             }
         )
         return
