@@ -73,7 +73,7 @@ def handle_message(ack, payload, client, context, say, body: dict):
 
     def thread_say(*args, **kwargs):
         """Reply in the thread if the message was sent in a thread."""
-        say(*args, thread_ts=thread_ts, **kwargs)
+        return say(*args, thread_ts=thread_ts, **kwargs)
 
     # Actually put the slack event handler on this one so that we can dual-wield
     # `message_received` for interactive mode and normal interaction.
