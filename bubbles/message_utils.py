@@ -12,9 +12,10 @@ class MessageUtils:
             channel=message["channel"], timestamp=message["ts"], name=name
         )
 
-    def update_message(self, message: Dict, *args, **kwargs) -> Any:
+    def update_message(self, response: Dict, *args, **kwargs) -> Any:
+        """Pass the result of `say` into this."""
         return self.client.chat_update(
-            channel=message["channel"], timestamp=message["ts"], *args, **kwargs
+            channel=response["channel"], timestamp=response['message']['ts'], *args, **kwargs
         )
 
     def upload_file(
