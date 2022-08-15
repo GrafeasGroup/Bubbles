@@ -161,7 +161,7 @@ def _deploy_service(service: str, payload: dict) -> None:
             )
 
         if verify_service_up(service):
-            context_step_succeeded()
+            context_step_succeeded(end_text=f"Successfully deployed {service}!")
         else:
             revert_and_recover()
             raise DeployError(
