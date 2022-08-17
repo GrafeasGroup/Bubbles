@@ -6,7 +6,11 @@ from praw.models import Rule
 from bubbles.config import reddit
 
 
+# Newly-added subreddits that don't have their rules tracked yet
 new_subreddits: List[str] = []
+# The stack for the subreddits to process
+# The subreddits that have not been updated for the longest are at the top
+# of the stack (the end of the list)
 subreddit_stack: List[str] = []
 
 
@@ -107,6 +111,14 @@ def _initialize_rules(sub_name: str):
 
 
 def _check_rule_changes(sub_name: str) -> RuleChanges:
+    """Check if the rules of the given sub have been changed.
+
+    The rules are identified by their index.
+    If a rule is moved to a new index, this is not recognized and might show
+    up as multiple edits of other rules.
+    However, this system is easy to implement and other comparison systems
+    also have their limits in other scenarios.
+    """
     old_rules = _load_rules_for_sub(sub_name)
     new_rules = _get_subreddit_rules(sub_name)
     edited: List[RuleEdited] = []
@@ -127,6 +139,14 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
 
 
 def _initialize_subreddit_stack():
+    """Initialize the subreddit stack.
+
+    The list of subreddits is fetched from the wiki and then compared with
+    the subreddits that have already been processed before.
+    Newly-added subreddits are identified.
+    Old subreddits are then sorted by the time they were last updated and
+    saved to the subreddit stack.
+    """
     global new_subreddits
     global subreddit_stack
 
@@ -157,7 +177,7 @@ def rule_monitoring_callback():
     """Check for rule changes for the next subreddit in the list.
 
     If no subs are left to process, the subreddit list is updated again.
-    If new subs have been added, they will be processed immidiately.
+    If new subs have been added, they will be processed immediately.
     """
     # Repopulate the subreddit queue if necessary
     if len(subreddit_stack) == 0:
