@@ -84,9 +84,10 @@ def _get_subreddit_names() -> List[str]:
     return subreddits
 
 
-def _convert_subreddit_rule(rule: Rule) -> SubredditRule:
+def _convert_subreddit_rule(rule: Rule, index: int) -> SubredditRule:
     """Convert a Reddit rule to our own rule representation."""
     return {
+        "index": index,
         "name": rule.short_name or "",
         "description": rule.description or "",
         "created_time": datetime.utcfromtimestamp(rule.created_utc),
@@ -99,7 +100,9 @@ def _get_subreddit_rules(sub_name: str) -> List[SubredditRule]:
     If no rules have been defined, `None` is returned.
     """
     sub = reddit.subreddit(sub_name)
-    rules = [_convert_subreddit_rule(rule) for rule in sub.rules]
+    rules = [
+        _convert_subreddit_rule(rule, idx + 1) for idx, rule in enumerate(sub.rules)
+    ]
 
     return rules
 
