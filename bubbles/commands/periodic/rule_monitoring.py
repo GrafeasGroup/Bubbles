@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, TypedDict, Dict, Optional
+from typing import List, TypedDict, Dict, Optional, Tuple
 
 from praw.models import Rule
 
@@ -18,10 +18,15 @@ class SubredditRule(TypedDict):
     created_time: datetime
 
 
+class RuleEntry(TypedDict):
+    last_update: datetime
+    rules: List[SubredditRule]
+
+
 # A map from a subreddit name to its rules
 # If the dict has no entry for a given sub, the rules have not been fetched yet
 # If the dict has an empty list as entry for a given sub, this sub did not define any rules
-SubredditRuleMap = Dict[str, List[SubredditRule]]
+SubredditRuleMap = Dict[str, RuleEntry]
 
 
 class RuleEdited(TypedDict):
@@ -122,11 +127,30 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
 
 
 def _initialize_subreddit_stack():
-    subreddit_names = _get_subreddit_names()
+    global new_subreddits
+    global subreddit_stack
 
-    # TODO: Get saved subreddit file
-    # TODO: Determine new subreddits and save them
-    # TODO: Sort old subreddits by last update date and save them
+    subreddit_names = _get_subreddit_names()
+    saved_rules = _load_all_rules()
+
+    _new_subreddits: List[str] = []
+    entries: List[Tuple[str, RuleEntry]] = []
+
+    # Check which subs are new and which are already in the save file
+    for sub_name in subreddit_names:
+        if saved_rules.get(sub_name) is None:
+            _new_subreddits.append(sub_name)
+        else:
+            entries.append((sub_name, saved_rules[sub_name]))
+
+    # Sort the old entries by the time they were last updated
+    # The oldest entries are last, so at the top of the stack
+    entries.sort(key=lambda x: x[1]["last_updated"], reverse=True)
+
+    # Update the global variables
+    # We only do this once the process is complete, in case the bot crashes in-between
+    new_subreddits = _new_subreddits
+    subreddit_stack = [entry[1]["rules"] for entry in entries]
 
 
 def rule_monitoring_callback():
