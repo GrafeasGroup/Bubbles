@@ -16,7 +16,9 @@ def msg(message: str) -> None:
 
 try:
     git_response = (
-        subprocess.check_output(["git", "pull", "origin", get_branch_head()]).decode().strip()
+        subprocess.check_output(["git", "pull", "origin", get_branch_head()])
+        .decode()
+        .strip()
     )
     msg(f"Git:\n```\n{git_response}```")
 
