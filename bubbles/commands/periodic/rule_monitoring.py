@@ -3,8 +3,8 @@ from typing import List, TypedDict, Dict, Optional, Tuple
 
 from praw.models import Rule
 
-from bubbles.config import reddit
-
+from bubbles.commands.periodic import RULE_MONITORING_CHANNEL_ID
+from bubbles.config import reddit, app
 
 # Newly-added subreddits that don't have their rules tracked yet
 new_subreddits: List[str] = []
@@ -184,6 +184,88 @@ def _initialize_subreddit_stack():
     subreddit_stack = [entry[1]["rules"] for entry in entries]
 
 
+def _format_rule(rule: SubredditRule) -> str:
+    """Format the rule to a readable string."""
+    return f"*{rule['name']}*\n{rule['description']}"
+
+
+def _get_rule_edited_message(changes: RuleChanges) -> Optional[str]:
+    """Get a message reflecting the edited rules."""
+    if len(changes["edited"]) == 0:
+        return None
+
+    def _edit_text(edit: RuleEdited) -> str:
+        index = edit["new_rule"]["index"]
+        heading = f"*## Edited Rule {index}*"
+        old = _format_rule(edit["old_rule"])
+        new = _format_rule(edit["new_rule"])
+        return f"{heading}\n\n*### Old*\n\n{old}\n\n*### New*\n\n{new}"
+
+    edited_rule_text = [_edit_text(edit) for edit in changes["edited"]]
+    return "\n\n".join(edited_rule_text)
+
+
+def _get_rule_added_message(changes: RuleChanges) -> Optional[str]:
+    """Get a message reflecting the added rules."""
+    if len(changes["added"]) == 0:
+        return None
+
+    added_rule_text = [
+        f"*## Added Rule {rule['index']}*\n\n{_format_rule(rule)}"
+        for rule in changes["added"]
+    ]
+    return "\n\n".join(added_rule_text)
+
+
+def _get_rule_removed_message(changes: RuleChanges) -> Optional[str]:
+    """Get a message reflecting the removed rules."""
+    if len(changes["removed"]) == 0:
+        return None
+
+    removed_rule_text = [
+        f"*## Removed Rule {rule['index']}*\n\n{_format_rule(rule)}"
+        for rule in changes["removed"]
+    ]
+    return "\n\n".join(removed_rule_text)
+
+
+def _get_rule_change_message(sub_name: str, changes: RuleChanges) -> Optional[str]:
+    """Get a message reflecting the rule changes for the given sub.
+
+    If there were no changes, `None` is returned.
+    """
+    edited_msg = _get_rule_edited_message(changes)
+    added_msg = _get_rule_added_message(changes)
+    removed_msg = _get_rule_removed_message(changes)
+
+    if edited_msg is None and added_msg is None and removed_msg is None:
+        # No changes
+        return None
+
+    msg = f"*# Rule changes in r/{sub_name}*"
+
+    if edited_msg:
+        msg += f"\n\n{edited_msg}"
+    if added_msg:
+        msg += f"\n\n{added_msg}"
+    if removed_msg:
+        msg += f"\n\n{removed_msg}"
+
+    return msg
+
+
+def _notify_mods(text: str) -> None:
+    """Send a message regarding the rule changes to the mods."""
+    app.client.chat_postMessage(
+        channel=RULE_MONITORING_CHANNEL_ID,
+        text=text,
+        link_names=1,
+        unfurl_links=False,
+        unfurl_media=False,
+        as_user=True,
+    )
+
+
 def rule_monitoring_callback():
     """Check for rule changes for the next subreddit in the list.
 
@@ -199,7 +281,8 @@ def rule_monitoring_callback():
         for sub_name in new_subreddits:
             _check_rule_changes(sub_name)
 
-        # TODO: Notify user
+        subs = ", ".join(new_subreddits)
+        _notify_mods(f"*Initialized* the rules of the following sub(s):\n{subs}")
 
     # If no subs need to be checked, we wait for the next cycle
     # Then, the stack will be re-initialized
@@ -208,6 +291,8 @@ def rule_monitoring_callback():
 
     # Process the next sub in the stack
     sub_name = subreddit_stack.pop()
-    _check_rule_changes(sub_name)
+    rule_changes = _check_rule_changes(sub_name)
 
-    # TODO: Notify user
+    # If there were changes, notify the mods
+    if change_message := _get_rule_change_message(sub_name, rule_changes):
+        _notify_mods(change_message)
