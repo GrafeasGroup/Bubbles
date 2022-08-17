@@ -110,8 +110,10 @@ def _initialize_rules(sub_name: str):
     _save_rules_for_sub(sub_name, rules)
 
 
-def _check_rule_changes(sub_name: str) -> RuleChanges:
-    """Check if the rules of the given sub have been changed.
+def _compare_rules(
+    old_rules: List[SubredditRule], new_rules: List[SubredditRule]
+) -> RuleChanges:
+    """Compare the given set of rules and determine all changes.
 
     The rules are identified by their index.
     If a rule is moved to a new index, this is not recognized and might show
@@ -119,8 +121,6 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
     However, this system is easy to implement and other comparison systems
     also have their limits in other scenarios.
     """
-    old_rules = _load_rules_for_sub(sub_name)
-    new_rules = _get_subreddit_rules(sub_name)
     edited: List[RuleEdited] = []
 
     # Check for edited rules
@@ -128,14 +128,25 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
         if old["name"] != new["name"] or old["description"] != new["description"]:
             edited.append({"old_rule": old, "new_rule": new})
 
-    added: List[SubredditRule] = new_rules[len(old_rules):]
-    removed: List[SubredditRule] = old_rules[len(new_rules):]
+    added: List[SubredditRule] = new_rules[len(old_rules) :]
+    removed: List[SubredditRule] = old_rules[len(new_rules) :]
 
     return {
         "added": added,
         "removed": removed,
         "edited": edited,
     }
+
+
+def _check_rule_changes(sub_name: str) -> RuleChanges:
+    """Check if the rules of the given sub have been changed.
+
+    This loads the saved rules from the sub and compares them with the newly fetched rules from Reddit.
+    """
+    old_rules = _load_rules_for_sub(sub_name)
+    new_rules = _get_subreddit_rules(sub_name)
+
+    return _compare_rules(old_rules, new_rules)
 
 
 def _initialize_subreddit_stack():
