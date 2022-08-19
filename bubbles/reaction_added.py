@@ -3,7 +3,10 @@ from bubbles.config import USERNAME, DEFAULT_CHANNEL, users_list
 
 def reaction_added_callback(payload):
     user_who_reacted = users_list[payload["user"]]
-    user_whose_message_has_been_reacted = users_list[payload["item_user"]]
+    user_whose_message_has_been_reacted = users_list[payload.get("item_user")]
+    if not user_whose_message_has_been_reacted:
+        # Sometimes we get partially formed reactions. Not entirely sure why.
+        return
     reaction = payload["reaction"]
     print(
         f"{user_who_reacted} has replied to one of {user_whose_message_has_been_reacted}'s"

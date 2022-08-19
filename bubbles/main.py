@@ -49,6 +49,7 @@ Full list of available event keys:
 
 @app.event("reaction_removed")
 @app.event("app_mention")
+@app.event("dnd_updated_user")
 def handle(ack):
     """
     Gracefully handle extra events so that slack is okay with it.
