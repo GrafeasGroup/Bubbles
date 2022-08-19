@@ -99,8 +99,11 @@ def _get_check_username(message: Dict) -> Optional[str]:
     :returns: The username, or None if it couldn't be found.
     """
     text = _extract_check_text(message)
-    username_match = USERNAME_REGEX.search(text)
-    return username_match.group("username") if username_match else None
+    try:
+        username_match = USERNAME_REGEX.search(text)
+        return username_match.group("username") if username_match else None
+    except TypeError:
+        print(f"Could not parse username. Value of `text`: {text}")
 
 
 def _get_check_status(message: Dict) -> Tuple[CheckStatus, Optional[str]]:

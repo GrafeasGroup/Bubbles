@@ -11,4 +11,4 @@ def debug(payload: dict) -> None:
         transcription_check_ping_callback()
 
 
-PLUGIN = Plugin(callable=debug, regex=r"^debug", ignore_prefix=True)
+PLUGIN = Plugin(callable=debug, regex=r"^debug")
