@@ -1,5 +1,7 @@
 from bubbles.commands import Plugin
-from bubbles.commands.periodic.transcription_check_ping import transcription_check_ping_callback
+from bubbles.commands.periodic.transcription_check_ping import (
+    transcription_check_ping_callback,
+)
 
 
 def debug(payload: dict) -> None:

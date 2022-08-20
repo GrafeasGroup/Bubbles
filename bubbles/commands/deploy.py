@@ -4,9 +4,8 @@ from pathlib import Path
 import shlex
 
 import requests
-from slack_sdk.models import blocks
 
-from bubbles.blocks import StatusContextBlock, StatusContainer
+from bubbles.blocks import ContextStepMessage
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
 from bubbles.service_utils import (
@@ -21,44 +20,8 @@ class DeployError(Exception):
 
 
 def _deploy_service(service: str, payload: dict) -> None:
-    def add_new_context_step(description: str) -> None:
-        status_container.append(StatusContextBlock(text=description))
-        update_message()
-
-    def context_step_failed(**kwargs) -> None:
-        status_container.get_latest().failure()
-        update_message(**kwargs)
-
-    def context_step_succeeded(**kwargs) -> None:
-        status_container.get_latest().success()
-        update_message(**kwargs)
-
-    def build_blocks(error: bool = False, end_text: str = None) -> list[blocks.Block]:
-        if error:
-            display_message = "Update stopped; see below."
-        else:
-            display_message = "This may take a minute. Please be patient."
-        if end_text:
-            end_section = [blocks.DividerBlock(), blocks.SectionBlock(text=end_text)]
-        else:
-            end_section = []
-
-        return (
-            [
-                blocks.HeaderBlock(text=f"Deploying {service}"),
-                blocks.SectionBlock(text=display_message),
-                blocks.DividerBlock(),
-            ]
-            + status_container
-            + end_section
-        )
-
-    def update_message(**kwargs) -> None:
-        """Generic helper function because I'm tired of writing this out."""
-        utils.update_message(response, blocks=build_blocks(**kwargs))
-
     def check_for_new_version() -> dict:
-        add_new_context_step("Checking for new release...")
+        StatusMessage.add_new_context_step("Checking for new release...")
 
         output = subprocess.check_output(shlex.split(f"./{service}.pyz --version"))
         # starting from something like b'BubblesV2, version ?????\n'
@@ -74,11 +37,11 @@ def _deploy_service(service: str, payload: dict) -> None:
         if release_data["name"] == current_version:
             raise DeployError("We are running the most recent release already.")
 
-        context_step_succeeded()
+        StatusMessage.step_succeeded()
         return release_data
 
     def download_new_release(release_data: dict):
-        add_new_context_step("Downloading new release...")
+        StatusMessage.add_new_context_step("Downloading new release...")
 
         url = release_data["assets"][0]["browser_download_url"]
         backup_archive = service_path / "backup.pyz"
@@ -96,11 +59,11 @@ def _deploy_service(service: str, payload: dict) -> None:
                 new.write(chunk)
 
         subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
-        context_step_succeeded()
+        StatusMessage.step_succeeded()
         return backup_archive, new_archive
 
     def test_new_archive(new_archive):
-        add_new_context_step("Validating new release...")
+        StatusMessage.add_new_context_step("Validating new release...")
 
         result = subprocess.run(
             shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
@@ -109,7 +72,7 @@ def _deploy_service(service: str, payload: dict) -> None:
         if result.returncode != 0:
             raise DeployError("The selfcheck failed. Aborting deploy.")
 
-        context_step_succeeded()
+        StatusMessage.step_succeeded()
 
     def send_error_end(exception=None):
         message = "Hit an error I couldn't recover from. Check logs for more context."
@@ -117,29 +80,33 @@ def _deploy_service(service: str, payload: dict) -> None:
             if exception.args:
                 message = exception.args[0]
 
-        context_step_failed(error=True, end_text=message)
+        StatusMessage.step_failed(end_text=message, error=True)
 
     def replace_running_service(new_archive):
-        add_new_context_step(f"Updating {service}...")
+        StatusMessage.add_new_context_step(f"Updating {service}...")
 
         # copy the new archive on top of the running one
         with open(service_path / f"{service}.pyz", "wb") as current, open(
-                new_archive, "rb"
+            new_archive, "rb"
         ) as tempfile:
             current.write(tempfile.read())
 
-        context_step_succeeded()
+        StatusMessage.step_succeeded()
 
     def _restart_service() -> str:
-        return subprocess.check_output(
-            ["sudo", "systemctl", "restart", get_service_name(service)]
-        ).decode().strip()
+        return (
+            subprocess.check_output(
+                ["sudo", "systemctl", "restart", get_service_name(service)]
+            )
+            .decode()
+            .strip()
+        )
 
     def revert_and_recover():
-        add_new_context_step(f"Reverting {service}...")
+        StatusMessage.add_new_context_step(f"Reverting {service}...")
 
         with open(service_path / f"{service}.pyz", "wb") as current, open(
-                backup_archive, "rb"
+            backup_archive, "rb"
         ) as tempfile:
             current.write(tempfile.read())
 
@@ -147,21 +114,20 @@ def _deploy_service(service: str, payload: dict) -> None:
         if systemctl_response != "":
             raise DeployError
 
-        context_step_succeeded()
+        StatusMessage.step_succeeded()
 
     def restart_service():
-        add_new_context_step(f"Restarting {service}...")
+        StatusMessage.add_new_context_step(f"Restarting {service}...")
         systemctl_response = _restart_service()
         if systemctl_response != "":
-            status_container.get_latest().failure()
-            update_message()
+            StatusMessage.step_failed()
             revert_and_recover()
             raise DeployError(
                 "Could not deploy due to system error. Reverted to previous release."
             )
 
         if verify_service_up(service):
-            context_step_succeeded(end_text=f"Successfully deployed {service}!")
+            StatusMessage.step_succeeded(end_text=f"Successfully deployed {service}!")
         else:
             revert_and_recover()
             raise DeployError(
@@ -169,11 +135,12 @@ def _deploy_service(service: str, payload: dict) -> None:
                 " Reverted to previous release."
             )
 
-    say = payload["extras"]["say"]
-    utils = payload["extras"]["utils"]
-
-    status_container: StatusContainer = StatusContainer()
-    response = say(blocks=build_blocks())
+    StatusMessage: ContextStepMessage = ContextStepMessage(
+        payload,
+        title=f"Deploying {service}",
+        start_message="This may take a minute. Please be patient.",
+        error_message="Update stopped; see below.",
+    )
 
     service_path = Path(f"/data/{service}")
     os.chdir(service_path)

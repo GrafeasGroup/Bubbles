@@ -1,3 +1,4 @@
+import logging
 import os
 import shlex
 import subprocess
@@ -7,31 +8,49 @@ import requests
 from shiv.bootstrap import current_zipfile
 
 from bubbles import __version__
+from bubbles.blocks import ContextStepMessage
 from bubbles.commands import Plugin
 
 from bubbles.config import USERNAME
 
+logger = logging.getLogger(__name__)
+
 
 def update(payload) -> None:
-    say = payload["extras"]["say"]
-    say("Preparing update...")
+    StatusMessage: ContextStepMessage = ContextStepMessage(
+        payload,
+        title="Updating!",
+        start_message="Beginning self-update. Please hold!",
+        error_message="Something went wrong. :sob:",
+    )
+
+    StatusMessage.add_new_context_step("Preparing update...")
     response = requests.get(
         "https://api.github.com/repos/grafeasgroup/bubbles-v2/releases/latest"
     )
     if response.status_code != 200:
-        print(f"GITHUB RESPONSE CONTENT: {response.content}")
-        say(
-            f"Something went wrong when talking to GitHub; got a"
-            f" {response.status_code}. Response content might be"
-            f" large, so I've printed it to the logs."
+        logger.error(f"GITHUB RESPONSE CONTENT: {response.content}")
+        StatusMessage.step_failed(
+            end_text=(
+                f"Something went wrong when talking to GitHub; got a"
+                f" {response.status_code}. Response content might be"
+                f" large, so I've printed it to the logs."
+            ),
+            error=True,
         )
         return
     release_data = response.json()
     if release_data["name"] == __version__:
-        say("Server version is the same as current version; nothing to update.")
+        StatusMessage.step_failed(
+            end_text="Server version is the same as current version; nothing to update.",
+            error=True,
+        )
         return
     else:
-        say(f"Downloading release {release_data['name']}...")
+        StatusMessage.step_succeeded()
+        StatusMessage.add_new_context_step(
+            f"Downloading release {release_data['name']}..."
+        )
 
     url = release_data["assets"][0]["browser_download_url"]
     with current_zipfile() as archive:
@@ -41,41 +60,57 @@ def update(payload) -> None:
         archive_path = Path(archive.filename)
         folder = archive_path.parent
 
-    backup_archive = folder / "backup.pyz"
+    try:
+        backup_archive = folder / "backup.pyz"
 
-    # First, back up the currently running zip
-    with open(backup_archive, "wb") as backup, open(archive_path, "rb") as original:
-        backup.write(original.read())
+        # First, back up the currently running zip
+        with open(backup_archive, "wb") as backup, open(archive_path, "rb") as original:
+            backup.write(original.read())
 
-    subprocess.check_output(shlex.split(f"chmod +x {str(backup_archive)}"))
+        subprocess.check_output(shlex.split(f"chmod +x {str(backup_archive)}"))
 
-    # write the new archive to disk
-    resp = requests.get(url, stream=True)
-    new_archive = folder / "temp.pyz"
-    with open(new_archive, "wb") as new:
-        for chunk in resp.iter_content(chunk_size=8192):
-            new.write(chunk)
+        # write the new archive to disk
+        resp = requests.get(url, stream=True)
+        new_archive = folder / "temp.pyz"
+        with open(new_archive, "wb") as new:
+            for chunk in resp.iter_content(chunk_size=8192):
+                new.write(chunk)
 
-    subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
-
+        subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
+    except subprocess.CalledProcessError:
+        StatusMessage.step_failed(
+            error=True,
+            end_text=(
+                "Something went wrong and I couldn't download it."
+                " Please check the logs for more information."
+            ),
+        )
+        return
+    StatusMessage.step_succeeded()
     # make sure the new archive passes the internal tests
-    say("Validating downloaded archive...")
+    StatusMessage.add_new_context_step("Validating downloaded archive...")
     result = subprocess.run(
         shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
         stdout=subprocess.DEVNULL,
     )
     if result.returncode != 0:
-        say(f"Selfcheck failed! Stopping update.")
+        StatusMessage.step_failed(
+            error=True, end_text="Selfcheck failed! Stopping update."
+        )
         return
+    StatusMessage.step_succeeded()
 
     # copy the new archive on top of the running one
+    StatusMessage.add_new_context_step("Updating...")
     with current_zipfile() as archive:
         with open(archive.filename, "wb") as current, open(
             new_archive, "rb"
         ) as tempfile:
             current.write(tempfile.read())
 
-    say(f"Update to {release_data['name']} complete. Restarting...")
+    StatusMessage.step_succeeded(
+        end_text=f"Update to {release_data['name']} complete. Restarting..."
+    )
 
     # spawn a new child that is separate from the parent process so that it doesn't
     # die immediately as we respawn the parent
