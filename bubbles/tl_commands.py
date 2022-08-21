@@ -1,4 +1,5 @@
 import inspect
+import logging
 import sys
 from datetime import datetime, timedelta
 
@@ -90,7 +91,11 @@ class TranscriptionCheckPing(TLJob):
 
 class RuleMonitoring(TLJob):
     def job(self):
-        rule_monitoring_callback()
+        try:
+            rule_monitoring_callback()
+        except Exception as e:
+            # Catch all errors to make sure the bot doesn't crash
+            logging.error(f"Failed to check for rule changes: {e}")
 
     class Meta:
         start_interval = timedelta(seconds=0)  # start now
