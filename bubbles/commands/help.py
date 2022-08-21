@@ -1,6 +1,6 @@
 from typing import Dict
 
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
 
 
 def format_text(data: Dict) -> str:
@@ -13,7 +13,7 @@ def format_text(data: Dict) -> str:
 
 def help(payload):
     plugins_with_help = dict()
-    for plugin in PluginManager.plugins:
+    for plugin in payload["extras"]["meta"].plugins:
         if plugin["help"] is not None:
             # grab the name of the command and the help string.
             plugin_split = str(plugin["callable"]).split()
@@ -31,6 +31,6 @@ def help(payload):
     payload["extras"]["say"](format_text(plugins_with_help))
 
 
-PluginManager.register_plugin(
-    help, r"^help$", help="!help - Lists out all available commands!"
+PLUGIN = Plugin(
+    callable=help, regex=r"^help$", help="!help - Lists out all available commands!"
 )

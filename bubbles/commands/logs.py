@@ -1,8 +1,8 @@
 import subprocess
 from datetime import datetime
 
+from bubbles.commands import Plugin
 from bubbles.service_utils import SERVICES, get_service_name
-from bubbles.config import PluginManager
 
 # note: this command requires setting up sudoers access
 
@@ -33,6 +33,9 @@ def logs(payload):
     )
 
 
-PluginManager.register_plugin(
-    logs, r"^logs([ a-zA-Z]+)?", help="!logs [service_name]", interactive_friendly=False
+PLUGIN = Plugin(
+    callable=logs,
+    regex=r"^logs([ a-zA-Z]+)?",
+    help="!logs [service_name]",
+    interactive_friendly=False,
 )

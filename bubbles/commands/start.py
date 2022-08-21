@@ -1,7 +1,8 @@
 import subprocess
 from typing import Callable
 
-from bubbles.config import PluginManager, COMMAND_PREFIXES
+from bubbles.config import COMMAND_PREFIXES
+from bubbles.commands import Plugin
 from bubbles.service_utils import (
     say_code,
     verify_service_up,
@@ -20,7 +21,7 @@ def _start_service(service: str, say: Callable) -> None:
         say("Something went wrong and could not start.")
         say_code(say, systemctl_response)
     else:
-        if verify_service_up(say, service):
+        if verify_service_up(service):
             say("Started successfully!")
         else:
             say(
@@ -59,9 +60,9 @@ def start(payload):
         _start_service(service, say)
 
 
-PluginManager.register_plugin(
-    start,
-    r"^start ?(.+)",
+PLUGIN = Plugin(
+    callable=start,
+    regex=r"^start ?(.+)",
     help=f"!start [{', '.join(SERVICES)}] - starts the requested bot.",
     interactive_friendly=False,
 )

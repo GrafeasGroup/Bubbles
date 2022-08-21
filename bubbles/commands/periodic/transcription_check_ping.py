@@ -99,6 +99,7 @@ def _get_check_username(message: Dict) -> Optional[str]:
     :returns: The username, or None if it couldn't be found.
     """
     text = _extract_check_text(message)
+
     username_match = USERNAME_REGEX.search(text)
     return username_match.group("username") if username_match else None
 
@@ -155,6 +156,7 @@ def _get_check_time(message: Dict) -> datetime:
 
 def _get_check_data(message: Dict) -> CheckData:
     """Extract the data from a given check message."""
+
     user = _get_check_username(message)
     status, mod = _get_check_status(message)
     link = _get_check_link(message)
@@ -179,6 +181,10 @@ def _extract_open_checks(messages: List[Dict]) -> List[CheckData]:
     for message in messages:
         # Only handle check messages
         if not _is_check_message(message):
+            continue
+
+        # sanity check, make sure the message is valid
+        if not _extract_check_text(message):
             continue
 
         check = _get_check_data(message)

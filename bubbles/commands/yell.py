@@ -1,6 +1,7 @@
 import re
 
-from bubbles.config import PluginManager, ME
+from bubbles.config import ME
+from bubbles.commands import Plugin
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
@@ -52,9 +53,9 @@ class Yell:
 
 
 instance = Yell()
-PluginManager.register_plugin(
-    instance.yell,
-    raw_pattern,
+PLUGIN = Plugin(
+    callable=instance.yell,
+    regex=raw_pattern,
     flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     callback=instance.yell_callback,
     ignore_prefix=True,

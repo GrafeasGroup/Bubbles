@@ -6,10 +6,16 @@ class MessageUtils:
         self.client = client
         self.payload = payload
 
-    def reaction_add(self, message: Dict, name: str) -> Any:
+    def reaction_add(self, response: Dict, name: str) -> Any:
         # this is mostly just annoying to remember
         return self.client.reactions_add(
-            channel=message["channel"], timestamp=message["ts"], name=name
+            channel=response["channel"], timestamp=response["ts"], name=name
+        )
+
+    def update_message(self, response: Dict, *args, **kwargs) -> Any:
+        """Pass the result of `say` into this."""
+        return self.client.chat_update(
+            channel=response["channel"], ts=response["ts"], *args, **kwargs
         )
 
     def upload_file(

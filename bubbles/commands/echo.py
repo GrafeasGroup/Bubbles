@@ -1,4 +1,5 @@
-from bubbles.config import PluginManager
+from bubbles.commands import Plugin
+
 import re
 
 # find a link in the slack format, then strip out the text at the end.
@@ -23,6 +24,8 @@ def echo(payload):
     payload["extras"]["say"](f"```{' '.join(text.split()[1:])}```")
 
 
-PluginManager.register_plugin(
-    echo, r"^echo", help="Repeats back whatever you pass in. Mostly for debugging."
+PLUGIN = Plugin(
+    callable=echo,
+    regex=r"^echo",
+    help="Repeats back whatever you pass in. Mostly for debugging.",
 )
