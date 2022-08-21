@@ -1,9 +1,11 @@
+import json
+import os.path
 from datetime import datetime
 from typing import List, TypedDict, Dict, Optional, Tuple
 
 from praw.models import Rule
 
-from bubbles.commands.periodic import RULE_MONITORING_CHANNEL_ID
+from bubbles.commands.periodic import RULE_MONITORING_CHANNEL_ID, RULE_MONITORING_DATA_PATH
 from bubbles.config import reddit, app
 
 # Newly-added subreddits that don't have their rules tracked yet
@@ -53,25 +55,67 @@ class RuleChanges(TypedDict):
     edited: List[RuleEdited]
 
 
+def _save_all_rules(rules: SubredditRuleMap):
+    """Save all rules to the save file."""
+    path = RULE_MONITORING_DATA_PATH
+    dir_path = os.path.dirname(path)
+
+    # Create the data folder if it doesn't exist yet
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path, exist_ok=True)
+
+    # Write the rules to the file
+    with open(path, "w+") as file:
+        json.dump(rules, file, indent=2)
+
+
 def _save_rules_for_sub(sub_name: str, rules: Optional[List[SubredditRule]]):
     """Save the rules for the given sub.
 
     The changes are persisted to a file, such that it is available after restart.
     """
-    # TODO: Implement this
-    pass
+    rule_entry: RuleEntry = {
+        # It has been updated now
+        "last_updated": datetime.now(),
+        "rules": rules or [],
+    }
+
+    # Load the previous rules
+    all_rules = _load_all_rules()
+    # Add the change
+    all_rules[sub_name] = rule_entry
+    # Save it again
+    _save_all_rules(all_rules)
 
 
 def _load_all_rules() -> SubredditRuleMap:
     """Loads all rules from the save file."""
-    # TODO: Implement this
-    pass
+    path = RULE_MONITORING_DATA_PATH
+
+    if not os.path.exists(path):
+        # We don't have any data saved yet, so no rules yet
+        return {}
+
+    with open(path, "r") as file:
+        content = file.read()
+
+        if content == "" or content.isspace():
+            # There is a file, but it's empty, so no rules yet
+            return {}
+
+        # Otherwise, parse the saved rule data
+        return json.loads(content)
 
 
-def _load_rules_for_sub(sub_name) -> List[SubredditRule]:
+def _load_rules_for_sub(sub_name) -> Optional[List[SubredditRule]]:
     """Load the rules for the given sub."""
-    # TODO: Implement this
-    pass
+    all_rules = _load_all_rules()
+
+    if rule_entry := all_rules.get(sub_name):
+        return rule_entry["rules"]
+
+    # We never checked the given sub
+    return None
 
 
 def _get_subreddit_names() -> List[str]:
@@ -86,9 +130,11 @@ def _get_subreddit_names() -> List[str]:
 
 def _convert_subreddit_rule(rule: Rule, index: int) -> SubredditRule:
     """Convert a Reddit rule to our own rule representation."""
+    name: str = rule.short_name or ""
+
     return {
         "index": index,
-        "name": rule.short_name or "",
+        "name": name,
         "description": rule.description or "",
         "created_time": datetime.utcfromtimestamp(rule.created_utc),
     }
