@@ -192,11 +192,16 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
     """Check if the rules of the given sub have been changed.
 
     This loads the saved rules from the sub and compares them with the newly fetched rules from Reddit.
+    It also saves the new rules back to the file.
     """
     old_rules = _load_rules_for_sub(sub_name)
     new_rules = _get_subreddit_rules(sub_name)
 
-    return _compare_rules(old_rules, new_rules)
+    changes = _compare_rules(old_rules, new_rules)
+
+    _save_rules_for_sub(sub_name, new_rules)
+
+    return changes
 
 
 def _initialize_subreddit_stack():
@@ -343,6 +348,7 @@ def rule_monitoring_callback():
 
     # Process the next sub in the stack
     sub_name = subreddit_stack.pop()
+    # Check the changes (and save the new rules to file)
     rule_changes = _check_rule_changes(sub_name)
 
     # If there were changes, notify the mods
