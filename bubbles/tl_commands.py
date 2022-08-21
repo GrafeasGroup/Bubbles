@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from bubbles.commands.periodic.banbot_check import banbot_check_callback
 from bubbles.commands.periodic.etsy_sale_check import etsy_recent_sale_callback
 from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
+from bubbles.commands.periodic.rule_monitoring import rule_monitoring_callback
 from bubbles.commands.periodic.welcome_ping import (
     welcome_ping_callback,
     periodic_ping_in_progress_callback,
@@ -85,6 +86,15 @@ class TranscriptionCheckPing(TLJob):
     class Meta:
         start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
         regular_interval = timedelta(hours=12)
+
+
+class RuleMonitoring(TLJob):
+    def job(self):
+        rule_monitoring_callback()
+
+    class Meta:
+        start_interval = timedelta(seconds=0)  # start now
+        regular_interval = timedelta(minutes=1)
 
 
 # TODO: This will require major surgery because the events API doesn't support
