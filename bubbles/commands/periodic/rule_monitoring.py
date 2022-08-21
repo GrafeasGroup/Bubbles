@@ -1,6 +1,7 @@
 import json
 import os.path
 from datetime import datetime
+from time import sleep
 from typing import List, TypedDict, Dict, Optional, Tuple
 
 from praw.models import Rule
@@ -328,7 +329,9 @@ def rule_monitoring_callback():
     # If there are new subs, check all of their rules directly
     if len(new_subreddits) > 0:
         for sub_name in new_subreddits:
-            _check_rule_changes(sub_name)
+            _initialize_rules(sub_name)
+            # Make sure we don't go over the API rate limit
+            sleep(1)
 
         subs = ", ".join(new_subreddits)
         _notify_mods(f"*Initialized* the rules of the following sub(s):\n{subs}")
