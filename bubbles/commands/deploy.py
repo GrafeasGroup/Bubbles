@@ -15,6 +15,10 @@ from bubbles.service_utils import (
 )
 
 
+# the actual command that you run on the server to get the right version
+PYTHON_VERSION = "python3.10"
+
+
 class DeployError(Exception):
     pass
 
@@ -23,7 +27,7 @@ def _deploy_service(service: str, payload: dict) -> None:
     def check_for_new_version() -> dict:
         StatusMessage.add_new_context_step("Checking for new release...")
 
-        output = subprocess.check_output(shlex.split(f"./{service}.pyz --version"))
+        output = subprocess.check_output(shlex.split(f"{PYTHON_VERSION} {service}.pyz --version"))
         # starting from something like b'BubblesV2, version ?????\n'
         current_version = output.decode().strip().split(", ")[-1].split()[-1]
         github_response = requests.get(
@@ -66,7 +70,7 @@ def _deploy_service(service: str, payload: dict) -> None:
         StatusMessage.add_new_context_step("Validating new release...")
 
         result = subprocess.run(
-            shlex.split(f"sh -c 'python3.10 {str(new_archive)} selfcheck'"),
+            shlex.split(f"sh -c '{PYTHON_VERSION} {str(new_archive)} selfcheck'"),
             stdout=subprocess.DEVNULL,
         )
         if result.returncode != 0:
