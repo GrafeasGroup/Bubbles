@@ -239,11 +239,16 @@ def _initialize_subreddit_stack():
     # Sort the old entries by the time they were last updated
     # The oldest entries are last, so at the top of the stack
     entries.sort(key=lambda x: x[1]["last_updated"], reverse=True)
+    _subreddit_stack = [entry[0] for entry in entries]
+
+    logging.info(
+        f"Initialized subreddit stack:\nNew subreddits: {_new_subreddits}\nSubreddit stack: {_subreddit_stack}"
+    )
 
     # Update the global variables
     # We only do this once the process is complete, in case the bot crashes in-between
     new_subreddits = _new_subreddits
-    subreddit_stack = [entry[0] for entry in entries]
+    subreddit_stack = _subreddit_stack
 
 
 def _format_rule(rule: SubredditRule) -> str:
@@ -326,6 +331,11 @@ def _notify_mods(text: str) -> None:
         unfurl_media=False,
         as_user=True,
     )
+
+
+def get_subreddit_stack() -> Tuple[List[str], List[str]]:
+    """Get the current new subreddits and subreddit stack."""
+    return new_subreddits, subreddit_stack
 
 
 def rule_monitoring_callback():
