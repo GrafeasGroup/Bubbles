@@ -344,6 +344,8 @@ def rule_monitoring_callback():
     If no subs are left to process, the subreddit list is updated again.
     If new subs have been added, they will be processed immediately.
     """
+    global new_subreddits
+
     # Repopulate the subreddit queue if necessary
     if len(subreddit_stack) == 0:
         _initialize_subreddit_stack()
@@ -356,6 +358,8 @@ def rule_monitoring_callback():
             sleep(1)
 
         subs = ", ".join(new_subreddits)
+        # Reset new subreddits, we initialized them all
+        new_subreddits = []
         _notify_mods(f"*Initialized* the rules of the following sub(s):\n{subs}")
 
     # If no subs need to be checked, we wait for the next cycle
