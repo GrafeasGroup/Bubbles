@@ -1,4 +1,7 @@
+import os.path
+
 from bubbles.commands import Plugin
+from bubbles.commands.periodic import RULE_MONITORING_DATA_PATH
 from bubbles.commands.periodic.transcription_check_ping import (
     transcription_check_ping_callback,
 )
@@ -15,7 +18,16 @@ def debug(payload: dict) -> None:
     elif "rule_monitoring" in text:
         new_subs = ", ".join(new_subreddits)
         sub_stack = ", ".join(subreddit_stack)
-        say(f"New subreddits:\n{new_subs}\n\nSubreddit stack:{sub_stack}")
+
+        path = RULE_MONITORING_DATA_PATH
+
+        if os.path.exists(path):
+            with open(path, "r") as file:
+                content = file.read()
+        else:
+            content = "<File does not exist>"
+
+        say(f"New subreddits:\n{new_subs}\n\nSubreddit stack:{sub_stack}\n\nSave file:\n```\n{content}\n```")
     else:
         say("Not sure what you want to debug.")
 

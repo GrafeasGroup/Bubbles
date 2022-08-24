@@ -105,9 +105,6 @@ def _load_all_rules() -> SubredditRuleMap:
     with open(path, "r") as file:
         content = file.read()
 
-        # FIXME: Remove this
-        logging.warning(f"Content:\n{content}")
-
         if content == "" or content.isspace():
             # There is a file, but it's empty, so no rules yet
             return {}
