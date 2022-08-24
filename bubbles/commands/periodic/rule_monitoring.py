@@ -123,7 +123,8 @@ def _get_subreddit_names() -> List[str]:
     """Get the names of all subreddits in the queue."""
     tor = reddit.subreddit("TranscribersOfReddit")
     subreddit_page = tor.wiki["subreddits"]
-    subreddits: List[str] = subreddit_page.content_md.trim().splitlines()
+    page_content: str = subreddit_page.content_md
+    subreddits: List[str] = page_content.strip().splitlines()
     # Sort the list alphabetically
     subreddits.sort(key=lambda x: x.casefold())
     return subreddits
