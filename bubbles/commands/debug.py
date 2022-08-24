@@ -15,10 +15,15 @@ def debug(payload: dict) -> None:
     elif "rule_monitoring" in text:
         new_subreddits, subreddit_stack = get_subreddit_stack()
 
-        new_subs = ", ".join(new_subreddits) if len(new_subreddits) > 0 else "<None>"
-        sub_stack = ", ".join(subreddit_stack) if len(subreddit_stack) > 0 else "<None>"
+        new_subs_count = len(new_subreddits)
+        sub_stack_count = len(subreddit_stack)
 
-        say(f"New subreddits:\n{new_subs}\n\nSubreddit stack:{sub_stack}")
+        new_subs = ", ".join(new_subreddits) if new_subs_count > 0 else "<None>"
+        sub_stack = ", ".join(subreddit_stack) if sub_stack_count > 0 else "<None>"
+
+        say(
+            f"*New subreddits* ({new_subs_count}): {new_subs}\n\n*Subreddit stack* ({sub_stack_count}): {sub_stack}"
+        )
     else:
         say("Not sure what you want to debug.")
 
