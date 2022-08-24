@@ -26,7 +26,8 @@ class SubredditRule(TypedDict):
     index: int
     name: str
     description: str
-    created_time: datetime
+    # Iso-formatted date string
+    created_time: str
 
 
 class RuleEntry(TypedDict):
@@ -143,7 +144,7 @@ def _convert_subreddit_rule(rule: Rule, index: int) -> SubredditRule:
         "index": index,
         "name": name,
         "description": rule.description or "",
-        "created_time": datetime.utcfromtimestamp(rule.created_utc),
+        "created_time": datetime.utcfromtimestamp(rule.created_utc).isoformat(),
     }
 
 
