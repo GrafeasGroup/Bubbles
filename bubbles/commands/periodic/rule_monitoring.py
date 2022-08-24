@@ -243,7 +243,7 @@ def _initialize_subreddit_stack():
     # Update the global variables
     # We only do this once the process is complete, in case the bot crashes in-between
     new_subreddits = _new_subreddits
-    subreddit_stack = [entry[1]["rules"] for entry in entries]
+    subreddit_stack = [entry[0] for entry in entries]
 
 
 def _format_rule(rule: SubredditRule) -> str:
