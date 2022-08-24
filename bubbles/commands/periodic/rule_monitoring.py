@@ -1,4 +1,5 @@
 import json
+import logging
 import os.path
 from datetime import datetime
 from time import sleep
@@ -29,7 +30,8 @@ class SubredditRule(TypedDict):
 
 
 class RuleEntry(TypedDict):
-    last_update: datetime
+    # Iso-formatted date string
+    last_update: str
     rules: List[SubredditRule]
 
 
@@ -80,7 +82,7 @@ def _save_rules_for_sub(sub_name: str, rules: Optional[List[SubredditRule]]):
     """
     rule_entry: RuleEntry = {
         # It has been updated now
-        "last_updated": datetime.now(),
+        "last_updated": datetime.now().isoformat(),
         "rules": rules or [],
     }
 
@@ -102,6 +104,9 @@ def _load_all_rules() -> SubredditRuleMap:
 
     with open(path, "r") as file:
         content = file.read()
+
+        # FIXME: Remove this
+        logging.warning(f"Content:\n{content}")
 
         if content == "" or content.isspace():
             # There is a file, but it's empty, so no rules yet
