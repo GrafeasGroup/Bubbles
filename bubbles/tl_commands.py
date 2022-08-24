@@ -1,6 +1,7 @@
 import inspect
 import logging
 import sys
+import traceback
 from datetime import datetime, timedelta
 
 # from bubbles.commands.periodic.activity_checkin import (
@@ -95,7 +96,9 @@ class RuleMonitoring(TLJob):
             rule_monitoring_callback()
         except Exception as e:
             # Catch all errors to make sure the bot doesn't crash
-            logging.error(f"Failed to check for rule changes: {e}")
+            # See <https://stackoverflow.com/a/62952274>
+            tb_str = ''.join(traceback.format_exception(None, e, e.__traceback__))
+            logging.error(f"Failed to check for rule changes: {e}\n{tb_str}")
 
     class Meta:
         start_interval = timedelta(seconds=0)  # start now
