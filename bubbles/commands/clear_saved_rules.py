@@ -14,10 +14,7 @@ def clear_saved_rules(payload: dict) -> None:
         return
 
     with open(path, "w+") as file:
-        content = file.read()
-
         say("Clearing saved rules, I hope you know what you're doing!")
-        say(f"Previous content:\n```\n{content}\n```")
 
         file.write("")
 
