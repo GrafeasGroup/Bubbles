@@ -22,42 +22,38 @@ raw_pattern = r"""
 compiled_pattern = re.compile(raw_pattern, re.VERBOSE | re.MULTILINE | re.IGNORECASE)
 
 idk = (
-    "I KNOW YOU'RE HAVING TROUBLE BUT I JUST JOINED THIS ROOM! "
+    "I KNOW YOU'RE HAVING TROUBLE BUT "
     "I DON'T KNOW WHAT'S GOING ON EITHER."
 )
 
 
-class Yell:
-    def yell(self, payload):
-        """Everyone's a little bit hard of hearing sometimes."""
-        if not hasattr(self, "previous_message_dict"):
-            response = idk
-        elif payload["channel"] in self.previous_message_dict:
-            previous_message = self.previous_message_dict[payload["channel"]]
-            response = f"<@{payload['user']}>: {previous_message['text'].upper()}"
-        else:
-            response = idk
+def yell(payload: dict) -> None:
+    """Everyone's a little hard of hearing sometimes."""
+    cache = payload["extras"]["meta"].get_cache("yell")
+    if payload["channel"] in cache:
+        previous_message = cache[payload["channel"]]
+        response = f"<@{payload['user']}>: {previous_message['text'].upper()}"
+    else:
+        response = idk
 
-        payload["extras"]["say"](response)
-
-    def yell_callback(self, message):
-        if message["user"] == ME:
-            return
-        # back up the last message sent that doesn't match the patterns.
-        # Keep a running dict based on the channel it came from.
-        if not hasattr(self, "previous_message_dict"):
-            self.previous_message_dict = dict()
-
-        if not re.match(compiled_pattern, message["text"]):
-            self.previous_message_dict[message["channel"]] = message
+    payload["extras"]["say"](response)
 
 
-instance = Yell()
+def yell_callback(payload: dict) -> None:
+    cache = payload["extras"]["meta"].get_cache("yell")
+    if payload["user"] == ME:
+        return
+    # back up the last payload sent that doesn't match the patterns.
+    # Keep a running dict based on the channel it came from.
+    if not re.match(compiled_pattern, payload["text"]):
+        cache[payload["channel"]] = payload
+
+
 PLUGIN = Plugin(
-    callable=instance.yell,
+    callable=yell,
     regex=raw_pattern,
     flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
-    callback=instance.yell_callback,
+    callback=yell_callback,
     ignore_prefix=True,
     help="WHAT?!",
 )

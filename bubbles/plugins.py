@@ -21,6 +21,7 @@ class PluginManager:
         self.callbacks: List[Callable] = list()
         self.command_prefixes = command_prefixes
         self.interactive_mode = interactive_mode
+        self.cache = {}
 
     def try_get_command_text(self, message: str) -> Optional[str]:
         """Try to get the text content of a command.
@@ -36,6 +37,19 @@ class PluginManager:
                 return message[len(prefix) :].strip()
 
         return None
+
+    def get_cache(self, cache_name: str) -> dict:
+        """
+        Provide a shareable volatile cache for plugins.
+
+        Some commands need to either store information for later
+        or provide the ability to share information to other commands.
+        The plugin manager provides a shared cache dict that can be
+        used for this purpose.
+        """
+        if not self.cache.get(cache_name):
+            self.cache[cache_name] = {}
+        return self.cache[cache_name]
 
     def get_plugin(self, message: str) -> Union[Plugin, None, bool]:
         """Get the plugin corresponding to the given message."""
