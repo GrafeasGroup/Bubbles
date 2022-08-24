@@ -122,7 +122,7 @@ def _load_rules_for_sub(sub_name) -> Optional[List[SubredditRule]]:
 def _get_subreddit_names() -> List[str]:
     """Get the names of all subreddits in the queue."""
     tor = reddit.subreddit("TranscribersOfReddit")
-    subreddit_page = tor.wiki.get_page("subreddits")
+    subreddit_page = tor.wiki["subreddits"]
     subreddits: List[str] = subreddit_page.content_md.trim().splitlines()
     # Sort the list alphabetically
     subreddits.sort(key=lambda x: x.casefold())
