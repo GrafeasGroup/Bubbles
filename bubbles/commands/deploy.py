@@ -27,7 +27,9 @@ def _deploy_service(service: str, payload: dict) -> None:
     def check_for_new_version() -> dict:
         StatusMessage.add_new_context_step("Checking for new release...")
 
-        output = subprocess.check_output(shlex.split(f"{PYTHON_VERSION} {service}.pyz --version"))
+        output = subprocess.check_output(
+            shlex.split(f"{PYTHON_VERSION} {service}.pyz --version")
+        )
         # starting from something like b'BubblesV2, version ?????\n'
         current_version = output.decode().strip().split(", ")[-1].split()[-1]
         github_response = requests.get(

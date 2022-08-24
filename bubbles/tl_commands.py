@@ -97,7 +97,7 @@ class RuleMonitoring(TLJob):
         except Exception as e:
             # Catch all errors to make sure the bot doesn't crash
             # See <https://stackoverflow.com/a/62952274>
-            tb_str = ''.join(traceback.format_exception(None, e, e.__traceback__))
+            tb_str = "".join(traceback.format_exception(None, e, e.__traceback__))
             logging.error(f"Failed to check for rule changes: {e}\n{tb_str}")
 
     class Meta:

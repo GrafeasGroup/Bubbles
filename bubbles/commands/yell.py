@@ -21,10 +21,7 @@ raw_pattern = r"""
 
 compiled_pattern = re.compile(raw_pattern, re.VERBOSE | re.MULTILINE | re.IGNORECASE)
 
-idk = (
-    "I KNOW YOU'RE HAVING TROUBLE BUT "
-    "I DON'T KNOW WHAT'S GOING ON EITHER."
-)
+idk = "I KNOW YOU'RE HAVING TROUBLE BUT " "I DON'T KNOW WHAT'S GOING ON EITHER."
 
 
 def yell(payload: dict) -> None:
