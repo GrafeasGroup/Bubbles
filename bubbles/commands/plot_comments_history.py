@@ -1,7 +1,6 @@
 import datetime
 import re
 import warnings
-from typing import Dict
 
 import matplotlib.pyplot as plt
 from numpy import flip
@@ -11,24 +10,23 @@ from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
+from bubbles.message_utils import Payload
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
 
 
-def plot_comments_history(payload: Dict) -> None:
+def plot_comments_history(payload: Payload) -> None:
     # Syntax: !history [number of posts]
     count_days = {}
     count_hours = [0] * 24
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
-    utils = payload["extras"]["utils"]
+    args = payload.get_text().split()
     # print(args)
     number_posts = 100
     input_value = 100
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            say(
+            payload.say(
                 "`!history [number of posts]` shows the number of new comments"
                 " in #new-volunteers in function of their day. `number of posts`"
                 " must be an integer between 1 and 1000 inclusive."
@@ -37,7 +35,7 @@ def plot_comments_history(payload: Dict) -> None:
         else:
             input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
-        say(
+        payload.say(
             "ERROR! Too many arguments given as inputs!"
             " Syntax: `!history [number of posts]`"
         )
@@ -67,7 +65,9 @@ def plot_comments_history(payload: Dict) -> None:
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         count_hours[hour_message] = count_hours[hour_message] + 1
     timestamp = timestamp_min
-    say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}")
+    payload.say(
+        f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}"
+    )
     number_posts = []
     dates = []
     for i in range(0, max(count_days.keys())):
@@ -81,7 +81,7 @@ def plot_comments_history(payload: Dict) -> None:
     plt.ylabel("Number of messages")
     plt.grid(True, which="both")
     plt.savefig("plotHour.png")
-    utils.upload_file(file="plotHour.png")
+    payload.upload_file(file="plotHour.png")
 
     plt.close()
     plt.bar(range(0, 24), count_hours, 1, align="edge")
@@ -100,7 +100,7 @@ def plot_comments_history(payload: Dict) -> None:
     plt.text(13.5, max(count_hours) + 0.5, "Far East/Oceania evening")
     plt.text(19.5, max(count_hours) + 0.5, "Europe/Africa/Middle East evening")
     plt.savefig("plotHours.png")
-    utils.upload_file(file="plotHours.png")
+    payload.upload_file(file="plotHours.png")
 
     plt.close()
 

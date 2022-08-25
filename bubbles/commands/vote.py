@@ -1,21 +1,20 @@
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 
-def vote(payload):
-    say = payload["extras"]["say"]
-    utils = payload["extras"]["utils"]
-    text = " ".join(payload.get("cleaned_text").split()[1:])
+def vote(payload: Payload) -> None:
+    text = " ".join(payload.get_text().split()[1:])
 
     if len(text) == 0:
-        say(
+        payload.say(
             "Sorry, I didn't get a question for your poll!"
             " Usage: `poll Your Question Here!`"
         )
         return
 
-    response = say(f"VOTE: {text}")
+    response = payload.say(f"VOTE: {text}")
     for vote in ["upvote", "downvote"]:
-        utils.reaction_add(response, vote)
+        payload.reaction_add(response, vote)
 
 
 PLUGIN = Plugin(

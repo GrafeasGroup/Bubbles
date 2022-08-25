@@ -2,6 +2,7 @@ import re
 
 from bubbles.config import ME
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
@@ -24,26 +25,26 @@ compiled_pattern = re.compile(raw_pattern, re.VERBOSE | re.MULTILINE | re.IGNORE
 idk = "I KNOW YOU'RE HAVING TROUBLE BUT " "I DON'T KNOW WHAT'S GOING ON EITHER."
 
 
-def yell(payload: dict) -> None:
+def yell(payload: Payload) -> None:
     """Everyone's a little hard of hearing sometimes."""
-    cache = payload["extras"]["meta"].get_cache("yell")
-    if payload["channel"] in cache:
-        previous_message = cache[payload["channel"]]
-        response = f"<@{payload['user']}>: {previous_message['text'].upper()}"
+    cache: dict[str, Payload] = payload.get_cache("yell")
+    if payload.get_channel() in cache:
+        previous_message = cache[payload.get_channel()]
+        response = f"<@{payload.get_user()}>: {previous_message.get_text().upper()}"
     else:
         response = idk
 
-    payload["extras"]["say"](response)
+    payload.say(response)
 
 
-def yell_callback(payload: dict) -> None:
-    cache = payload["extras"]["meta"].get_cache("yell")
-    if payload["user"] == ME:
+def yell_callback(payload: Payload) -> None:
+    cache = payload.get_cache("yell")
+    if payload.get_user() == ME:
         return
     # back up the last payload sent that doesn't match the patterns.
     # Keep a running dict based on the channel it came from.
-    if not re.match(compiled_pattern, payload["text"]):
-        cache[payload["channel"]] = payload
+    if not re.match(compiled_pattern, payload.get_text()):
+        cache[payload.get_channel()] = payload
 
 
 PLUGIN = Plugin(

@@ -12,11 +12,12 @@ from bubbles.blocks import ContextStepMessage
 from bubbles.commands import Plugin
 
 from bubbles.config import USERNAME
+from bubbles.message_utils import Payload
 
 logger = logging.getLogger(__name__)
 
 
-def update(payload) -> None:
+def update(payload: Payload) -> None:
     StatusMessage: ContextStepMessage = ContextStepMessage(
         payload,
         title="Updating!",

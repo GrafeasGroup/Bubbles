@@ -3,6 +3,7 @@ import re
 
 from bubbles.config import USERNAME
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 
 pattern = r"""
@@ -14,7 +15,7 @@ f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{0}
 )
 
 
-def fuck_off(payload):
+def fuck_off(payload: Payload) -> None:
     responses = [
         "https://i.pinimg.com/564x/7f/de/1a/7fde1a18fd553ec5a1b7c7c3cdeeeda8.jpg",
         "https://i.pinimg.com/originals/d8/72/7a/d8727aafdb389f99e4643e39aaf4ed7b.jpg",
@@ -23,7 +24,7 @@ def fuck_off(payload):
         "https://mrwgifs.com/wp-content/uploads/2014/02/Bubbles-Sad-Crying-In-The-Rain-With-Puppy-Eyes-On-Powerpuff-Girlfs_408x408.jpg",
         "https://media2.giphy.com/media/j9COtyaa3nnAQ/200w.gif",
     ]
-    payload["extras"]["say"](random.choice(responses))
+    payload.say(random.choice(responses))
 
 
 PLUGIN = Plugin(

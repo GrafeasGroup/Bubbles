@@ -3,6 +3,7 @@ from typing import Callable
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 from bubbles.service_utils import SERVICES, get_service_name, say_code
 
 
@@ -19,16 +20,15 @@ def _stop_service(service: str, say: Callable) -> None:
     say(f"Stopped {service}.")
 
 
-def stop(payload):
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
+def stop(payload: Payload) -> None:
+    args = payload.get_text().split()
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
 
     if len(args) == 1:
-        say(
+        payload.say(
             "Need a service to stop in production. Usage: @bubbles stop [service]"
             " -- example: `@bubbles stop tor`"
         )
@@ -36,7 +36,7 @@ def stop(payload):
 
     service = args[1].lower().strip()
     if service not in SERVICES:
-        say(
+        payload.say(
             f"Received a request to stop {args[1]}, but I'm not sure what that is.\n\n"
             f"Available options: {', '.join(SERVICES)}"
         )
@@ -44,9 +44,9 @@ def stop(payload):
 
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _stop_service(system, say)
+            _stop_service(system, payload.say)
     else:
-        _stop_service(service, say)
+        _stop_service(service, payload.say)
 
 
 PLUGIN = Plugin(

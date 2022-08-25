@@ -1,4 +1,5 @@
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 import re
 
@@ -19,9 +20,9 @@ def clean_links(text):
     return text
 
 
-def echo(payload):
-    text = clean_links(payload.get("cleaned_text"))
-    payload["extras"]["say"](f"```{' '.join(text.split()[1:])}```")
+def echo(payload: Payload):
+    text = clean_links(payload.cleaned_text)
+    payload.say(f"```{' '.join(text.split()[1:])}```")
 
 
 PLUGIN = Plugin(

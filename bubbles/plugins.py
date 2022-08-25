@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Tuple, Union, Any, Optional
 import importlib
 
 from bubbles.config import users_list, USERNAME, ME
-from bubbles.message_utils import MessageUtils
+from bubbles.message_utils import Payload
 
 log = logging.getLogger(__name__)
 
@@ -37,19 +37,6 @@ class PluginManager:
                 return message[len(prefix) :].strip()
 
         return None
-
-    def get_cache(self, cache_name: str) -> dict:
-        """
-        Provide a shareable volatile cache for plugins.
-
-        Some commands need to either store information for later
-        or provide the ability to share information to other commands.
-        The plugin manager provides a shared cache dict that can be
-        used for this purpose.
-        """
-        if not self.cache.get(cache_name):
-            self.cache[cache_name] = {}
-        return self.cache[cache_name]
 
     def get_plugin(self, message: str) -> Union[Plugin, None, bool]:
         """Get the plugin corresponding to the given message."""
@@ -91,7 +78,7 @@ class PluginManager:
         # looking for.
         return None
 
-    def process_plugin_callbacks(self, data: Dict) -> None:
+    def process_plugin_callbacks(self, data: Payload) -> None:
         for func in self.callbacks:
             func(data)
 
@@ -144,12 +131,12 @@ class PluginManager:
             except Exception as e:
                 log.warning(f"Cannot load {plugin}: {e}")
 
-    def process_message(self, payload):
+    def process_message(self, payload: Payload):
         log.debug("Message received!")
         if len(payload) == 0:
             log.info("Unprocessable message. Ignoring.")
             return
-        message = payload.get("text")
+        message = payload.get_text()
 
         if not message:
             # sometimes we'll get an object without text; just discard it.
@@ -157,7 +144,7 @@ class PluginManager:
             return
 
         try:
-            user_who_sent_message = users_list[payload["user"]]
+            user_who_sent_message = users_list[payload.get_user()]
         except KeyError:
             # This will trigger if an app posts, like the RSS feeds.
             return
@@ -184,7 +171,7 @@ class PluginManager:
             # to use regular command syntax, though.
             # For example, trigger on "!hello" but not for "isn't bubbles great".
             if command_text := self.try_get_command_text(message):
-                payload["extras"]["say"](f"Unknown command: `{command_text}`")
+                payload.say(f"Unknown command: `{command_text}`")
 
         # If a command needs to be able to see all traffic for historical reasons,
         # register a separate callback function in a class for the command. See
@@ -206,25 +193,15 @@ class PluginManager:
 
         return self.try_get_command_text(text) or text
 
-    def message_received(self, ack, payload, client, context, say):
+    def message_received(self, ack, payload, client, context, say) -> None:
         ack()
         if not payload.get("text"):
             # we got a message that is not really a message for some reason.
             return
-        utils = MessageUtils(client, payload)
-        payload.update(
-            {
-                "cleaned_text": self.clean_text(payload.get("text")),
-                "extras": {
-                    "client": client,
-                    "context": context,
-                    "say": say,
-                    "utils": utils,
-                    "meta": self,
-                },
-            }
+        payload_obj = Payload(
+            client=client, slack_payload=payload, say=say, context=context, meta=self
         )
         try:
-            self.process_message(payload)
+            self.process_message(payload_obj)
         except:
             say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
