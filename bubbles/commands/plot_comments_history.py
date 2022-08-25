@@ -48,7 +48,7 @@ def plot_comments_history(payload: Payload) -> None:
     print("Number of messages retrieved: " + str(len(response["messages"])))
     for message in response["messages"]:
         if not re.search(
-                r"^<https://reddit.com/u", message["text"]
+            r"^<https://reddit.com/u", message["text"]
         ):  # Remove all messages who are not given by the bot
             continue
         # userWhoSentMessage = "[ERROR]" # Happens if a bot posts a message
@@ -65,7 +65,9 @@ def plot_comments_history(payload: Payload) -> None:
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         count_hours[hour_message] = count_hours[hour_message] + 1
     timestamp = timestamp_min
-    payload.say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}")
+    payload.say(
+        f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}"
+    )
     number_posts = []
     dates = []
     for i in range(0, max(count_days.keys())):

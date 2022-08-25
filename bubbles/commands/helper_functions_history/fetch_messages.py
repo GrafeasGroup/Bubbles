@@ -4,7 +4,9 @@ from bubbles.config import rooms_list
 from bubbles.message_utils import Payload
 
 
-def fetch_messages(payload: Payload, input_value: int, channel_name: str) -> SlackResponse:
+def fetch_messages(
+    payload: Payload, input_value: int, channel_name: str
+) -> SlackResponse:
     """
     Function that fetches the number of messages required by the input argument.
 
@@ -44,5 +46,7 @@ def fetch_messages(payload: Payload, input_value: int, channel_name: str) -> Sla
                 input_value = last_message["ts"]
             # print("Has this new message more data?" + str(is_there_other_data))
     else:
-        messages = payload.client.conversations_history(channel=channel, limit=input_value)
+        messages = payload.client.conversations_history(
+            channel=channel, limit=input_value
+        )
     return messages

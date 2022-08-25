@@ -93,7 +93,10 @@ def reaction_added(ack, payload):
 )
 @click.pass_context
 @click.option(
-    "-c", "--command", "command", help="Try and run a Bubbles command by name.",
+    "-c",
+    "--command",
+    "command",
+    help="Try and run a Bubbles command by name.",
 )
 @click.option(
     "-i",

@@ -9,13 +9,14 @@ if TYPE_CHECKING:
 
 class Payload:
     """Payload class for everything a command needs."""
+
     def __init__(
-            self,
-            client: WebClient=None,
-            slack_payload: dict=None,
-            say: Callable=None,
-            context: dict=None,
-            meta: PluginManager=None,
+        self,
+        client: WebClient = None,
+        slack_payload: dict = None,
+        say: Callable = None,
+        context: dict = None,
+        meta: PluginManager = None,
     ):
         self.client = client
         self._payload = slack_payload

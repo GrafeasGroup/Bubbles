@@ -199,11 +199,7 @@ class PluginManager:
             # we got a message that is not really a message for some reason.
             return
         payload_obj = Payload(
-            client=client,
-            slack_payload=payload,
-            say=say,
-            context=context,
-            meta=self
+            client=client, slack_payload=payload, say=say, context=context, meta=self
         )
         try:
             self.process_message(payload_obj)

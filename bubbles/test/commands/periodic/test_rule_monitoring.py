@@ -23,9 +23,17 @@ EXAMPLE_RULE = {
         # No rules
         ([], [], {"added": [], "removed": [], "edited": []}),
         # One rule added
-        ([], [EXAMPLE_RULE], {"added": [EXAMPLE_RULE], "removed": [], "edited": []},),
+        (
+            [],
+            [EXAMPLE_RULE],
+            {"added": [EXAMPLE_RULE], "removed": [], "edited": []},
+        ),
         # One rule removed
-        ([EXAMPLE_RULE], [], {"added": [], "removed": [EXAMPLE_RULE], "edited": []},),
+        (
+            [EXAMPLE_RULE],
+            [],
+            {"added": [], "removed": [EXAMPLE_RULE], "edited": []},
+        ),
         # One rule edited (name)
         (
             [EXAMPLE_RULE],

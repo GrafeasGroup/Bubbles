@@ -19,7 +19,9 @@ def isup(payload: Payload):
             )
             payload.say(f"Yep, {name} is up!")
         except subprocess.CalledProcessError:
-            payload.say(f"...something might be wrong; {name} doesn't look like it's up.")
+            payload.say(
+                f"...something might be wrong; {name} doesn't look like it's up."
+            )
 
     service = text[1]
     if service not in SERVICES:
