@@ -19,7 +19,7 @@ class Payload:
         meta: PluginManager = None,
     ):
         self.client = client
-        self._payload = slack_payload
+        self._slack_payload = slack_payload
         # say is abstracted out because we patch it early on to support threads
         self.say = say
         self.context = context
@@ -28,7 +28,7 @@ class Payload:
         self.cleaned_text = self.meta.clean_text(self.get_text())
 
     def __len__(self):
-        return len(self._payload)
+        return len(self._slack_payload)
 
     def get_cache(self, cache_name: str) -> dict:
         """
@@ -45,14 +45,14 @@ class Payload:
 
     def get_user(self) -> Optional[str]:
         """Get the user who sent the slack message."""
-        return self._payload.get("user")
+        return self._slack_payload.get("user")
 
     def get_channel(self) -> Optional[str]:
         """Return the channel the message originated from."""
-        return self._payload.get("channel")
+        return self._slack_payload.get("channel")
 
     def get_text(self) -> str:
-        return self._payload.get("text")
+        return self._slack_payload.get("text")
 
     def reaction_add(self, response: Dict, name: str) -> Any:
         """
@@ -88,7 +88,7 @@ class Payload:
             raise Exception("Must have either a file or content to post!")
 
         if not payload:
-            payload = self._payload
+            payload = self._slack_payload
         if not title:
             title = "Just vibing."
         self.client.files_upload(
