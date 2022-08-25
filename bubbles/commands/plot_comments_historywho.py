@@ -13,6 +13,8 @@ from bubbles.commands.helper_functions_history.extract_date_or_number import (
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 from bubbles.config import users_list
+from bubbles.message_utils import Payload
+
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
@@ -25,41 +27,37 @@ HELP_MESSAGE = (
 )
 
 
-def plot_comments_historywho(payload: Dict) -> None:
+def plot_comments_historywho(payload: Payload) -> None:
     # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
     # last_datetime = datetime.datetime.now().timestamp()
     count_reactions_all = {}
     count_reactions_people = {}
     datetime_now = datetime.datetime.now()
 
-    say = payload["extras"]["say"]
-    client = payload["extras"]["client"]
-    utils = payload["extras"]["utils"]
-
-    if '"' not in payload.get("text") and payload.get("text") != "!historywho -h":
-        say(
+    if '"' not in payload.get_text() and payload.get_text() != "!historywho -h":
+        payload.say(
             "`historywho` must specify a person (the name must be inside double"
             ' quotes) and a number of posts. Example: `"!historywho 169 "Bubbles"`'
         )
         return
 
-    name_person_to_search = payload.get("text").split('"')[1]
+    name_person_to_search = payload.get_text().split('"')[1]
     if name_person_to_search not in users_list.keys():
-        say(f"ERROR! {name_person_to_search} is not on the list of users.")
+        payload.say(f"ERROR! {name_person_to_search} is not on the list of users.")
         return
 
-    print(payload.get("text"))
-    other_params = payload.get("text").split('"')[0]
+    print(payload.get_text())
+    other_params = payload.get_text().split('"')[0]
     print("--- " + str(other_params))
     args = other_params.split()
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            say(HELP_MESSAGE)
+            payload.say(HELP_MESSAGE)
             return
         else:
             input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
-        say(f"Too many arguments given as inputs! Syntax: {HELP_MESSAGE}")
+        payload.say(f"Too many arguments given as inputs! Syntax: {HELP_MESSAGE}")
         return
 
     response = fetch_messages(payload, input_value, "new_volunteers")
@@ -101,7 +99,7 @@ def plot_comments_historywho(payload: Dict) -> None:
         # print(str(lastDatetime))
         # print(time_send)
 
-    say(
+    payload.say(
         f"{str(len(response['messages']))} messages retrieved since {str(timestamp_min)}"
     )
     number_posts = {}
@@ -160,7 +158,7 @@ def plot_comments_historywho(payload: Dict) -> None:
     plt.legend()
     plt.savefig("plotHourMods.png")
     plt.close()
-    utils.upload_file(file="plotHourMods.png")
+    payload.upload_file(file="plotHourMods.png")
 
 
 PLUGIN = Plugin(

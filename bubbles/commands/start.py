@@ -3,6 +3,7 @@ from typing import Callable
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 from bubbles.service_utils import (
     say_code,
     verify_service_up,
@@ -30,16 +31,15 @@ def _start_service(service: str, say: Callable) -> None:
             )
 
 
-def start(payload):
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
+def start(payload: Payload) -> None:
+    args = payload.get_text().split()
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
 
     if len(args) == 1:
-        say(
+        payload.say(
             "Need a service to start in production. Usage: @bubbles start [service]"
             " -- example: `@bubbles start tor`"
         )
@@ -47,7 +47,7 @@ def start(payload):
 
     service = args[1].lower().strip()
     if service not in SERVICES:
-        say(
+        payload.say(
             f"Received a request to start {args[1]}, but I'm not sure what that is.\n\n"
             f"Available options: {', '.join(SERVICES)}"
         )
@@ -55,9 +55,9 @@ def start(payload):
 
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _start_service(system, say)
+            _start_service(system, payload.say)
     else:
-        _start_service(service, say)
+        _start_service(service, payload.say)
 
 
 PLUGIN = Plugin(

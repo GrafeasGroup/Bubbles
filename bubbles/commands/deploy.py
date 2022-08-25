@@ -8,6 +8,7 @@ import requests
 from bubbles.blocks import ContextStepMessage
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 from bubbles.service_utils import (
     verify_service_up,
     SERVICES,
@@ -23,7 +24,7 @@ class DeployError(Exception):
     pass
 
 
-def _deploy_service(service: str, payload: dict) -> None:
+def _deploy_service(service: str, payload: Payload) -> None:
     def check_for_new_version() -> dict:
         StatusMessage.add_new_context_step("Checking for new release...")
 
@@ -166,16 +167,15 @@ def _deploy_service(service: str, payload: dict) -> None:
     os.chdir("/data/bubbles")
 
 
-def deploy(payload):
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
+def deploy(payload: Payload) -> None:
+    args = payload.get_text().split()
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
 
     if len(args) == 1:
-        say(
+        payload.say(
             "Need a service to deploy to production. Usage: @bubbles deploy [service]"
             " -- example: `@bubbles deploy tor`"
         )
@@ -183,14 +183,14 @@ def deploy(payload):
 
     service = args[1].lower().strip()
     if service not in SERVICES:
-        say(
+        payload.say(
             f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
             f"Available options: {', '.join(SERVICES)}"
         )
         return
 
     if service == "blossom":
-        say(
+        payload.say(
             "Sorry, deployments for Blossom are temporarily on hold. Please ping Joe"
             " if it's important."
         )

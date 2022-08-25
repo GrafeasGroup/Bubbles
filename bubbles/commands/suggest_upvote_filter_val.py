@@ -6,6 +6,7 @@ from typing import List
 
 from bubbles.config import reddit
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
@@ -141,10 +142,9 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     )
 
 
-def suggest_filter(payload) -> None:
-    sub = re.search(SUGGEST_FILTER_RE, payload["text"]).groups()[1]
-    say = payload["extras"]["say"]
-    say(f"Processing data for r/{sub}. This may take a moment...")
+def suggest_filter(payload: Payload) -> None:
+    sub = re.search(SUGGEST_FILTER_RE, payload.get_text()).groups()[1]
+    payload.say(f"Processing data for r/{sub}. This may take a moment...")
 
     ten_post_window, all_posts = get_new_posts_from_sub(sub)
     upvote_list_window = get_upvotes_from_list(ten_post_window)
@@ -165,7 +165,7 @@ def suggest_filter(payload) -> None:
         upvote_list_all_posts, posts_per_day_count
     )
 
-    say(
+    payload.say(
         f"Stats for r/{sub} over the last 10 submissions:\n"
         f"\n"
         f"* karma distribution: {min_karma} | {max_karma}\n"

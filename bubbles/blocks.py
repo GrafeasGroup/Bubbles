@@ -1,5 +1,7 @@
 from slack_sdk.models import blocks
 
+from bubbles.message_utils import Payload
+
 
 class StatusContextBlock(blocks.ContextBlock):
     """
@@ -87,15 +89,14 @@ class ContextStepMessage:
 
     def __init__(
         self,
-        payload: dict,
+        payload: Payload,
         title: str = None,
         start_message: str = None,
         error_message: str = None,
         start_immediately: bool = True,
     ):
         self.slack_response = None
-        self.say = payload["extras"]["say"]
-        self.utils = payload["extras"]["utils"]
+        self.payload = payload
         self.steps = []
         self.title = title if title else "Doing the thing..."
         self.start_message = start_message if start_message else "Here we go!"
@@ -105,7 +106,7 @@ class ContextStepMessage:
 
     def start(self) -> None:
         """Post the message that will be updated to Slack."""
-        self.slack_response = self.say(blocks=self._build_blocks())
+        self.slack_response = self.payload.say(blocks=self._build_blocks())
 
     def set_all_success(self) -> None:
         """Set all the steps in this container to Success."""
@@ -159,7 +160,7 @@ class ContextStepMessage:
         )
 
     def _update_message(self, error: bool = False, end_text: str = None) -> None:
-        self.utils.update_message(
+        self.payload.update_message(
             self.slack_response,
             blocks=self._build_blocks(error=error, end_text=end_text),
         )

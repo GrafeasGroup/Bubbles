@@ -1,6 +1,7 @@
 from typing import Dict
 
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 
 def format_text(data: Dict) -> str:
@@ -11,9 +12,9 @@ def format_text(data: Dict) -> str:
     return template.format("".join(commands))
 
 
-def help(payload):
+def help(payload: Payload) -> None:
     plugins_with_help = dict()
-    for plugin in payload["extras"]["meta"].plugins:
+    for plugin in payload.meta.plugins:
         if plugin["help"] is not None:
             # grab the name of the command and the help string.
             plugin_split = str(plugin["callable"]).split()
@@ -28,7 +29,7 @@ def help(payload):
             plugins_with_help[plugin_name] = plugin["help"]
     # sort that sucker alphabetically
     plugins_with_help = {key: value for key, value in sorted(plugins_with_help.items())}
-    payload["extras"]["say"](format_text(plugins_with_help))
+    payload.say(format_text(plugins_with_help))
 
 
 PLUGIN = Plugin(

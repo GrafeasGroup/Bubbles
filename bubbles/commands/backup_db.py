@@ -4,13 +4,11 @@ import os
 import shlex
 from pathlib import Path
 
+from bubbles.message_utils import Payload
 from bubbles.commands import Plugin
 
 
-def backup_db(payload):
-    say = payload["extras"]["say"]
-    utils = payload["extras"]["utils"]
-
+def backup_db(payload: Payload) -> None:
     # the db info is injected into the bot environment, so we'll grab it
     # and regurgitate it for the command
     password = os.environ.get("postgres_password")
@@ -19,7 +17,7 @@ def backup_db(payload):
     host = os.environ.get("postgres_host")
     filename = f"db_backup_{str(datetime.now().date())}.tar"
 
-    say("Starting DB export. This may take a moment.")
+    payload.say("Starting DB export. This may take a moment.")
 
     with open(filename, "w") as outfile:
         subprocess.Popen(
@@ -28,8 +26,8 @@ def backup_db(payload):
             stdout=outfile,
         ).wait()
 
-    say("DB export complete. Uploading...")
-    utils.upload_file(file=filename, title=filename)
+    payload.say("DB export complete. Uploading...")
+    payload.upload_file(file=filename, title=filename)
 
     p = Path(".")
     previous_backups = list(p.glob("db_backup_*.tar"))

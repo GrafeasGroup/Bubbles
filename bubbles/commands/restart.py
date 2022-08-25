@@ -3,6 +3,7 @@ from typing import Callable
 
 from bubbles.commands import Plugin
 from bubbles.config import COMMAND_PREFIXES
+from bubbles.message_utils import Payload
 from bubbles.service_utils import (
     say_code,
     verify_service_up,
@@ -34,16 +35,15 @@ def _restart_service(service: str, say: Callable) -> None:
     restart_service(service)
 
 
-def restart(payload):
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
+def restart(payload: Payload):
+    args = payload.get_text().split()
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
 
     if len(args) == 1:
-        say(
+        payload.say(
             "Need a service to restart in production. Usage: @bubbles restart [service]"
             " -- example: `@bubbles restart tor`"
         )
@@ -51,7 +51,7 @@ def restart(payload):
 
     service = args[1].lower().strip()
     if service not in SERVICES:
-        say(
+        payload.say(
             f"Received a request to restart {args[1]}, but I'm not sure what that is.\n\n"
             f"Available options: {', '.join(SERVICES)}"
         )
@@ -59,9 +59,9 @@ def restart(payload):
 
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _restart_service(system, say)
+            _restart_service(system, payload.say)
     else:
-        _restart_service(service, say)
+        _restart_service(service, payload.say)
 
 
 PLUGIN = Plugin(

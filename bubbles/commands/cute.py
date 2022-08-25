@@ -4,6 +4,7 @@ import requests
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.commands import Plugin
+from bubbles.message_utils import Payload
 
 # Pulled a bunch of these URLs from https://github.com/treboryx/animalsAPI -- many thanks
 
@@ -76,18 +77,17 @@ animals = {
 }
 
 
-def cute(data):
+def cute(payload: Payload) -> None:
     """
     !cute [animal from the dict above], or just !cute to get a random picture
     """
-    args = data.get("text").split()
+    args = payload.get_text().split()
 
     if args[0] in COMMAND_PREFIXES:
         # remove the call from the arg list so that it's one less thing
         # to account for
         args.pop(0)
 
-    say = data["extras"]["say"]
     animal = None
     unknown = False
 
@@ -103,9 +103,9 @@ def cute(data):
 
     animal_name, pic = get_pic(random.choice(animal))
     if unknown:
-        say(f"I'm not sure what you asked for, so here's a {animal_name}!")
+        payload.say(f"I'm not sure what you asked for, so here's a {animal_name}!")
 
-    say(pic)
+    payload.say(pic)
 
 
 PLUGIN = Plugin(
