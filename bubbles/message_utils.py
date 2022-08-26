@@ -44,7 +44,7 @@ class Payload:
         return self.meta.cache[cache_name]
 
     def get_user(self) -> Optional[str]:
-        """Get the user who sent the slack message."""
+        """Get the user who sent the Slack message."""
         return self._slack_payload.get("user")
 
     def get_channel(self) -> Optional[str]:
@@ -56,7 +56,7 @@ class Payload:
 
     def reaction_add(self, response: Dict, name: str) -> Any:
         """
-        Apply an emoji to a given slack submission.
+        Apply an emoji to a given Slack submission.
 
         Pass in the complete response from `say` and the name of an emoji.
         """
@@ -66,9 +66,9 @@ class Payload:
 
     def update_message(self, response: Dict, *args, **kwargs) -> Any:
         """
-        Edit / update a given slack submission.
+        Edit / update a given Slack submission.
 
-        Pass in the complete response from `say` and the name of an emoji.
+        Pass in the complete response from `say` and your new content.
         """
         return self.client.chat_update(
             channel=response["channel"], ts=response["ts"], *args, **kwargs
@@ -83,7 +83,7 @@ class Payload:
         filetype: str = None,  # https://api.slack.com/types/file#file_types
         initial_comment: str = None,
     ) -> Any:
-        """Upload a file to a given slack channel."""
+        """Upload a file to a given Slack channel."""
         if (not file and not content) or (file and content):
             raise Exception("Must have either a file or content to post!")
 
