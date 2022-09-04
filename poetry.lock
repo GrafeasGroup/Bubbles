@@ -46,10 +46,10 @@ optional = false
 python-versions = ">=3.5"
 
 [package.extras]
-dev = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "furo", "sphinx", "sphinx-notfound-page", "pre-commit", "cloudpickle"]
-docs = ["furo", "sphinx", "zope.interface", "sphinx-notfound-page"]
-tests = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "zope.interface", "cloudpickle"]
-tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "mypy (>=0.900,!=0.940)", "pytest-mypy-plugins", "cloudpickle"]
+dev = ["cloudpickle", "coverage[toml] (>=5.0.2)", "furo", "hypothesis", "mypy (>=0.900,!=0.940)", "pre-commit", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "sphinx", "sphinx-notfound-page", "zope.interface"]
+docs = ["furo", "sphinx", "sphinx-notfound-page", "zope.interface"]
+tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "zope.interface"]
+tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy (>=0.900,!=0.940)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins"]
 
 [[package]]
 name = "black"
@@ -117,9 +117,9 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.extras]
-redis = ["redis (>=3.3.6,<4.0.0)"]
 memcached = ["python-memcached (>=1.59,<2.0)"]
 msgpack = ["msgpack-python (>=0.5,<0.6)"]
+redis = ["redis (>=3.3.6,<4.0.0)"]
 
 [[package]]
 name = "certifi"
@@ -203,11 +203,11 @@ cffi = ">=1.12"
 
 [package.extras]
 docs = ["sphinx (>=1.6.5,!=1.8.0,!=3.1.0,!=3.1.1)", "sphinx-rtd-theme"]
-docstest = ["pyenchant (>=1.6.11)", "twine (>=1.12.0)", "sphinxcontrib-spelling (>=4.0.1)"]
+docstest = ["pyenchant (>=1.6.11)", "sphinxcontrib-spelling (>=4.0.1)", "twine (>=1.12.0)"]
 pep8test = ["black", "flake8", "flake8-import-order", "pep8-naming"]
 sdist = ["setuptools_rust (>=0.11.4)"]
 ssh = ["bcrypt (>=3.1.5)"]
-test = ["pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest-subtests", "pytest-xdist", "pretend", "iso8601", "pytz", "hypothesis (>=1.11.4,!=3.79.2)"]
+test = ["hypothesis (>=1.11.4,!=3.79.2)", "iso8601", "pretend", "pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest-subtests", "pytest-xdist", "pytz"]
 
 [[package]]
 name = "cycler"
@@ -282,9 +282,9 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-all = ["fs (>=2.2.0,<3)", "lxml (>=4.0,<5)", "zopfli (>=0.1.4)", "lz4 (>=1.7.4.2)", "matplotlib", "sympy", "skia-pathops (>=0.5.0)", "uharfbuzz (>=0.23.0)", "brotlicffi (>=0.8.0)", "scipy", "brotli (>=1.0.1)", "munkres", "unicodedata2 (>=14.0.0)", "xattr"]
+all = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "fs (>=2.2.0,<3)", "lxml (>=4.0,<5)", "lz4 (>=1.7.4.2)", "matplotlib", "munkres", "scipy", "skia-pathops (>=0.5.0)", "sympy", "uharfbuzz (>=0.23.0)", "unicodedata2 (>=14.0.0)", "xattr", "zopfli (>=0.1.4)"]
 graphite = ["lz4 (>=1.7.4.2)"]
-interpolatable = ["scipy", "munkres"]
+interpolatable = ["munkres", "scipy"]
 lxml = ["lxml (>=4.0,<5)"]
 pathops = ["skia-pathops (>=0.5.0)"]
 plot = ["matplotlib"]
@@ -293,7 +293,7 @@ symfont = ["sympy"]
 type1 = ["xattr"]
 ufo = ["fs (>=2.2.0,<3)"]
 unicode = ["unicodedata2 (>=14.0.0)"]
-woff = ["zopfli (>=0.1.4)", "brotlicffi (>=0.8.0)", "brotli (>=1.0.1)"]
+woff = ["brotli (>=1.0.1)", "brotlicffi (>=0.8.0)", "zopfli (>=0.1.4)"]
 
 [[package]]
 name = "frozenlist"
@@ -316,10 +316,10 @@ six = ">=1.9"
 webencodings = "*"
 
 [package.extras]
-lxml = ["lxml"]
-genshi = ["genshi"]
+all = ["chardet (>=2.2)", "genshi", "lxml"]
 chardet = ["chardet (>=2.2)"]
-all = ["lxml", "chardet (>=2.2)", "genshi"]
+genshi = ["genshi"]
+lxml = ["lxml"]
 
 [[package]]
 name = "idna"
@@ -349,8 +349,8 @@ python-versions = ">=3.7"
 more-itertools = "*"
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
+docs = ["jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx"]
+testing = ["pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [[package]]
 name = "jeepney"
@@ -361,8 +361,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-test = ["pytest", "pytest-trio", "pytest-asyncio (>=0.17)", "testpath", "trio", "async-timeout"]
-trio = ["trio", "async-generator"]
+test = ["async-timeout", "pytest", "pytest-asyncio (>=0.17)", "pytest-trio", "testpath", "trio"]
+trio = ["async-generator", "trio"]
 
 [[package]]
 name = "jsonschema"
@@ -395,8 +395,8 @@ pywin32-ctypes = {version = "<0.1.0 || >0.1.0,<0.1.1 || >0.1.1", markers = "sys_
 SecretStorage = {version = ">=3.2", markers = "sys_platform == \"linux\""}
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "flake8 (<5)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
+docs = ["jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx"]
+testing = ["flake8 (<5)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [[package]]
 name = "kiwisolver"
@@ -537,7 +537,7 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [package.extras]
-testing = ["nose", "coverage"]
+testing = ["coverage", "nose"]
 
 [[package]]
 name = "platformdirs"
@@ -548,8 +548,8 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
-docs = ["furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx-autodoc-typehints (>=1.12)", "sphinx (>=4)"]
-test = ["appdirs (==1.4.4)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)", "pytest (>=6)"]
+docs = ["furo (>=2021.7.5b38)", "proselint (>=0.10.2)", "sphinx (>=4)", "sphinx-autodoc-typehints (>=1.12)"]
+test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock (>=3.6)"]
 
 [[package]]
 name = "pluggy"
@@ -647,7 +647,7 @@ websocket-client = ">=0.54.0"
 
 [package.extras]
 ci = ["coveralls"]
-dev = ["packaging", "pre-commit", "sphinx", "sphinx-rtd-theme", "betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)"]
+dev = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "packaging", "pre-commit", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)", "sphinx", "sphinx-rtd-theme"]
 lint = ["pre-commit", "sphinx", "sphinx-rtd-theme"]
 readthedocs = ["sphinx", "sphinx-rtd-theme"]
 test = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.3.0,<0.5)", "pytest (>=2.7.3)", "requests (>=2.20.1,<3)"]
@@ -665,8 +665,8 @@ requests = ">=2.6.0,<3.0"
 
 [package.extras]
 ci = ["coveralls"]
-dev = ["black", "flake8", "pre-commit", "pydocstyle", "flynt", "betamax (>=0.8,<0.9)", "betamax-matchers (>=0.4.0,<0.5)", "betamax-serializers (>=0.2.0,<0.3)", "mock (>=0.8)", "pytest", "testfixtures (>4.13.2,<7)"]
-lint = ["black", "flake8", "pre-commit", "pydocstyle", "flynt"]
+dev = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.4.0,<0.5)", "betamax-serializers (>=0.2.0,<0.3)", "black", "flake8", "flynt", "mock (>=0.8)", "pre-commit", "pydocstyle", "pytest", "testfixtures (>4.13.2,<7)"]
+lint = ["black", "flake8", "flynt", "pre-commit", "pydocstyle"]
 test = ["betamax (>=0.8,<0.9)", "betamax-matchers (>=0.4.0,<0.5)", "betamax-serializers (>=0.2.0,<0.3)", "mock (>=0.8)", "pytest", "testfixtures (>4.13.2,<7)"]
 
 [[package]]
@@ -710,7 +710,7 @@ optional = false
 python-versions = ">=3.6.8"
 
 [package.extras]
-diagrams = ["railroad-diagrams", "jinja2"]
+diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyrsistent"
@@ -881,11 +881,11 @@ python-versions = ">=3.6"
 slack-sdk = ">=3.17.2,<4"
 
 [package.extras]
-adapter = ["boto3 (<=2)", "bottle (>=0.12,<1)", "chalice (>=1.26.5,<2)", "click (>=7,<8)", "CherryPy (>=18,<19)", "Django (>=3,<5)", "falcon (>=2,<4)", "fastapi (>=0.70.0,<1)", "Flask (>=1,<3)", "Werkzeug (>=2,<3)", "pyramid (>=1,<3)", "sanic (>=21,<22)", "starlette (>=0.14,<1)", "tornado (>=6,<7)", "uvicorn (<1)", "gunicorn (>=20,<21)", "websocket-client (>=1.2.3,<2)"]
-adapter_testing = ["moto (>=3,<4)", "docker (>=5,<6)", "boddle (>=0.2,<0.3)", "Flask (>=1,<2)", "Werkzeug (>=1,<2)", "sanic-testing (>=0.7)", "requests (>=2,<3)"]
+adapter = ["CherryPy (>=18,<19)", "Django (>=3,<5)", "Flask (>=1,<3)", "Werkzeug (>=2,<3)", "boto3 (<=2)", "bottle (>=0.12,<1)", "chalice (>=1.26.5,<2)", "click (>=7,<8)", "falcon (>=2,<4)", "fastapi (>=0.70.0,<1)", "gunicorn (>=20,<21)", "pyramid (>=1,<3)", "sanic (>=21,<22)", "starlette (>=0.14,<1)", "tornado (>=6,<7)", "uvicorn (<1)", "websocket-client (>=1.2.3,<2)"]
+adapter_testing = ["Flask (>=1,<2)", "Werkzeug (>=1,<2)", "boddle (>=0.2,<0.3)", "docker (>=5,<6)", "moto (>=3,<4)", "requests (>=2,<3)", "sanic-testing (>=0.7)"]
 async = ["aiohttp (>=3,<4)", "websockets (>=8,<10)"]
-testing = ["pytest (>=6.2.5,<7)", "pytest-cov (>=3,<4)", "Flask-Sockets (>=0.2,<1)", "Werkzeug (>=1,<2)", "itsdangerous (==2.0.1)", "Jinja2 (==3.0.3)", "black (==22.3.0)", "click (<=8.0.4)", "pytest-asyncio (>=0.18.2,<1)", "aiohttp (>=3,<4)"]
-testing_without_asyncio = ["pytest (>=6.2.5,<7)", "pytest-cov (>=3,<4)", "Flask-Sockets (>=0.2,<1)", "Werkzeug (>=1,<2)", "itsdangerous (==2.0.1)", "Jinja2 (==3.0.3)", "black (==22.3.0)", "click (<=8.0.4)"]
+testing = ["Flask-Sockets (>=0.2,<1)", "Jinja2 (==3.0.3)", "Werkzeug (>=1,<2)", "aiohttp (>=3,<4)", "black (==22.3.0)", "click (<=8.0.4)", "itsdangerous (==2.0.1)", "pytest (>=6.2.5,<7)", "pytest-asyncio (>=0.18.2,<1)", "pytest-cov (>=3,<4)"]
+testing_without_asyncio = ["Flask-Sockets (>=0.2,<1)", "Jinja2 (==3.0.3)", "Werkzeug (>=1,<2)", "black (==22.3.0)", "click (<=8.0.4)", "itsdangerous (==2.0.1)", "pytest (>=6.2.5,<7)", "pytest-cov (>=3,<4)"]
 
 [[package]]
 name = "slack-sdk"
@@ -896,8 +896,8 @@ optional = false
 python-versions = ">=3.6.0"
 
 [package.extras]
-optional = ["aiodns (>1.0)", "aiohttp (>=3.7.3,<4)", "boto3 (<=2)", "SQLAlchemy (>=1,<2)", "websockets (>=10,<11)", "websocket-client (>=1,<2)"]
-testing = ["pytest (>=6.2.5,<7)", "pytest-asyncio (<1)", "Flask-Sockets (>=0.2,<1)", "Flask (>=1,<2)", "Werkzeug (<2)", "itsdangerous (==1.1.0)", "Jinja2 (==3.0.3)", "pytest-cov (>=2,<3)", "codecov (>=2,<3)", "flake8 (>=5,<6)", "black (==22.8.0)", "click (==8.0.4)", "psutil (>=5,<6)", "databases (>=0.5)", "boto3 (<=2)", "moto (>=3,<4)"]
+optional = ["SQLAlchemy (>=1,<2)", "aiodns (>1.0)", "aiohttp (>=3.7.3,<4)", "boto3 (<=2)", "websocket-client (>=1,<2)", "websockets (>=10,<11)"]
+testing = ["Flask (>=1,<2)", "Flask-Sockets (>=0.2,<1)", "Jinja2 (==3.0.3)", "Werkzeug (<2)", "black (==22.8.0)", "boto3 (<=2)", "click (==8.0.4)", "codecov (>=2,<3)", "databases (>=0.5)", "flake8 (>=5,<6)", "itsdangerous (==1.1.0)", "moto (>=3,<4)", "psutil (>=5,<6)", "pytest (>=6.2.5,<7)", "pytest-asyncio (<1)", "pytest-cov (>=2,<3)"]
 
 [[package]]
 name = "timeloop"
@@ -948,8 +948,8 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4"
 
 [package.extras]
-brotli = ["brotlicffi (>=0.8.0)", "brotli (>=1.0.9)", "brotlipy (>=0.6.0)"]
-secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "certifi", "urllib3-secure-extra", "ipaddress"]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)", "brotlipy (>=0.6.0)"]
+secure = ["certifi", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "ipaddress", "pyOpenSSL (>=0.14)", "urllib3-secure-extra"]
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
@@ -986,9 +986,9 @@ optional = false
 python-versions = ">=3.7"
 
 [package.extras]
+docs = ["Sphinx (>=3.4)", "sphinx-rtd-theme (>=0.5)"]
+optional = ["python-socks", "wsaccel"]
 test = ["websockets"]
-optional = ["wsaccel", "python-socks"]
-docs = ["sphinx-rtd-theme (>=0.5)", "Sphinx (>=3.4)"]
 
 [[package]]
 name = "xattr"
