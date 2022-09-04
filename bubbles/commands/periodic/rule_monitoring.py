@@ -19,6 +19,10 @@ new_subreddits: List[str] = []
 # The subreddits that have not been updated for the longest are at the top
 # of the stack (the end of the list)
 subreddit_stack: List[str] = []
+# global shutoff check for local development
+DISABLED: bool = False
+
+logger = logging.getLogger("__name__")
 
 
 class SubredditRule(TypedDict):
@@ -345,6 +349,16 @@ def rule_monitoring_callback():
     If new subs have been added, they will be processed immediately.
     """
     global new_subreddits
+    global DISABLED
+
+    if DISABLED:
+        return
+
+    # Global shutoff. If there's no path in the config, don't run.
+    if not RULE_MONITORING_DATA_PATH:
+        logger.error("No path to rules file found. Not running rules checks.")
+        DISABLED = True
+        return
 
     # Repopulate the subreddit queue if necessary
     if len(subreddit_stack) == 0:

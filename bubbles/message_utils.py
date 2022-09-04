@@ -5,6 +5,7 @@ from slack_sdk.web.client import WebClient
 
 if TYPE_CHECKING:
     from bubbles.plugins import PluginManager
+    from bubbles.interactive import MockClient
 
 
 class Payload:
@@ -12,20 +13,25 @@ class Payload:
 
     def __init__(
         self,
-        client: WebClient = None,
+        client: WebClient | MockClient = None,
         slack_payload: dict = None,
+        slack_body: dict = None,
         say: Callable = None,
         context: dict = None,
         meta: PluginManager = None,
     ):
         self.client = client
         self._slack_payload = slack_payload
-        # say is abstracted out because we patch it early on to support threads
-        self.say = say
+        self._slack_body = slack_body or {}
+        self._say = say
         self.context = context
         self.meta = meta
 
-        self.cleaned_text = self.meta.clean_text(self.get_text())
+        try:
+            self.cleaned_text = self.meta.clean_text(self.get_text())
+        except AttributeError:
+            # Sometimes we're processing payloads without text.
+            self.cleaned_text = None
 
     def __len__(self):
         return len(self._slack_payload)
@@ -43,9 +49,25 @@ class Payload:
             self.meta.cache[cache_name] = {}
         return self.meta.cache[cache_name]
 
+    def say(self, *args, **kwargs):
+        """Reply in the thread if the message was sent in a thread."""
+        # Extract the thread that the message was posted in (if any)
+        if self._slack_body:
+            thread_ts = self._slack_body["event"].get("thread_ts")
+        else:
+            thread_ts = None
+        return self._say(*args, thread_ts=thread_ts, **kwargs)
+
     def get_user(self) -> Optional[str]:
         """Get the user who sent the Slack message."""
         return self._slack_payload.get("user")
+
+    def get_item_user(self) -> Optional[str]:
+        """If this is a reaction_* obj, return the user whose content was reacted to."""
+        return self._slack_payload.get("item_user")
+
+    def is_reaction(self) -> bool:
+        return self._slack_payload.get("reaction")
 
     def get_channel(self) -> Optional[str]:
         """Return the channel the message originated from."""
@@ -53,6 +75,78 @@ class Payload:
 
     def get_text(self) -> str:
         return self._slack_payload.get("text")
+
+    def get_event_type(self) -> str:
+        """
+        Return the type of event that this payload is for.
+
+        Expected types you might get are:
+        - message
+        - reaction_added
+        - reaction_removed
+        """
+        return self._slack_payload.get("type")
+
+    def get_reaction(self) -> Optional[str]:
+        """
+        If this is a reaction_* payload, return the emoji used.
+
+        Example responses:
+        - thumbsup
+        - thumbsdown
+        - blue_blog_onr
+        """
+        return self._slack_payload.get("reaction")
+
+    def get_reaction_message(self) -> Optional[dict]:
+        """
+        If this is a reaction payload, look up the message that the reaction was for.
+
+        This will return a full Slack response dict if the message is found or None.
+        https://api.slack.com/methods/reactions.list
+
+        Example response here:
+        {
+            'type': 'message',
+            'channel': 'HIJKLM',
+            'message': {
+                'client_msg_id': '3456c594-3024-404d-9e08-3eb4fe0924c0',
+                'type': 'message',
+                'text': 'Sounds great, thanksss',
+                'user': 'XYZABC',
+                'ts': '1661965345.288219',
+                'team': 'GFEDCBA',
+                'blocks': [...],
+                'reactions': [
+                    {
+                        'name': 'upvote',
+                        'users': ['ABCDEFG'], 'count': 1
+                    }
+                ],
+                'permalink': 'https://...'
+            }
+        }
+        """
+        resp = self.client.reactions_list(count=1, user=self.get_user())
+        if not resp.get('ok'):
+            return
+
+        item_payload = self._slack_payload.get('item')
+        if not item_payload:
+            return
+
+        target_reaction_ts = item_payload.get("ts")
+        if not target_reaction_ts:
+            return
+
+        # short circuit for interactive mode
+        if len(resp.get('items')) == 1 and resp['items'][0].get('channel') == 'console':
+            return resp['items'][0]
+
+        for message in resp.get('items'):
+            if message['message']['ts'] == target_reaction_ts:
+                return message
+
 
     def reaction_add(self, response: Dict, name: str) -> Any:
         """

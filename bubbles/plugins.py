@@ -8,6 +8,7 @@ import importlib
 
 from bubbles.config import users_list, USERNAME, ME
 from bubbles.message_utils import Payload
+from bubbles.reaction_added import reaction_added_callback
 
 log = logging.getLogger(__name__)
 
@@ -193,15 +194,36 @@ class PluginManager:
 
         return self.try_get_command_text(text) or text
 
-    def message_received(self, ack, payload, client, context, say) -> None:
-        ack()
+    def message_received(self, payload, client, context, body, say) -> None:
         if not payload.get("text"):
             # we got a message that is not really a message for some reason.
             return
         payload_obj = Payload(
-            client=client, slack_payload=payload, say=say, context=context, meta=self
+            client=client,
+            slack_payload=payload,
+            say=say,
+            context=context,
+            slack_body=body,
+            meta=self
         )
         try:
             self.process_message(payload_obj)
+        except:
+            say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")
+
+    def reaction_received(self, payload, client, context, say) -> None:
+        user_whose_message_has_been_reacted = users_list[payload.get("item_user")]
+        if not user_whose_message_has_been_reacted:
+            # Sometimes we get partially formed reactions. Not entirely sure why.
+            return
+        payload_obj = Payload(
+            client=client,
+            slack_payload=payload,
+            say=say,
+            context=context,
+            meta=self
+        )
+        try:
+            reaction_added_callback(payload_obj)
         except:
             say(f"Computer says noooo: \n```\n{traceback.format_exc()}```")

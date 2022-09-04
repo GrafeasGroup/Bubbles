@@ -13,7 +13,8 @@ from bubbles.config import (
     COMMAND_PREFIXES,
     DEFAULT_CHANNEL,
 )
-from bubbles.interactive import InteractiveSession
+from bubbles.interactive import InteractiveSession, MockClient
+from bubbles.message_utils import Payload
 from bubbles.plugins import PluginManager
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.tl_commands import enable_tl_jobs
@@ -69,22 +70,15 @@ def handle(ack):
 
 @app.event("message")
 def handle_message(ack, payload, client, context, say, body: dict):
-    # Extract the thread that the message was posted in (if any)
-    thread_ts = body["event"].get("thread_ts")
-
-    def thread_say(*args, **kwargs):
-        """Reply in the thread if the message was sent in a thread."""
-        return say(*args, thread_ts=thread_ts, **kwargs)
-
-    # Actually put the slack event handler on this one so that we can dual-wield
-    # `message_received` for interactive mode and normal interaction.
-    plugin_manager.message_received(ack, payload, client, context, say=thread_say)
+    ack()
+    plugin_manager.message_received(payload, client, context, body, say)
 
 
 @app.event("reaction_added")
-def reaction_added(ack, payload):
+def reaction_added(ack, payload, client, context, say):
     ack()
-    reaction_added_callback(payload)
+    # reaction_added_callback(payload)
+    plugin_manager.reaction_received(payload, client, context, say)
 
 
 @click.group(
@@ -119,18 +113,22 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
     plugin_manager.load_all_plugins()
 
     if command:
+        # todo: this is broken
         plugin_manager.process_message(
-            {
-                "user": "bubbles_console",
-                "text": f"!{command}",
-                "channel": "console",
-                "extras": {"say": click.echo},
-            }
+            Payload(
+                client=MockClient(),
+                slack_payload={
+                    "user": "bubbles_console",
+                    "text": f"!{command}",
+                    "channel": "console",
+                },
+                say=click.echo
+            )
         )
         return
 
     if interactive:
-        InteractiveSession(plugin_manager.message_received).repl()
+        InteractiveSession(plugin_manager).repl()
         sys.exit(0)
     enable_tl_jobs()
     tl.start()
