@@ -189,17 +189,8 @@ def deploy(payload: Payload) -> None:
         )
         return
 
-    if service == "blossom":
-        payload.say(
-            "Sorry, deployments for Blossom are temporarily on hold. Please ping Joe"
-            " if it's important."
-        )
-        return
-
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            if system == "blossom":
-                continue
             _deploy_service(system, payload)
     else:
         _deploy_service(service, payload)
