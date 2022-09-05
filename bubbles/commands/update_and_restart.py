@@ -27,7 +27,7 @@ def update(payload: Payload) -> None:
 
     StatusMessage.add_new_context_step("Preparing update...")
     response = requests.get(
-        "https://api.github.com/repos/grafeasgroup/bubbles-v2/releases/latest"
+        "https://api.github.com/repos/grafeasgroup/bubbles/releases/latest"
     )
     if response.status_code != 200:
         logger.error(f"GITHUB RESPONSE CONTENT: {response.content}")

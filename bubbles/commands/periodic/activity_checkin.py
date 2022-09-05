@@ -21,7 +21,7 @@ MESSAGE = (
     "Don't respond to me because, well, I'm a bot. I haven't told anyone else that I've"
     " sent this message, though -- it's just between you and me. If you want to look for"
     " yourself, you can see the code for this message"
-    " <https://github.com/GrafeasGroup/Bubbles-V2/blob/master/bubbles/commands/periodic"
+    " <https://github.com/GrafeasGroup/Bubbles/blob/master/bubbles/commands/periodic"
     "/activity_checkin.py|right here>.\n\n"
     "We always want to support you as best we can; if there's any way we can help, let"
     " us know. You're a valued member of our crew!\n\n"
