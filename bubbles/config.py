@@ -24,9 +24,11 @@ with current_zipfile() as archive:
     if archive:
         # if archive is none, we're not in the zipfile and are probably
         # in development mode right now.
-        dotenv_path = str(Path(archive.filename).parent / ".env")
+        ARCHIVE_PATH = Path(archive.filename).parent
+        dotenv_path = str(ARCHIVE_PATH / ".env")
     else:
         dotenv_path = None
+        ARCHIVE_PATH = None
 load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(
