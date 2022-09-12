@@ -4,9 +4,10 @@ import time
 from datetime import datetime, timedelta
 from typing import List
 
+from utonium import Payload, Plugin
+
 from bubbles.config import reddit
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
+
 
 SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 

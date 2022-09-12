@@ -1,19 +1,17 @@
 import datetime
 import warnings
 import re
-from typing import Dict
 
 import matplotlib.pyplot as plt
 from numpy import zeros, flip, cumsum
+from utonium import Payload, Plugin
 
-from bubbles.commands import Plugin
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 from bubbles.config import users_list
-from bubbles.message_utils import Payload
 
 
 # get rid of matplotlib's complaining

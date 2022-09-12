@@ -1,9 +1,9 @@
 import subprocess
 from typing import Callable
 
+from utonium import Payload, Plugin
+
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
 from bubbles.service_utils import SERVICES, get_service_name, say_code
 
 

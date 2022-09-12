@@ -1,10 +1,10 @@
 import random
 
 import requests
+from utonium import Payload, Plugin
 
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
+
 
 # Pulled a bunch of these URLs from https://github.com/treboryx/animalsAPI -- many thanks
 

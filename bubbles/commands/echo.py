@@ -1,7 +1,6 @@
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
-
 import re
+
+from utonium import Payload, Plugin
 
 # find a link in the slack format, then strip out the text at the end.
 # they're formatted like this: <https://example.com|Text!>

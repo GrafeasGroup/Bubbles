@@ -1,7 +1,6 @@
 from typing import Dict
 
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
+from utonium import Payload, Plugin
 
 
 def format_text(data: Dict) -> str:

@@ -1,9 +1,9 @@
 import random
 import re
 
+from utonium import Payload, Plugin
+
 from bubbles.config import USERNAME
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
 
 
 pattern = r"""

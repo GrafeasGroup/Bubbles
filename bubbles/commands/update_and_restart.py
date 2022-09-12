@@ -5,14 +5,13 @@ import subprocess
 from pathlib import Path
 
 import requests
+from utonium import Payload, Plugin
 from shiv.bootstrap import current_zipfile
 
 from bubbles import __version__
 from bubbles.blocks import ContextStepMessage
-from bubbles.commands import Plugin
 
 from bubbles.config import USERNAME
-from bubbles.message_utils import Payload
 
 logger = logging.getLogger(__name__)
 
