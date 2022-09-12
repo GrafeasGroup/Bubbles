@@ -1,7 +1,7 @@
-from bubbles.commands import Plugin
+from utonium import Payload, Plugin
 
 
-def exclamation(payload):
+def exclamation(payload: Payload):
     """Ignore messages starting with multiple exclamation marks.
 
     Messages such as "!!! I'm so excited !!!" used to trigger the

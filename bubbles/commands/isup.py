@@ -1,7 +1,7 @@
 import subprocess
 
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
+from utonium import Payload, Plugin
+
 from bubbles.service_utils import SERVICES, get_service_name
 
 

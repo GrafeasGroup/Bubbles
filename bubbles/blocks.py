@@ -1,6 +1,5 @@
 from slack_sdk.models import blocks
-
-from bubbles.message_utils import Payload
+from utonium import Payload
 
 
 class StatusContextBlock(blocks.ContextBlock):

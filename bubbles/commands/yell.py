@@ -1,8 +1,9 @@
 import re
 
+from utonium import Payload, Plugin
+
 from bubbles.config import ME
-from bubbles.commands import Plugin
-from bubbles.message_utils import Payload
+
 
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|

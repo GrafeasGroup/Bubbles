@@ -21,6 +21,7 @@ etsy2 = {git = "https://github.com/simpassi/etsy-python2"}
 shiv = "^1.0.1"
 pytest = "^7.1.2"
 click = "^8.1.3"
+utonium = { git = "https://github.com/GrafeasGroup/utonium.git", branch = "main" }
 
 [tool.poetry.plugins."console_scripts"]
 "bubbles" = "bubbles.main:main"

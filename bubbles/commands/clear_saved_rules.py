@@ -1,8 +1,8 @@
 import os.path
 
-from bubbles.commands import Plugin
 from bubbles.commands.periodic import RULE_MONITORING_DATA_PATH
-from bubbles.message_utils import Payload
+
+from utonium import Payload, Plugin
 
 
 def clear_saved_rules(payload: Payload) -> None:

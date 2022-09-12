@@ -1,7 +1,8 @@
 from slack_sdk.web import SlackResponse
 
+from utonium import Payload
+
 from bubbles.config import rooms_list
-from bubbles.message_utils import Payload
 
 
 def fetch_messages(

@@ -6,22 +6,24 @@ import sys
 import click
 from click.core import Context
 from slack_bolt.adapter.socket_mode import SocketModeHandler
+from utonium import PluginManager, Payload
 
 from bubbles import __version__
 from bubbles.config import (
     app,
     COMMAND_PREFIXES,
     DEFAULT_CHANNEL,
+    users_list,
+    rooms_list
 )
 from bubbles.interactive import InteractiveSession, MockClient
-from bubbles.message_utils import Payload
-from bubbles.plugins import PluginManager
 from bubbles.reaction_added import reaction_added_callback
 from bubbles.tl_commands import enable_tl_jobs
 from bubbles.tl_utils import tl
 
 plugin_manager: PluginManager
 log = logging.getLogger(__name__)
+command_folder_path = pathlib.Path(__file__).parent / "commands"
 
 """
 Notes:
@@ -109,7 +111,15 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
         # directly to the subcommand.
         return
 
-    plugin_manager = PluginManager(COMMAND_PREFIXES, interactive)
+    plugin_manager = PluginManager(
+        command_prefixes=COMMAND_PREFIXES,
+        command_folder=command_folder_path,
+        slack_app=app,
+        interactive_mode=interactive,
+        reaction_added_callback=reaction_added_callback,
+        users_dict=users_list,
+        rooms_dict=rooms_list
+    )
     plugin_manager.load_all_plugins()
 
     if command:
@@ -167,7 +177,14 @@ def selfcheck(verbose: bool) -> None:
         tl.start()
         # If any of the commands have a syntax error, it will explode here.
         tl.stop()
-        plugin_manager = PluginManager(COMMAND_PREFIXES)
+        plugin_manager = PluginManager(
+            command_prefixes=COMMAND_PREFIXES,
+            command_folder=command_folder_path,
+            slack_app=app,
+            reaction_added_callback=reaction_added_callback,
+            users_dict=users_list,
+            rooms_dict=rooms_list
+        )
         plugin_manager.load_all_plugins()
     except Exception as e:
         log.error(e)

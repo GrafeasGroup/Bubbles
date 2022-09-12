@@ -1,5 +1,5 @@
 from bubbles.config import users_list
-from bubbles.message_utils import Payload
+from utonium import Payload
 
 
 def reaction_added_callback(payload: Payload) -> None:

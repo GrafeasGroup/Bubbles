@@ -37,19 +37,17 @@ Bubbles uses a plugin manager to register commands. Each command is registered i
 ### Example Command
 
 ```python
-from bubbles.commands import Plugin
+from utonium import Payload, Plugin
 
 
-def hello_world(rtmclient, client, user_list, data):
-    return client.chat_postMessage(
-        channel=data.get("channel"), text="Hello, world!", as_user=True
-    )
+def hello_world(payload: Payload) -> None:
+    payload.say("Hello, world!")
 
 
 PLUGIN = Plugin(callable=hello_world, regex=r"hello")
 ```
 
-The above plugin will post "Hello, world!" to the channel you message Bubbles from with the following any of the following syntax:
+The above plugin will post "Hello, world!" to the channel you messaged Bubbles from with the following any of the following syntax:
 
 ```
 !hello

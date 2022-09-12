@@ -2,7 +2,7 @@ import random
 
 import click
 
-from bubbles.plugins import PluginManager
+from utonium import PluginManager
 
 
 class MockClient:

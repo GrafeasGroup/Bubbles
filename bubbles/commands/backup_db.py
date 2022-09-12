@@ -4,9 +4,7 @@ import os
 import shlex
 from pathlib import Path
 
-from bubbles.message_utils import Payload
-from bubbles.commands import Plugin
-
+from utonium import Payload, Plugin
 
 def backup_db(payload: Payload) -> None:
     # the db info is injected into the bot environment, so we'll grab it
