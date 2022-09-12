@@ -111,11 +111,6 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
         # directly to the subcommand.
         return
 
-    print("*"*40)
-    print((pathlib.Path(__file__).parent / "commands").is_dir())
-    print("*"*40)
-
-
     plugin_manager = PluginManager(
         command_prefixes=COMMAND_PREFIXES,
         command_folder=command_folder_path,
