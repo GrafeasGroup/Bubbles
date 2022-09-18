@@ -1029,7 +1029,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "utonium"
-version = "0.5.0"
+version = "0.5.1"
 description = "The Slack Bolt plugin handler it always wanted."
 category = "main"
 optional = false
@@ -1045,7 +1045,7 @@ slack-sdk = "^3.18.3"
 type = "git"
 url = "https://github.com/GrafeasGroup/utonium.git"
 reference = "main"
-resolved_reference = "a4dcef5e04bdc795a85b782bd3931ff21a660d52"
+resolved_reference = "06096d2ed956378897a527dff0b23a9b63c78b05"
 
 [[package]]
 name = "virtualenv"
