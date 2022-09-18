@@ -6,10 +6,10 @@ from pathlib import Path
 
 import requests
 from utonium import Payload, Plugin
+from utonium.blocks import ContextStepMessage
 from shiv.bootstrap import current_zipfile
 
 from bubbles import __version__
-from bubbles.blocks import ContextStepMessage
 
 from bubbles.config import USERNAME
 
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 def update(payload: Payload) -> None:
+    """!update - pull changes from github and restart!"""
     StatusMessage: ContextStepMessage = ContextStepMessage(
         payload,
         title="Updating!",
@@ -124,8 +125,7 @@ def update(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=update,
+    func=update,
     regex=r"^update$",
-    help="!update - pull changes from github and restart!",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

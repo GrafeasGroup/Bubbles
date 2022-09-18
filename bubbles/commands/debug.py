@@ -29,4 +29,4 @@ def debug(payload: Payload) -> None:
         payload.say("Not sure what you want to debug.")
 
 
-PLUGIN = Plugin(callable=debug, regex=r"^debug")
+PLUGIN = Plugin(func=debug, regex=r"^debug")

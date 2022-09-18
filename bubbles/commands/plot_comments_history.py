@@ -16,7 +16,11 @@ warnings.filterwarnings("ignore")
 
 
 def plot_comments_history(payload: Payload) -> None:
-    # Syntax: !history [number of posts]
+    """
+    !history [number of posts] - plot new volunteer join rate.
+
+    `number of posts` must be an integer between 1 and 1000 inclusive.
+    """
     count_days = {}
     count_hours = [0] * 24
     args = payload.get_text().split()
@@ -105,12 +109,7 @@ def plot_comments_history(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=plot_comments_history,
+    func=plot_comments_history,
     regex=r"^history([0-9 ]+)?",
-    help=(
-        "!history [number of posts] - shows the number of new comments in"
-        " #new-volunteers in function of their day. `number of posts` must"
-        " be an integer between 1 and 1000 inclusive."
-    ),
-    interactive_friendly=False,
+    interactive_friendly=False
 )

@@ -21,6 +21,7 @@ def _stop_service(service: str, say: Callable) -> None:
 
 
 def stop(payload: Payload) -> None:
+    """!stop [bot_name] - stops the requested bot."""
     args = payload.get_text().split()
 
     if len(args) > 1:
@@ -50,8 +51,7 @@ def stop(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=stop,
+    func=stop,
     regex=r"^stop ?(.+)",
-    help=f"!stop [{', '.join(SERVICES)}] - stops the requested bot.",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

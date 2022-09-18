@@ -18,4 +18,4 @@ def clear_saved_rules(payload: Payload) -> None:
         file.write("")
 
 
-PLUGIN = Plugin(callable=clear_saved_rules, regex=r"^clear_saved_rules")
+PLUGIN = Plugin(func=clear_saved_rules, regex=r"^clear_saved_rules")

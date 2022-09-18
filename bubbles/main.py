@@ -116,7 +116,6 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
         command_folder=command_folder_path,
         slack_app=app,
         interactive_mode=interactive,
-        reaction_added_callback=reaction_added_callback,
         users_dict=users_list,
         rooms_dict=rooms_list
     )
@@ -181,7 +180,6 @@ def selfcheck(verbose: bool) -> None:
             command_prefixes=COMMAND_PREFIXES,
             command_folder=command_folder_path,
             slack_app=app,
-            reaction_added_callback=reaction_added_callback,
             users_dict=users_list,
             rooms_dict=rooms_list
         )

@@ -32,6 +32,7 @@ def _start_service(service: str, say: Callable) -> None:
 
 
 def start(payload: Payload) -> None:
+    """!start [bot_name] - starts the requested bot."""
     args = payload.get_text().split()
 
     if len(args) > 1:
@@ -61,8 +62,7 @@ def start(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=start,
+    func=start,
     regex=r"^start ?(.+)",
-    help=f"!start [{', '.join(SERVICES)}] - starts the requested bot.",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

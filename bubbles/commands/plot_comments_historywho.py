@@ -17,15 +17,13 @@ from bubbles.config import users_list
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
 
-HELP_MESSAGE = (
-    '!historywho [number of posts] "person" - shows the number of new'
-    " volunteers welcomed by `person` in function of their day, comparing"
-    " it to the other folks and non-welcomed volunteers. `number of posts`"
-    " (optional) must be an integer between 1 and 1000 inclusive."
-)
-
 
 def plot_comments_historywho(payload: Payload) -> None:
+    """
+    !historywho [number of posts] "person" - plot welcomed people by specific mod.
+
+    `number of posts` must be an integer between 1 and 1000 inclusive.
+    """
     # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
     # last_datetime = datetime.datetime.now().timestamp()
     count_reactions_all = {}
@@ -160,7 +158,6 @@ def plot_comments_historywho(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=plot_comments_historywho,
-    regex=r"^historywho([ \"a-zA-Z]+)?",
-    help=HELP_MESSAGE,
+    func=plot_comments_historywho,
+    regex=r"^historywho([ \"a-zA-Z]+)?"
 )
