@@ -7,6 +7,7 @@ from pathlib import Path
 from utonium import Payload, Plugin
 
 def backup_db(payload: Payload) -> None:
+    """!backup - creates and uploads a full backup of our postgres db."""
     # the db info is injected into the bot environment, so we'll grab it
     # and regurgitate it for the command
     password = os.environ.get("postgres_password")
@@ -36,8 +37,7 @@ def backup_db(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=backup_db,
+    func=backup_db,
     regex=r"^backup",
-    help="!backup - creates and uploads a full backup of our postgres db.",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

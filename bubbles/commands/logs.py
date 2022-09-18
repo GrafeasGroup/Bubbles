@@ -12,6 +12,7 @@ VALID = "Valid choices: {}".format(", ".join(SERVICES))
 
 
 def logs(payload: Payload) -> None:
+    """!logs [service_name] - upload the last 50 lines of logs from that service."""
     text = payload.cleaned_text.split()
 
     if len(text) == 1:
@@ -34,8 +35,7 @@ def logs(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=logs,
+    func=logs,
     regex=r"^logs([ a-zA-Z]+)?",
-    help="!logs [service_name]",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

@@ -2,6 +2,10 @@ from utonium import Payload, Plugin
 
 
 def vote(payload: Payload) -> None:
+    """
+    !vote [your question] - create a vote.
+    Usage: `!vote Is this cool or what?`
+    """
     text = " ".join(payload.get_text().split()[1:])
 
     if len(text) == 0:
@@ -17,7 +21,6 @@ def vote(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=vote,
-    regex=r"^vote([ \S]+)?|poll([ \S]+)?",
-    help="!vote [your vote!] Example: `!vote Is this cool or what?`",
+    func=vote,
+    regex=r"^vote([ \S]+)?|poll([ \S]+)?"
 )

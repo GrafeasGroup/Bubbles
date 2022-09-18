@@ -20,12 +20,12 @@ def clean_links(text):
 
 
 def echo(payload: Payload):
+    """Repeats back whatever you pass in. Mostly for debugging."""
     text = clean_links(payload.cleaned_text)
     payload.say(f"```{' '.join(text.split()[1:])}```")
 
 
 PLUGIN = Plugin(
-    callable=echo,
-    regex=r"^echo",
-    help="Repeats back whatever you pass in. Mostly for debugging.",
+    func=echo,
+    regex=r"^echo"
 )

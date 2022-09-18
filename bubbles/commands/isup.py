@@ -6,6 +6,7 @@ from bubbles.service_utils import SERVICES, get_service_name
 
 
 def isup(payload: Payload):
+    """!isup [service_name] - is the service currently running?"""
     text = payload.cleaned_text.split()
     if len(text) == 1:
         payload.say("What service should I be checking on?")
@@ -35,8 +36,7 @@ def isup(payload: Payload):
 
 
 PLUGIN = Plugin(
-    callable=isup,
+    func=isup,
     regex=r"^isup([ a-zA-Z]+)?",
-    help="!isup [service_name]",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

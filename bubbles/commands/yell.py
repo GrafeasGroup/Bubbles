@@ -27,7 +27,6 @@ idk = "I KNOW YOU'RE HAVING TROUBLE BUT " "I DON'T KNOW WHAT'S GOING ON EITHER."
 
 
 def yell(payload: Payload) -> None:
-    """Everyone's a little hard of hearing sometimes."""
     cache: dict[str, Payload] = payload.get_cache("yell")
     if payload.get_channel() in cache:
         previous_message = cache[payload.get_channel()]
@@ -49,10 +48,9 @@ def yell_callback(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=yell,
+    func=yell,
     regex=raw_pattern,
     flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     callback=yell_callback,
-    ignore_prefix=True,
-    help="WHAT?!",
+    ignore_prefix=True
 )

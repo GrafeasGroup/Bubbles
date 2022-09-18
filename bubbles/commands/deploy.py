@@ -5,8 +5,8 @@ import shlex
 
 import requests
 from utonium import Payload, Plugin
+from utonium.blocks import ContextStepMessage
 
-from bubbles.blocks import ContextStepMessage
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import (
     verify_service_up,
@@ -167,6 +167,9 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
 
 def deploy(payload: Payload) -> None:
+    """
+    !deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!
+    """
     args = payload.get_text().split()
 
     if len(args) > 1:
@@ -196,11 +199,7 @@ def deploy(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=deploy,
+    func=deploy,
     regex=r"^deploy ?(.+)",
-    help=(
-        f"!deploy [{', '.join(SERVICES)}] - deploys the code currently on github to"
-        f" production."
-    ),
-    interactive_friendly=False,
+    interactive_friendly=False
 )

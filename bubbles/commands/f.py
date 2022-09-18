@@ -23,4 +23,4 @@ def fancy_f(payload: Payload) -> None:
         payload.say(F)
 
 
-PLUGIN = Plugin(callable=fancy_f, regex=r"^[fF]$", ignore_prefix=True)
+PLUGIN = Plugin(func=fancy_f, regex=r"^[fF]$", ignore_prefix=True)

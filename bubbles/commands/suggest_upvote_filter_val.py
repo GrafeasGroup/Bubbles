@@ -144,6 +144,11 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
 
 def suggest_filter(payload: Payload) -> None:
+    """
+    !suggest filter {subreddit} - create a guess for a post filter value.
+
+    Usage: @bubbles suggest filter r/thathappened
+    """
     sub = re.search(SUGGEST_FILTER_RE, payload.get_text()).groups()[1]
     payload.say(f"Processing data for r/{sub}. This may take a moment...")
 
@@ -181,10 +186,6 @@ def suggest_filter(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=suggest_filter,
-    regex=SUGGEST_FILTER_RE,
-    help=(
-        "!suggest filter {subreddit} - have me guess at an appropriate filter value"
-        " for a given subreddit. Usage: @bubbles suggest filter r/thathappened"
-    ),
+    func=suggest_filter,
+    regex=SUGGEST_FILTER_RE
 )

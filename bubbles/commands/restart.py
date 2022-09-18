@@ -36,6 +36,7 @@ def _restart_service(service: str, say: Callable) -> None:
 
 
 def restart(payload: Payload):
+    """!restart [bot name] - restarts the requested bot."""
     args = payload.get_text().split()
 
     if len(args) > 1:
@@ -65,8 +66,7 @@ def restart(payload: Payload):
 
 
 PLUGIN = Plugin(
-    callable=restart,
+    func=restart,
     regex=r"^restart ?(.+)",
-    help=f"!restart [{', '.join(SERVICES)}] - restarts the requested bot.",
-    interactive_friendly=False,
+    interactive_friendly=False
 )

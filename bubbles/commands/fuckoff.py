@@ -28,5 +28,5 @@ def fuck_off(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=fuck_off, regex=pattern, flags=re.IGNORECASE, ignore_prefix=True
+    func=fuck_off, regex=pattern, flags=re.IGNORECASE, ignore_prefix=True
 )

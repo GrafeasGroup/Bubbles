@@ -79,7 +79,7 @@ animals = {
 
 def cute(payload: Payload) -> None:
     """
-    !cute [animal from the dict above], or just !cute to get a random picture
+    !cute [cat/dog/bunny/lizard/fox/duck/shibe], or just !cute to get a random picture
     """
     args = payload.get_text().split()
 
@@ -109,10 +109,6 @@ def cute(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=cute,
-    regex=r"^cute",
-    help=(
-        f"!cute [{', '.join([k for k in animals.keys()])}] - Specify an animal"
-        f" for a cute picture! Or just !cute for a random one."
-    ),
+    func=cute,
+    regex=r"^cute"
 )

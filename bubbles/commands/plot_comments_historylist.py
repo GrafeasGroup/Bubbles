@@ -14,7 +14,11 @@ warnings.filterwarnings("ignore")
 
 
 def plot_comments_historylist(payload: Payload) -> None:
-    # Syntax: !historylist [number of posts]
+    """
+    !historylist [number of posts] - plot new volunteers by who welcomed them.
+
+    `number of posts` must be an integer between 1 and 1000 inclusive.
+    """
     args = payload.get_text().split()
     # client = payload.client
     print(args)
@@ -67,11 +71,6 @@ def plot_comments_historylist(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    callable=plot_comments_historylist,
-    regex=r"^listmodsTEST ([0-9 ]+)?",
-    help=(
-        "!historylist [number of posts] - shows the number of new comments in"
-        " #new-volunteers in function of the mod having welcomed them. `number"
-        "of posts` must be an integer between 1 and 1000 inclusive."
-    ),
+    func=plot_comments_historylist,
+    regex=r"^listmodsTEST ([0-9 ]+)?"
 )
