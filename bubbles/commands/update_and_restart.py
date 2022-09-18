@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 from utonium import Payload, Plugin
-from utonium.blocks import ContextStepMessage
+from utonium.specialty_blocks import ContextStepMessage
 from shiv.bootstrap import current_zipfile
 
 from bubbles import __version__

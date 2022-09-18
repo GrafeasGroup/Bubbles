@@ -5,7 +5,7 @@ import shlex
 
 import requests
 from utonium import Payload, Plugin
-from utonium.blocks import ContextStepMessage
+from utonium.specialty_blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import (
