@@ -12,25 +12,37 @@ def process_modmail(message_state: str) -> None:
             # this attribute will have a timestamp if there's an unread message and
             # will be empty if we've been here before.
             continue
-        # The other end of the message is either in .participant (a Redditor instance)
-        # or .participant_subreddit (a dict).
-        if convo.participant != {}:
-            recipient = f"u/{convo.participant.name}"
+        # The other end of the message is one of:
+        # *.user: Redditor
+        # *.participant: Redditor
+        # *.participant_subreddit: dict
+        if convo.user != {}:
+            participant = f"u/{convo.user.name}"
+        elif convo.participant != {}:
+            participant = f"u/{convo.participant.name}"
         elif convo.participant_subreddit != {}:
-            recipient = f"r/{convo.participant_subreddit['name']}"
+            participant = f"r/{convo.participant_subreddit['name']}"
         else:
-            recipient = "unknown participant"
+            participant = "unknown participant"
 
         latest_message = convo.messages[-1]
+        if latest_message.author == participant and convo.num_messages == 1:
+            # this is a new message thread and someone sent something in.
+            sender = participant
+            recipient = "r/TranscribersOfReddit"
+        elif latest_message.author == participant:
+            sender = participant
+            recipient = f"u/{convo.messages[-2].author.name}"
+        else:
+            sender = latest_message.author.name
+            recipient = participant
         convo.read()
 
         app.client.chat_postMessage(
             channel=rooms_list["mod_messages"],
             as_user=True,
-            icon_emoji="modmail",
-            username="Modmail!",
             blocks=[
-                blocks.SectionBlock(text=f"*u/{latest_message.author.name}* :arrow_right: *{recipient}*"),
+                blocks.SectionBlock(text=f"*u/{sender}* :arrow_right: *{recipient}*"),
                 blocks.DividerBlock(),
                 blocks.SectionBlock(text=latest_message.body_markdown),
                 blocks.DividerBlock(),
