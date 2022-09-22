@@ -32,7 +32,11 @@ def process_modmail(message_state: str) -> None:
             recipient = "r/TranscribersOfReddit"
         elif latest_message.author == participant:
             sender = participant
-            recipient = f"u/{convo.messages[-2].author.name}"
+            if len(convo.authors) == 1:
+                # they just sent another message to the same thread that they started
+                recipient = "r/TranscribersOfReddit"
+            else:
+                recipient = f"u/{convo.messages[-2].author.name}"
         else:
             sender = latest_message.author.name
             recipient = participant
