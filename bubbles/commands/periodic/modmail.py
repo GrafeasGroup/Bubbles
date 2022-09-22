@@ -1,3 +1,5 @@
+from praw.models import Redditor, Subreddit
+
 from bubbles.config import app, reddit, rooms_list
 
 from slack_sdk.models import blocks
@@ -17,11 +19,11 @@ def process_modmail(message_state: str) -> None:
         # *.participant: Redditor
         # *.participant_subreddit: dict
         if convo.user != {}:
-            participant = f"u/{convo.user.name}"
+            participant = convo.user
         elif convo.participant != {}:
-            participant = f"u/{convo.participant.name}"
+            participant = convo.participant
         elif convo.participant_subreddit != {}:
-            participant = f"r/{convo.participant_subreddit['name']}"
+            participant = reddit.subreddit(convo.participant_subreddit['name'])
         else:
             participant = "unknown participant"
 
@@ -29,24 +31,35 @@ def process_modmail(message_state: str) -> None:
         if latest_message.author == participant and convo.num_messages == 1:
             # this is a new message thread and someone sent something in.
             sender = participant
-            recipient = "r/TranscribersOfReddit"
+            recipient = sub
         elif latest_message.author == participant:
             sender = participant
             if len(convo.authors) == 1:
                 # they just sent another message to the same thread that they started
-                recipient = "r/TranscribersOfReddit"
+                recipient = sub
             else:
-                recipient = f"u/{convo.messages[-2].author.name}"
+                recipient = convo.messages[-2].author
         else:
-            sender = latest_message.author.name
+            sender = latest_message.author
             recipient = participant
         convo.read()
+
+        if isinstance(sender, Redditor):
+            sender = f"u/{sender.name}"
+        if isinstance(sender, Subreddit):
+            sender = f"r/{sender.display_name}"
+
+        if isinstance(recipient, Redditor):
+            recipient = f"u/{recipient.name}"
+        if isinstance(recipient, Subreddit):
+            recipient = f"r/{recipient.display_name}"
 
         app.client.chat_postMessage(
             channel=rooms_list["mod_messages"],
             as_user=True,
             blocks=[
-                blocks.SectionBlock(text=f"*u/{sender}* :arrow_right: *{recipient}*"),
+                blocks.SectionBlock(text=f"*{sender}* :arrow_right: *{recipient}*"),
+                blocks.SectionBlock(text=f"Subject: {convo.subject}"),
                 blocks.DividerBlock(),
                 blocks.SectionBlock(text=latest_message.body_markdown),
                 blocks.DividerBlock(),
