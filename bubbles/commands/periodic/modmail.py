@@ -45,6 +45,6 @@ def process_modmail(message_state: str) -> None:
 def modmail_callback() -> None:
     unread_counts: dict[str, int] = sub.modmail.unread_count()
 
-    for message_state, count in unread_counts:
+    for message_state, count in unread_counts.items():
         if count > 0:
             process_modmail(message_state)
