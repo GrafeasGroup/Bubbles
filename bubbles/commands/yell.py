@@ -52,5 +52,5 @@ PLUGIN = Plugin(
     regex=raw_pattern,
     flags=re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     callback=yell_callback,
-    ignore_prefix=True
+    ignore_prefix=True,
 )

@@ -18,29 +18,26 @@ class MockClient:
     def reactions_list(self, *args, **kwargs) -> dict:
         """Triggers short circuit condition in Payload.get_reaction_message()."""
         return {
-            'items': [
+            "items": [
                 {
-                    'type': 'message',
-                    'channel': 'console',
-                    'message': {
-                        'client_msg_id': '3456c594-3024-404d-9e08-3eb4fe0924c0',
-                        'type': 'message',
-                        'text': 'This is pretending to be the message you reacted to!',
-                        'user': 'console',
-                        'ts': '1661965345.288219',
-                        'team': 'GFEDCBA',
-                        'blocks': [...],
-                        'reactions': [
-                            {
-                                'name': 'upvote',
-                                'users': ['console'], 'count': 1
-                            }
+                    "type": "message",
+                    "channel": "console",
+                    "message": {
+                        "client_msg_id": "3456c594-3024-404d-9e08-3eb4fe0924c0",
+                        "type": "message",
+                        "text": "This is pretending to be the message you reacted to!",
+                        "user": "console",
+                        "ts": "1661965345.288219",
+                        "team": "GFEDCBA",
+                        "blocks": [...],
+                        "reactions": [
+                            {"name": "upvote", "users": ["console"], "count": 1}
                         ],
-                        'permalink': 'https://...'
-                    }
+                        "permalink": "https://...",
+                    },
                 }
             ],
-            'ok': True
+            "ok": True,
         }
 
 
@@ -67,35 +64,35 @@ class InteractiveSession:
 
     def build_message_payload(self, text) -> dict:
         resp = self._base_payload()
-        resp |= {'type': 'message', 'text': text, 'item_user': 'console'}
+        resp |= {"type": "message", "text": text, "item_user": "console"}
         return resp
 
     def build_fake_slack_response(self, payload: dict, context=None) -> dict:
         context = context or {}
         return {
-            'payload': payload,
-            'client': MockClient(),
-            'context': context,
-            'say': self.say
+            "payload": payload,
+            "client": MockClient(),
+            "context": context,
+            "say": self.say,
         }
 
     def build_message(self, text: str) -> dict:
         payload = self.build_message_payload(text)
         resp = self.build_fake_slack_response(payload)
         # messages expect the `body` argument from slack_bolt
-        resp |= {'body': None}
+        resp |= {"body": None}
         return resp
 
     def build_reaction(self, reaction: str) -> dict:
         payload = self._base_payload()
         payload |= {
-            'type': 'reaction_added',
-            'reaction': reaction,
-            'item_user': 'console',
+            "type": "reaction_added",
+            "reaction": reaction,
+            "item_user": "console",
             "item": {
                 "type": "message",
                 "channel": "console",
-                "ts": str(random.randint(0, 9999) + random.random())
+                "ts": str(random.randint(0, 9999) + random.random()),
             },
         }
         return self.build_fake_slack_response(payload)

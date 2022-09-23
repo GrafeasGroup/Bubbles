@@ -198,8 +198,4 @@ def deploy(payload: Payload) -> None:
         _deploy_service(service, payload)
 
 
-PLUGIN = Plugin(
-    func=deploy,
-    regex=r"^deploy ?(.+)",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=deploy, regex=r"^deploy ?(.+)", interactive_friendly=False)

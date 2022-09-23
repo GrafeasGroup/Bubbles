@@ -18,30 +18,34 @@ def process_modmail(message_state: str) -> None:
         # *.user: Redditor
         # *.participant: Redditor
         # *.participant_subreddit: dict
-        if convo.user != {}:
+        if convo.participant_subreddit != {}:
+            # this is the least likely, but if it should happen we definitely
+            # want to catch it
+            participant = reddit.subreddit(convo.participant_subreddit["name"])
+        elif convo.user != {}:
             participant = convo.user
         elif convo.participant != {}:
             participant = convo.participant
-        elif convo.participant_subreddit != {}:
-            participant = reddit.subreddit(convo.participant_subreddit['name'])
         else:
-            participant = "unknown participant"
+            participant = None
 
         latest_message = convo.messages[-1]
-        if latest_message.author == participant and convo.num_messages == 1:
-            # this is a new message thread and someone sent something in.
+        if convo.num_messages == 1 and (
+            latest_message.author == participant or isinstance(participant, Subreddit)
+        ):
+            # we were sent a message!
             sender = participant
             recipient = sub
-        elif latest_message.author == participant:
-            sender = participant
-            if len(convo.authors) == 1:
-                # they just sent another message to the same thread that they started
-                recipient = sub
-            else:
-                recipient = convo.messages[-2].author
-        else:
+        elif convo.num_messages == 1 and latest_message.author != participant:
             sender = latest_message.author
             recipient = participant
+        elif convo.num_messages > 1:
+            sender = latest_message.author
+            recipient = convo.messages[-2].author
+        else:
+            # realistically we shouldn't ever hit this, but it's a good safety
+            sender = "unknown sender"
+            recipient = "unknown recipient"
         convo.read()
 
         if isinstance(sender, Redditor):
@@ -53,21 +57,35 @@ def process_modmail(message_state: str) -> None:
             recipient = f"u/{recipient.name}"
         if isinstance(recipient, Subreddit):
             recipient = f"r/{recipient.display_name}"
-
+        extra = (
+            " :banhammer_fancy:"
+            if convo.subject.startswith("You've been permanently banned")
+            else None
+        )
         app.client.chat_postMessage(
             channel=rooms_list["mod_messages"],
             as_user=True,
             blocks=[
                 blocks.SectionBlock(text=f"*{sender}* :arrow_right: *{recipient}*"),
-                blocks.SectionBlock(text=f"Subject: {convo.subject}"),
+                blocks.SectionBlock(text=f"*Subject*: {convo.subject}{extra}"),
                 blocks.DividerBlock(),
                 blocks.SectionBlock(text=latest_message.body_markdown),
                 blocks.DividerBlock(),
-                blocks.ContextBlock(elements=[
-                    blocks.MarkdownTextObject(text=f"Conversation ID: {convo.id}"),
-                    blocks.MarkdownTextObject(text=f"Message ID: {latest_message.id}")
-                ])
-            ]
+                blocks.SectionBlock(
+                    text=":modmail: :link: :arrow_right:",
+                    accessory=blocks.LinkButtonElement(
+                        url=f"https://mod.reddit.com/mail/all/{convo.id}", text="Open"
+                    ),
+                ),
+                blocks.ContextBlock(
+                    elements=[
+                        blocks.MarkdownTextObject(text=f"Conversation ID: {convo.id}"),
+                        blocks.MarkdownTextObject(
+                            text=f"Message ID: {latest_message.id}"
+                        ),
+                    ]
+                ),
+            ],
         )
 
 

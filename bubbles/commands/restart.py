@@ -65,8 +65,4 @@ def restart(payload: Payload):
         _restart_service(service, payload.say)
 
 
-PLUGIN = Plugin(
-    func=restart,
-    regex=r"^restart ?(.+)",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=restart, regex=r"^restart ?(.+)", interactive_friendly=False)

@@ -108,7 +108,4 @@ def cute(payload: Payload) -> None:
     payload.say(pic)
 
 
-PLUGIN = Plugin(
-    func=cute,
-    regex=r"^cute"
-)
+PLUGIN = Plugin(func=cute, regex=r"^cute")

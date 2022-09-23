@@ -109,7 +109,5 @@ def plot_comments_history(payload: Payload) -> None:
 
 
 PLUGIN = Plugin(
-    func=plot_comments_history,
-    regex=r"^history([0-9 ]+)?",
-    interactive_friendly=False
+    func=plot_comments_history, regex=r"^history([0-9 ]+)?", interactive_friendly=False
 )

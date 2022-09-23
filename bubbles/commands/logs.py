@@ -34,8 +34,4 @@ def logs(payload: Payload) -> None:
     )
 
 
-PLUGIN = Plugin(
-    func=logs,
-    regex=r"^logs([ a-zA-Z]+)?",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=logs, regex=r"^logs([ a-zA-Z]+)?", interactive_friendly=False)

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from utonium import Payload, Plugin
 
+
 def backup_db(payload: Payload) -> None:
     """!backup - creates and uploads a full backup of our postgres db."""
     # the db info is injected into the bot environment, so we'll grab it
@@ -36,8 +37,4 @@ def backup_db(payload: Payload) -> None:
         os.remove(previous_backups[0])
 
 
-PLUGIN = Plugin(
-    func=backup_db,
-    regex=r"^backup",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=backup_db, regex=r"^backup", interactive_friendly=False)

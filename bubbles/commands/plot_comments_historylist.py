@@ -70,7 +70,4 @@ def plot_comments_historylist(payload: Payload) -> None:
         payload.say(f"Volunteers welcomed by {key}: {list_volunteers_per_person[key]}")
 
 
-PLUGIN = Plugin(
-    func=plot_comments_historylist,
-    regex=r"^listmodsTEST ([0-9 ]+)?"
-)
+PLUGIN = Plugin(func=plot_comments_historylist, regex=r"^listmodsTEST ([0-9 ]+)?")

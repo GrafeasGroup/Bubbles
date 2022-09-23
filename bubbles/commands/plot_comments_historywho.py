@@ -157,7 +157,4 @@ def plot_comments_historywho(payload: Payload) -> None:
     payload.upload_file(file="plotHourMods.png")
 
 
-PLUGIN = Plugin(
-    func=plot_comments_historywho,
-    regex=r"^historywho([ \"a-zA-Z]+)?"
-)
+PLUGIN = Plugin(func=plot_comments_historywho, regex=r"^historywho([ \"a-zA-Z]+)?")

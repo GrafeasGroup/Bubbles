@@ -124,8 +124,4 @@ def update(payload: Payload) -> None:
     )
 
 
-PLUGIN = Plugin(
-    func=update,
-    regex=r"^update$",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=update, regex=r"^update$", interactive_friendly=False)

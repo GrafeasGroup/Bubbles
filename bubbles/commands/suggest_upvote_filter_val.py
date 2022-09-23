@@ -185,7 +185,4 @@ def suggest_filter(payload: Payload) -> None:
     )
 
 
-PLUGIN = Plugin(
-    func=suggest_filter,
-    regex=SUGGEST_FILTER_RE
-)
+PLUGIN = Plugin(func=suggest_filter, regex=SUGGEST_FILTER_RE)

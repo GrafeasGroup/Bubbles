@@ -25,7 +25,4 @@ def echo(payload: Payload):
     payload.say(f"```{' '.join(text.split()[1:])}```")
 
 
-PLUGIN = Plugin(
-    func=echo,
-    regex=r"^echo"
-)
+PLUGIN = Plugin(func=echo, regex=r"^echo")

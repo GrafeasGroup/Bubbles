@@ -61,8 +61,4 @@ def start(payload: Payload) -> None:
         _start_service(service, payload.say)
 
 
-PLUGIN = Plugin(
-    func=start,
-    regex=r"^start ?(.+)",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=start, regex=r"^start ?(.+)", interactive_friendly=False)

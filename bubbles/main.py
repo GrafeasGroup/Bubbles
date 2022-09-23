@@ -14,7 +14,7 @@ from bubbles.config import (
     COMMAND_PREFIXES,
     DEFAULT_CHANNEL,
     users_list,
-    rooms_list
+    rooms_list,
 )
 from bubbles.interactive import InteractiveSession, MockClient
 from bubbles.reaction_added import reaction_added_callback
@@ -117,7 +117,7 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
         slack_app=app,
         interactive_mode=interactive,
         users_dict=users_list,
-        rooms_dict=rooms_list
+        rooms_dict=rooms_list,
     )
     plugin_manager.load_all_plugins()
 
@@ -131,7 +131,7 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
                     "text": f"!{command}",
                     "channel": "console",
                 },
-                say=click.echo
+                say=click.echo,
             )
         )
         return
@@ -181,7 +181,7 @@ def selfcheck(verbose: bool) -> None:
             command_folder=command_folder_path,
             slack_app=app,
             users_dict=users_list,
-            rooms_dict=rooms_list
+            rooms_dict=rooms_list,
         )
         plugin_manager.load_all_plugins()
     except Exception as e:

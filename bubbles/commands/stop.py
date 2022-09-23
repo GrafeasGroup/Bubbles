@@ -50,8 +50,4 @@ def stop(payload: Payload) -> None:
         _stop_service(service, payload.say)
 
 
-PLUGIN = Plugin(
-    func=stop,
-    regex=r"^stop ?(.+)",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=stop, regex=r"^stop ?(.+)", interactive_friendly=False)

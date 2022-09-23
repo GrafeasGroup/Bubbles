@@ -20,7 +20,4 @@ def vote(payload: Payload) -> None:
         payload.reaction_add(response, vote)
 
 
-PLUGIN = Plugin(
-    func=vote,
-    regex=r"^vote([ \S]+)?|poll([ \S]+)?"
-)
+PLUGIN = Plugin(func=vote, regex=r"^vote([ \S]+)?|poll([ \S]+)?")

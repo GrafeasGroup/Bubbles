@@ -27,6 +27,4 @@ def fuck_off(payload: Payload) -> None:
     payload.say(random.choice(responses))
 
 
-PLUGIN = Plugin(
-    func=fuck_off, regex=pattern, flags=re.IGNORECASE, ignore_prefix=True
-)
+PLUGIN = Plugin(func=fuck_off, regex=pattern, flags=re.IGNORECASE, ignore_prefix=True)

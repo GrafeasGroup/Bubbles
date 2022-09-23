@@ -35,8 +35,4 @@ def isup(payload: Payload):
         _check(service)
 
 
-PLUGIN = Plugin(
-    func=isup,
-    regex=r"^isup([ a-zA-Z]+)?",
-    interactive_friendly=False
-)
+PLUGIN = Plugin(func=isup, regex=r"^isup([ a-zA-Z]+)?", interactive_friendly=False)
