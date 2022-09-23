@@ -39,6 +39,14 @@ def process_modmail(message_state: str) -> None:
         elif convo.num_messages == 1 and latest_message.author != participant:
             sender = latest_message.author
             recipient = participant
+        elif (
+            convo.num_messages > 1
+            and len(set(convo.authors)) == 1
+            and convo.authors[0] == participant
+        ):
+            # it's one person sending multiple messages that haven't been responded to yet.
+            sender = participant
+            recipient = sub
         elif convo.num_messages > 1:
             sender = latest_message.author
             recipient = convo.messages[-2].author
