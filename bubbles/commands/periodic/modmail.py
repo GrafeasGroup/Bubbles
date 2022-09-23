@@ -41,10 +41,13 @@ def process_modmail(message_state: str) -> None:
             recipient = participant
         elif (
             convo.num_messages > 1
-            and len(set(convo.authors)) == 1
-            and convo.authors[0] == participant
+            and len(set([m.author for m in convo.messages])) == 1  # see footnote
         ):
-            # it's one person sending multiple messages that haven't been responded to yet.
+            # It's one person sending multiple messages that haven't been responded
+            # to yet.
+            # Footnote: we can't use len(set(convo.authors)) here because it turns
+            # out that any action taken (like just archiving a modmail) adds you to
+            # the list of authors, even if you didn't author a message. -sigh-
             sender = participant
             recipient = sub
         elif convo.num_messages > 1:
@@ -68,7 +71,7 @@ def process_modmail(message_state: str) -> None:
         extra = (
             " :banhammer_fancy:"
             if convo.subject.startswith("You've been permanently banned")
-            else None
+            else ""
         )
         app.client.chat_postMessage(
             channel=rooms_list["mod_messages"],
@@ -79,11 +82,13 @@ def process_modmail(message_state: str) -> None:
                 blocks.DividerBlock(),
                 blocks.SectionBlock(text=latest_message.body_markdown),
                 blocks.DividerBlock(),
-                blocks.SectionBlock(
-                    text=":modmail: :link: :arrow_right:",
-                    accessory=blocks.LinkButtonElement(
-                        url=f"https://mod.reddit.com/mail/all/{convo.id}", text="Open"
-                    ),
+                blocks.ActionsBlock(
+                    elements=[
+                        blocks.LinkButtonElement(
+                            url=f"https://mod.reddit.com/mail/all/{convo.id}",
+                            text="Open in Modmail",
+                        )
+                    ]
                 ),
                 blocks.ContextBlock(
                     elements=[
