@@ -76,6 +76,13 @@ def process_modmail(message_state: str) -> None:
         app.client.chat_postMessage(
             channel=rooms_list["mod_messages"],
             as_user=True,
+            text=(
+                f":modmail: *{sender}* :arrow_right: *{recipient}*\n"
+                f":star2: *{convo.subject}*\n"
+                f"{latest_message.body_markdown}"
+            ),
+            unfurl_links=False,
+            unfurl_media=False,
             blocks=[
                 blocks.SectionBlock(text=f"*{sender}* :arrow_right: *{recipient}*"),
                 blocks.SectionBlock(text=f"*Subject*: {convo.subject}{extra}"),
