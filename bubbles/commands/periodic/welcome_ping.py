@@ -1,11 +1,10 @@
 import datetime
 
-from bubbles.commands.periodic import (
-    NEW_VOLUNTEER_CHANNEL,
-    NEW_VOLUNTEER_PING_CHANNEL,
-)
+from bubbles.commands.helper_functions_history.extract_author import \
+    extract_author
+from bubbles.commands.periodic import (NEW_VOLUNTEER_CHANNEL,
+                                       NEW_VOLUNTEER_PING_CHANNEL)
 from bubbles.config import app, rooms_list
-from bubbles.commands.helper_functions_history.extract_author import extract_author
 
 
 def get_username_and_permalink(message):

@@ -1,5 +1,5 @@
 from bubbles.commands.periodic import NEW_VOLUNTEER_PING_CHANNEL
-from bubbles.config import blossom, app, ENABLE_BLOSSOM
+from bubbles.config import ENABLE_BLOSSOM, app, blossom
 
 
 def get_in_progress_callback():

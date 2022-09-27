@@ -1,7 +1,6 @@
 import subprocess
 import time
 
-
 SERVICES = ["tor", "tor_ocr", "tor_archivist", "blossom", "all", "buttercup"]
 # special cases
 SERVICE_NAMES = {"tor": "tor_moderator"}

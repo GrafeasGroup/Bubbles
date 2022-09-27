@@ -1,16 +1,14 @@
 import logging
-from datetime import datetime, timedelta
 import re
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, Optional, Tuple, List, TypedDict
+from typing import Dict, List, Optional, Tuple, TypedDict
 
-from bubbles.commands.periodic import (
-    TRANSCRIPTION_CHECK_CHANNEL,
-    TRANSCRIPTION_CHECK_PING_CHANNEL,
-)
-from bubbles.config import app, users_list, rooms_list
-from bubbles.commands.helper_functions_history.extract_author import extract_author
-
+from bubbles.commands.helper_functions_history.extract_author import \
+    extract_author
+from bubbles.commands.periodic import (TRANSCRIPTION_CHECK_CHANNEL,
+                                       TRANSCRIPTION_CHECK_PING_CHANNEL)
+from bubbles.config import app, rooms_list, users_list
 
 USERNAME_REGEX = re.compile(r"u/(?P<username>[^ *:\[\]()?!<>]+)")
 STATUS_REGEX = re.compile(r"Status: \*(?P<status>[^*]+)\*(?: by u/(?P<mod>\S+))?")

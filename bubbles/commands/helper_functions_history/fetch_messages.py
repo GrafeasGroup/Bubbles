@@ -1,5 +1,4 @@
 from slack_sdk.web import SlackResponse
-
 from utonium import Payload
 
 from bubbles.config import rooms_list

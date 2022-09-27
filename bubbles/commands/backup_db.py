@@ -1,7 +1,7 @@
-from datetime import datetime
-import subprocess
 import os
 import shlex
+import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from utonium import Payload, Plugin

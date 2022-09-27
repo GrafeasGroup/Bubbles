@@ -3,11 +3,9 @@ from typing import List
 
 import pytest
 
-from bubbles.commands.periodic.rule_monitoring import (
-    SubredditRule,
-    RuleChanges,
-    _compare_rules,
-)
+from bubbles.commands.periodic.rule_monitoring import (RuleChanges,
+                                                       SubredditRule,
+                                                       _compare_rules)
 
 EXAMPLE_RULE = {
     "index": 0,

@@ -4,7 +4,6 @@ from utonium import Payload, Plugin
 
 from bubbles.config import ME
 
-
 raw_pattern = r"""
 ^w+h+a+t*[.!?\s]*$|
 ^w+a+t+[.!?\s]*$|

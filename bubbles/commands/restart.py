@@ -4,12 +4,8 @@ from typing import Callable
 from utonium import Payload, Plugin
 
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.service_utils import (
-    say_code,
-    verify_service_up,
-    SERVICES,
-    get_service_name,
-)
+from bubbles.service_utils import (SERVICES, get_service_name, say_code,
+                                   verify_service_up)
 
 
 def _restart_service(service: str, say: Callable) -> None:

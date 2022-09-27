@@ -5,7 +5,6 @@ from utonium import Payload, Plugin
 
 from bubbles.config import COMMAND_PREFIXES
 
-
 # Pulled a bunch of these URLs from https://github.com/treboryx/animalsAPI -- many thanks
 
 cat_api = "http://thecatapi.com/api/images/get?format=json&results_per_page={}"

@@ -3,15 +3,13 @@ import logging
 import os.path
 from datetime import datetime
 from time import sleep
-from typing import List, TypedDict, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, TypedDict
 
 from praw.models import Rule
 
-from bubbles.commands.periodic import (
-    RULE_MONITORING_CHANNEL_ID,
-    RULE_MONITORING_DATA_PATH,
-)
-from bubbles.config import reddit, app
+from bubbles.commands.periodic import (RULE_MONITORING_CHANNEL_ID,
+                                       RULE_MONITORING_DATA_PATH)
+from bubbles.config import app, reddit
 
 # Newly-added subreddits that don't have their rules tracked yet
 new_subreddits: List[str] = []

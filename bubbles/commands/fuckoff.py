@@ -5,7 +5,6 @@ from utonium import Payload, Plugin
 
 from bubbles.config import USERNAME
 
-
 pattern = r"""
 f+u+c+k+(\ )?(?:(y+o+u+|u+|o+f+))?[,\ ]+?{0}
 |h+a+t+e+[,\ ]+?{0}

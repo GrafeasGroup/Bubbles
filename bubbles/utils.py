@@ -1,5 +1,5 @@
-from typing import List
 import subprocess
+from typing import List
 
 
 def get_branch_head() -> str:

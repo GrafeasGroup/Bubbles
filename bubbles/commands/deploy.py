@@ -1,19 +1,14 @@
 import os
+import shlex
 import subprocess
 from pathlib import Path
-import shlex
 
 import requests
 from utonium import Payload, Plugin
 from utonium.specialty_blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.service_utils import (
-    verify_service_up,
-    SERVICES,
-    get_service_name,
-)
-
+from bubbles.service_utils import SERVICES, get_service_name, verify_service_up
 
 # the actual command that you run on the server to get the right version
 PYTHON_VERSION = "python3.10"

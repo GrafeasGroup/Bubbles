@@ -8,7 +8,6 @@ from utonium import Payload, Plugin
 
 from bubbles.config import reddit
 
-
 SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
 
 

@@ -1,22 +1,14 @@
 from datetime import datetime, timedelta
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 from unittest.mock import patch
 
 import pytest
 
 from bubbles.commands.periodic.transcription_check_ping import (
-    _is_old_check,
-    _extract_check_text,
-    _get_check_username,
-    CheckStatus,
-    _get_check_status,
-    CheckData,
-    _get_check_data,
-    _aggregate_checks_by_mod,
-    _aggregate_checks_by_time,
-    _get_check_reminder,
-    _is_check_message,
-)
+    CheckData, CheckStatus, _aggregate_checks_by_mod,
+    _aggregate_checks_by_time, _extract_check_text, _get_check_data,
+    _get_check_reminder, _get_check_status, _get_check_username,
+    _is_check_message, _is_old_check)
 
 EXAMPLE_USER_LIST = {
     "UEEMDNC0K": "mod974",

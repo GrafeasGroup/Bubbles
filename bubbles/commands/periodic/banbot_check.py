@@ -1,4 +1,4 @@
-from bubbles.config import app, rooms_list, reddit
+from bubbles.config import app, reddit, rooms_list
 
 
 def banbot_check_callback() -> None:

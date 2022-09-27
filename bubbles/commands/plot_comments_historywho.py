@@ -1,18 +1,18 @@
 import datetime
-import warnings
 import re
+import warnings
 
 import matplotlib.pyplot as plt
-from numpy import zeros, flip, cumsum
+from numpy import cumsum, flip, zeros
 from utonium import Payload, Plugin
 
-from bubbles.commands.helper_functions_history.extract_author import extract_author
-from bubbles.commands.helper_functions_history.extract_date_or_number import (
-    extract_date_or_number,
-)
-from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
+from bubbles.commands.helper_functions_history.extract_author import \
+    extract_author
+from bubbles.commands.helper_functions_history.extract_date_or_number import \
+    extract_date_or_number
+from bubbles.commands.helper_functions_history.fetch_messages import \
+    fetch_messages
 from bubbles.config import users_list
-
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")

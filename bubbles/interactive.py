@@ -1,7 +1,6 @@
 import random
 
 import click
-
 from utonium import PluginManager
 
 
