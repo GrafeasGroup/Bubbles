@@ -141,7 +141,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.add_new_context_step(f"Running migrations...")
         try:
             subprocess.check_call(
-                shlex.split(f"sh -c '{PYTHON_VERSION} {str(service)} -c migrate'")
+                shlex.split(f"sh -c '{PYTHON_VERSION} {str(service)}.pyz -c migrate'")
             )
         except subprocess.CalledProcessError:
             StatusMessage.step_failed()
