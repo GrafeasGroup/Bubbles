@@ -136,6 +136,19 @@ def _deploy_service(service: str, payload: Payload) -> None:
                 " Reverted to previous release."
             )
 
+    def migrate():
+        # Only for Blossom.
+        StatusMessage.add_new_context_step(f"Running migrations...")
+        try:
+            subprocess.check_call(
+                shlex.split(f"sh -c '{PYTHON_VERSION} {str(service)} -c migrate'")
+            )
+        except subprocess.CalledProcessError:
+            StatusMessage.step_failed()
+            revert_and_recover()
+            raise DeployError("Could not perform database migration! Unable to proceed!")
+        StatusMessage.step_succeeded()
+
     StatusMessage: ContextStepMessage = ContextStepMessage(
         payload,
         title=f"Deploying {service}",
@@ -151,6 +164,8 @@ def _deploy_service(service: str, payload: Payload) -> None:
         backup_archive, new_archive = download_new_release(release_data)
         test_new_archive(new_archive)
         replace_running_service(new_archive)
+        if service.lower() == "blossom":
+            migrate()
         restart_service()
     except (DeployError, subprocess.CalledProcessError) as e:
         print(e)  # make available in logs
