@@ -16,19 +16,21 @@ from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
 from shiv.bootstrap import current_zipfile
 from slack_bolt import App
+from tinydb import TinyDB
+
 
 log = logging.getLogger(__name__)
 
-
+# Build paths inside the project like this: BASE_DIR / "myfolder"
 with current_zipfile() as archive:
     if archive:
         # if archive is none, we're not in the zipfile and are probably
         # in development mode right now.
-        ARCHIVE_PATH = Path(archive.filename).parent
-        dotenv_path = str(ARCHIVE_PATH / ".env")
+        BASE_DIR = Path(archive.filename).resolve(strict=True).parent
+        dotenv_path = str(BASE_DIR / ".env")
     else:
+        BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
         dotenv_path = None
-        ARCHIVE_PATH = None
 load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(
@@ -158,6 +160,9 @@ except ValueError:
     # Like everything Etsy does, this library is half-assed too
     log.warning("Missing one or more required Etsy secrets. Disabling Etsy.")
     etsy = MagicMock()
+
+# https://tinydb.readthedocs.io/en/latest/getting-started.html#basic-usage
+db = TinyDB(BASE_DIR / "db.json")
 
 
 TIME_STARTED = datetime.now()
