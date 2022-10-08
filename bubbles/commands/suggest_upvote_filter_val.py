@@ -8,7 +8,7 @@ from utonium import Payload, Plugin
 
 from bubbles.config import reddit
 
-SUGGEST_FILTER_RE = r"^suggest filter (r\/|\/r\/)?([a-z_-]+)$"
+SUGGEST_FILTER_RE = r"^suggest filter (?:r\/|\/r\/)?(?P<sub_name>\S+)$"
 
 
 def avg(mylist: List) -> int:
@@ -148,10 +148,20 @@ def suggest_filter(payload: Payload) -> None:
 
     Usage: @bubbles suggest filter r/thathappened
     """
-    sub = re.search(SUGGEST_FILTER_RE, payload.get_text()).groups()[1]
-    payload.say(f"Processing data for r/{sub}. This may take a moment...")
+    text = payload.get_text()
+    match = re.search(SUGGEST_FILTER_RE, text)
 
-    ten_post_window, all_posts = get_new_posts_from_sub(sub)
+    if match is None:
+        payload.say(
+            f"Sorry, looks like `{text}` is in the wrong format. "
+            "Did you enter the sub name correctly?"
+        )
+        return
+
+    sub_name = match.group("sub_name")
+    payload.say(f"Processing data for r/{sub_name}. This may take a moment...")
+
+    ten_post_window, all_posts = get_new_posts_from_sub(sub_name)
     upvote_list_window = get_upvotes_from_list(ten_post_window)
     upvote_list_all_posts = get_upvotes_from_list(all_posts)
 
@@ -171,7 +181,7 @@ def suggest_filter(payload: Payload) -> None:
     )
 
     payload.say(
-        f"Stats for r/{sub} over the last 10 submissions:\n"
+        f"Stats for r/{sub_name} over the last 10 submissions:\n"
         f"\n"
         f"* karma distribution: {min_karma} | {max_karma}\n"
         f"* time spread: {hours}h {minutes}m\n"
