@@ -148,7 +148,7 @@ def suggest_filter(payload: Payload) -> None:
 
     Usage: @bubbles suggest filter r/thathappened
     """
-    text = payload.get_text()
+    text = payload.cleaned_text
     match = re.search(SUGGEST_FILTER_RE, text)
 
     if match is None:
