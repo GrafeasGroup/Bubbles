@@ -42,9 +42,16 @@ def build_and_send_message(
     if len(convo.messages) == 1 and (
             message.author == participant or isinstance(participant, Subreddit)
     ):
-        # we were sent a message!
-        sender = participant
-        recipient = sub
+        # WAIT! We _might_ have been sent a message, but the modmail API doesn't
+        # make that clear.
+        if message.author in [i for i in sub.moderator()]:
+            # The author is one of our moderators, so we sent it.
+            sender = sub
+            recipient = participant
+        else:
+            # we were sent a message!
+            sender = participant
+            recipient = sub
     elif len(convo.messages) == 1 and message.author != participant:
         sender = message.author
         recipient = participant
