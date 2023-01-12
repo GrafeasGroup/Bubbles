@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-wheel = "^0.36.2"
+wheel = "^0.38.1"
 blossom-wrapper = { git = "https://github.com/GrafeasGroup/blossom-wrapper.git", branch = "master" }
 matplotlib = "^3.3.0"
 requests = "^2.24.0"
