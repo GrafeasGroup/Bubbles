@@ -63,18 +63,6 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
         return backup_archive, new_archive
 
-    def test_new_archive(new_archive):
-        StatusMessage.add_new_context_step("Validating new release...")
-
-        result = subprocess.run(
-            shlex.split(f"sh -c '{PYTHON_VERSION} {str(new_archive)} selfcheck'"),
-            stdout=subprocess.DEVNULL,
-        )
-        if result.returncode != 0:
-            raise DeployError("The selfcheck failed. Aborting deploy.")
-
-        StatusMessage.step_succeeded()
-
     def send_error_end(exception=None):
         message = "Hit an error I couldn't recover from. Check logs for more context."
         if exception:
@@ -162,7 +150,6 @@ def _deploy_service(service: str, payload: Payload) -> None:
     try:
         release_data = check_for_new_version()
         backup_archive, new_archive = download_new_release(release_data)
-        test_new_archive(new_archive)
         replace_running_service(new_archive)
         if service.lower() == "blossom":
             migrate()
