@@ -11,15 +11,20 @@ from datetime import datetime, timedelta
 from bubbles.commands.modmail import modmail_callback
 from bubbles.commands.periodic.banbot_check import banbot_check_callback
 from bubbles.commands.periodic.etsy_sale_check import etsy_recent_sale_callback
-from bubbles.commands.periodic.get_in_progress_posts import \
-    get_in_progress_callback
+from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
 from bubbles.commands.periodic.rule_monitoring import rule_monitoring_callback
-from bubbles.commands.periodic.transcription_check_ping import \
-    transcription_check_ping_callback
+from bubbles.commands.periodic.transcription_check_ping import (
+    transcription_check_ping_callback,
+)
 from bubbles.commands.periodic.welcome_ping import (
-    periodic_ping_in_progress_callback, welcome_ping_callback)
-from bubbles.time_constants import (TRIGGER_4_HOURS_AGO, TRIGGER_12_HOURS_AGO,
-                                    TRIGGER_YESTERDAY)
+    periodic_ping_in_progress_callback,
+    welcome_ping_callback,
+)
+from bubbles.time_constants import (
+    TRIGGER_4_HOURS_AGO,
+    TRIGGER_12_HOURS_AGO,
+    TRIGGER_YESTERDAY,
+)
 from bubbles.tl_utils import TLJob
 
 # class PeriodicCheck(TLJob):
