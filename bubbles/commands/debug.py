@@ -1,8 +1,9 @@
 from utonium import Payload, Plugin
 
 from bubbles.commands.periodic.rule_monitoring import get_subreddit_stack
-from bubbles.commands.periodic.transcription_check_ping import \
-    transcription_check_ping_callback
+from bubbles.commands.periodic.transcription_check_ping import (
+    transcription_check_ping_callback,
+)
 
 
 def debug(payload: Payload) -> None:

@@ -6,10 +6,10 @@ import matplotlib.pyplot as plt
 from numpy import flip
 from utonium import Payload, Plugin
 
-from bubbles.commands.helper_functions_history.extract_date_or_number import \
-    extract_date_or_number
-from bubbles.commands.helper_functions_history.fetch_messages import \
-    fetch_messages
+from bubbles.commands.helper_functions_history.extract_date_or_number import (
+    extract_date_or_number,
+)
+from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")

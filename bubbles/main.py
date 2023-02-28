@@ -9,8 +9,13 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from utonium import Payload, PluginManager
 
 from bubbles import __version__
-from bubbles.config import (COMMAND_PREFIXES, DEFAULT_CHANNEL, app, rooms_list,
-                            users_list)
+from bubbles.config import (
+    COMMAND_PREFIXES,
+    DEFAULT_CHANNEL,
+    app,
+    rooms_list,
+    users_list,
+)
 from bubbles.interactive import InteractiveSession, MockClient
 from bubbles.tl_commands import enable_tl_jobs
 from bubbles.tl_utils import tl
@@ -76,8 +81,12 @@ def reaction_added(ack, payload, client, context, say):
     # reaction_added_callback(payload)
     plugin_manager.reaction_received(payload, client, context, say)
 
+
 import re
+
 pattern = re.compile(".*")
+
+
 @app.action(pattern)
 def handle_action(ack, body, client, context, say):
     ack()

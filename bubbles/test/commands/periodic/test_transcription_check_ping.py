@@ -5,10 +5,18 @@ from unittest.mock import patch
 import pytest
 
 from bubbles.commands.periodic.transcription_check_ping import (
-    CheckData, CheckStatus, _aggregate_checks_by_mod,
-    _aggregate_checks_by_time, _extract_check_text, _get_check_data,
-    _get_check_reminder, _get_check_status, _get_check_username,
-    _is_check_message, _is_old_check)
+    CheckData,
+    CheckStatus,
+    _aggregate_checks_by_mod,
+    _aggregate_checks_by_time,
+    _extract_check_text,
+    _get_check_data,
+    _get_check_reminder,
+    _get_check_status,
+    _get_check_username,
+    _is_check_message,
+    _is_old_check,
+)
 
 EXAMPLE_USER_LIST = {
     "UEEMDNC0K": "mod974",

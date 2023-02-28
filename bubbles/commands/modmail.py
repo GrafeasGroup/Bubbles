@@ -9,10 +9,10 @@ MESSAGE_CUTOFF_LENGTH = 250
 
 
 def build_and_send_message(
-        convo_id: str = None,
-        message_id: str = None,
-        expand_message: bool = False,
-        update_message_data: dict = None
+    convo_id: str = None,
+    message_id: str = None,
+    expand_message: bool = False,
+    update_message_data: dict = None,
 ) -> None:
     """
     Starting from a conversation id and a message ID, build the notification message.
@@ -40,7 +40,7 @@ def build_and_send_message(
         participant = None
 
     if len(convo.messages) == 1 and (
-            message.author == participant or isinstance(participant, Subreddit)
+        message.author == participant or isinstance(participant, Subreddit)
     ):
         # WAIT! We _might_ have been sent a message, but the modmail API doesn't
         # make that clear.
@@ -56,8 +56,8 @@ def build_and_send_message(
         sender = message.author
         recipient = participant
     elif (
-            len(convo.messages) > 1
-            and len(set([m.author for m in convo.messages])) == 1  # see footnote
+        len(convo.messages) > 1
+        and len(set([m.author for m in convo.messages])) == 1  # see footnote
     ):
         # It's one person sending multiple messages that haven't been responded
         # to yet.
@@ -130,15 +130,11 @@ def build_and_send_message(
         ]
 
     msg_blocks += [
-        blocks.ActionsBlock(
-            elements=action_elements
-        ),
+        blocks.ActionsBlock(elements=action_elements),
         blocks.ContextBlock(
             elements=[
                 blocks.MarkdownTextObject(text=f"Conversation ID: {convo.id}"),
-                blocks.MarkdownTextObject(
-                    text=f"Message ID: {message.id}"
-                ),
+                blocks.MarkdownTextObject(text=f"Message ID: {message.id}"),
             ]
         ),
     ]
@@ -157,12 +153,12 @@ def build_and_send_message(
 
     if update_message_data:
         app.client.chat_update(
-            channel=update_message_data["channel"], ts=update_message_data["ts"], **chat_args
+            channel=update_message_data["channel"],
+            ts=update_message_data["ts"],
+            **chat_args,
         )
     else:
-        app.client.chat_postMessage(
-            channel=rooms_list["mod_messages"], **chat_args
-        )
+        app.client.chat_postMessage(channel=rooms_list["mod_messages"], **chat_args)
 
 
 def process_modmail(message_state: str) -> None:
@@ -189,15 +185,17 @@ def handle_expansion_actions(payload: Payload) -> None:
     action = payload.get_block_kit_action().split("_")
 
     update_data = {
-        "channel": payload._slack_payload['container']['channel_id'],
-        "ts": payload._slack_payload['container']['message_ts']
+        "channel": payload._slack_payload["container"]["channel_id"],
+        "ts": payload._slack_payload["container"]["message_ts"],
     }
     build_and_send_message(
         convo_id=action[2],
         message_id=action[3],
         update_message_data=update_data,
-        expand_message=action[1] == 'embiggen'
+        expand_message=action[1] == "embiggen",
     )
 
 
-PLUGIN = Plugin(block_kit_action_func=handle_expansion_actions, block_kit_action_regex=r"^modmail_")
+PLUGIN = Plugin(
+    block_kit_action_func=handle_expansion_actions, block_kit_action_regex=r"^modmail_"
+)

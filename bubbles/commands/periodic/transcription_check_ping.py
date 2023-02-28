@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, TypedDict
 
-from bubbles.commands.helper_functions_history.extract_author import \
-    extract_author
-from bubbles.commands.periodic import (TRANSCRIPTION_CHECK_CHANNEL,
-                                       TRANSCRIPTION_CHECK_PING_CHANNEL)
+from bubbles.commands.helper_functions_history.extract_author import extract_author
+from bubbles.commands.periodic import (
+    TRANSCRIPTION_CHECK_CHANNEL,
+    TRANSCRIPTION_CHECK_PING_CHANNEL,
+)
 from bubbles.config import app, rooms_list, users_list
 
 USERNAME_REGEX = re.compile(r"u/(?P<username>[^ *:\[\]()?!<>]+)")

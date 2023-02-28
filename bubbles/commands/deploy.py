@@ -134,7 +134,9 @@ def _deploy_service(service: str, payload: Payload) -> None:
         except subprocess.CalledProcessError:
             StatusMessage.step_failed()
             revert_and_recover()
-            raise DeployError("Could not perform database migration! Unable to proceed!")
+            raise DeployError(
+                "Could not perform database migration! Unable to proceed!"
+            )
         StatusMessage.step_succeeded()
 
     StatusMessage: ContextStepMessage = ContextStepMessage(

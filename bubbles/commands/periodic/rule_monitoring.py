@@ -7,8 +7,10 @@ from typing import Dict, List, Optional, Tuple, TypedDict
 
 from praw.models import Rule
 
-from bubbles.commands.periodic import (RULE_MONITORING_CHANNEL_ID,
-                                       RULE_MONITORING_DATA_PATH)
+from bubbles.commands.periodic import (
+    RULE_MONITORING_CHANNEL_ID,
+    RULE_MONITORING_DATA_PATH,
+)
 from bubbles.config import app, reddit
 
 # Newly-added subreddits that don't have their rules tracked yet
