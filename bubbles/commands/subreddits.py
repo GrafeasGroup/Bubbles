@@ -12,7 +12,7 @@ def subreddits(payload: Payload) -> None:
     parts = payload.get_text().split()
 
     start_text = parts[1] if len(parts) >= 2 else "1 week ago"
-    end_text = parts[2] if len(parts) >= 3 else "now"
+    end_text = parts[2] if len(parts) >= 3 else "end"
 
     try:
         start, end, time_str = parse_time_constraints(start_text, end_text)
@@ -36,7 +36,7 @@ def subreddits(payload: Payload) -> None:
         return
 
     data = response.json()
-    response_txt = "\n".join(f"- r/{sub}: {count}" for sub, count in data.items())
+    response_txt = "\n".join(f"- r/{sub}: {count}" for (sub, count) in data.items())
 
     payload.say(response_txt)
 
