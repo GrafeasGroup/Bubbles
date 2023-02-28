@@ -38,7 +38,7 @@ def subreddits(payload: Payload) -> None:
     data = response.json()
     response_txt = "\n".join(f"- r/{sub}: {count}" for (sub, count) in data.items())
 
-    payload.say(response_txt)
+    payload.say(f"Transcription count by subreddit {time_str}:\n{response_txt}")
 
 
 PLUGIN = Plugin(func=subreddits, regex=r"^subreddits.*")
