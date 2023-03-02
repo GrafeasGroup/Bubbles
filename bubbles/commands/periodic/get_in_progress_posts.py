@@ -3,6 +3,12 @@ from bubbles.config import ENABLE_BLOSSOM, app, blossom
 
 
 def get_in_progress_callback():
+    # This command may need additional work before fully deploying.
+    # Right now there are a lot of posts that match the criteria,
+    # so the old data should be cleared out on Blossom's side before
+    # fully enabling this command.
+    return
+
     if not ENABLE_BLOSSOM:
         return
 
