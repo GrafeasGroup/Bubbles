@@ -2,7 +2,7 @@ import logging
 import subprocess
 
 from utonium import Payload, Plugin
-from utonium.blocks import ContextStepMessage
+from utonium.specialty_blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import SERVICES, get_service_name, verify_service_up
