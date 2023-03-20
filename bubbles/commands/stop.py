@@ -1,23 +1,30 @@
 import subprocess
-from typing import Callable
+import logging
 
 from utonium import Payload, Plugin
+from utonium.blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.service_utils import SERVICES, get_service_name, say_code
+from bubbles.service_utils import (
+    SERVICES, get_service_name
+)
+
+logger = logging.getLogger(__name__)
 
 
-def _stop_service(service: str, say: Callable) -> None:
-    say(f"Stopping {service} in production...")
+def _stop_service(service: str, message_block: ContextStepMessage) -> None:
+    message_block.add_new_context_step(f"Stopping {service} in production...")
 
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "stop", get_service_name(service)]
     )
     if systemctl_response.decode().strip() != "":
-        say("Something went wrong and could not stop.")
-        say_code(say, systemctl_response)
+        message_block.step_failed(
+            "Something went wrong and could not stop. Check logs for error."
+        )
+        logging.error(systemctl_response)
 
-    say(f"Stopped {service}.")
+    message_block.step_succeeded("Stopped successfully!")
 
 
 def stop(payload: Payload) -> None:
@@ -43,11 +50,18 @@ def stop(payload: Payload) -> None:
         )
         return
 
+    StatusMessage: ContextStepMessage = ContextStepMessage(
+        payload,
+        title=f"Stopping {service}",
+        start_message="This may take a minute. Please be patient.",
+        error_message="Can't continue; see below.",
+    )
+
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _stop_service(system, payload.say)
+            _stop_service(system, message_block=StatusMessage)
     else:
-        _stop_service(service, payload.say)
+        _stop_service(service, message_block=StatusMessage)
 
 
 PLUGIN = Plugin(func=stop, regex=r"^stop ?(.+)", interactive_friendly=False)

@@ -1,31 +1,33 @@
+import logging
 import subprocess
-from typing import Callable
 
 from utonium import Payload, Plugin
+from utonium.blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import (
-    SERVICES,
-    get_service_name,
-    say_code,
-    verify_service_up,
+    SERVICES, get_service_name, verify_service_up
 )
 
+logger = logging.getLogger(__name__)
 
-def _start_service(service: str, say: Callable) -> None:
-    say(f"Starting {service} in production...")
+
+def _start_service(service: str, message_block: ContextStepMessage) -> None:
+    message_block.add_new_context_step(f"Starting {service} in production...")
 
     systemctl_response = subprocess.check_output(
         ["sudo", "systemctl", "start", get_service_name(service)]
     )
     if systemctl_response.decode().strip() != "":
-        say("Something went wrong and could not start.")
-        say_code(say, systemctl_response)
+        message_block.step_failed(
+            "Something went wrong and could not stop. Check logs for error."
+        )
+        logging.error(systemctl_response)
     else:
         if verify_service_up(service):
-            say("Started successfully!")
+            message_block.step_succeeded("Started successfully!")
         else:
-            say(
+            message_block.step_failed(
                 f"{service} is not responding. Cannot recover from here -- please check the"
                 f" logs for more information."
             )
@@ -54,11 +56,18 @@ def start(payload: Payload) -> None:
         )
         return
 
+    StatusMessage: ContextStepMessage = ContextStepMessage(
+        payload,
+        title=f"Stopping {service}",
+        start_message="This may take a minute. Please be patient.",
+        error_message="Can't continue; see below.",
+    )
+
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _start_service(system, payload.say)
+            _start_service(system, message_block=StatusMessage)
     else:
-        _start_service(service, payload.say)
+        _start_service(service, message_block=StatusMessage)
 
 
 PLUGIN = Plugin(func=start, regex=r"^start ?(.+)", interactive_friendly=False)
