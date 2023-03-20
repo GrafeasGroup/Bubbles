@@ -23,7 +23,7 @@ def _start_service(service: str, message_block: ContextStepMessage) -> None:
         logging.error(systemctl_response)
     else:
         if verify_service_up(service):
-            message_block.step_succeeded("Started successfully!")
+            message_block.step_succeeded()
         else:
             message_block.step_failed(
                 f"{service} is not responding. Cannot recover from here -- please check the"

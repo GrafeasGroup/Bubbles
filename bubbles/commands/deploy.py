@@ -7,6 +7,8 @@ import requests
 from utonium import Payload, Plugin
 from utonium.specialty_blocks import ContextStepMessage
 
+from bubbles.commands.start import _start_service
+from bubbles.commands.stop import _stop_service
 from bubbles.config import COMMAND_PREFIXES
 from bubbles.service_utils import SERVICES, get_service_name, verify_service_up
 
@@ -139,6 +141,14 @@ def _deploy_service(service: str, payload: Payload) -> None:
             )
         StatusMessage.step_succeeded()
 
+    def stop_all_tor_bots_but_blossom():
+        for bot in ['tor', 'tor_ocr', 'tor_archivist']:
+            _stop_service(bot, message_block=StatusMessage)
+
+    def start_all_tor_bots_but_blossom():
+        for bot in ['tor', 'tor_ocr', 'tor_archivist']:
+            _start_service(bot, message_block=StatusMessage)
+
     StatusMessage: ContextStepMessage = ContextStepMessage(
         payload,
         title=f"Deploying {service}",
@@ -153,9 +163,17 @@ def _deploy_service(service: str, payload: Payload) -> None:
         release_data = check_for_new_version()
         backup_archive, new_archive = download_new_release(release_data)
         replace_running_service(new_archive)
+
         if service.lower() == "blossom":
+            # As the blossom deploys take longer, let's try stopping everyone else,
+            # deploying blossom, and then starting everyone again.
+            stop_all_tor_bots_but_blossom()
             migrate()
+
         restart_service()
+        if service.lower() == "blossom":
+            start_all_tor_bots_but_blossom()
+
     except (DeployError, subprocess.CalledProcessError) as e:
         print(e)  # make available in logs
         send_error_end(e)

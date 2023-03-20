@@ -22,7 +22,7 @@ def _stop_service(service: str, message_block: ContextStepMessage) -> None:
         )
         logging.error(systemctl_response)
 
-    message_block.step_succeeded("Stopped successfully!")
+    message_block.step_succeeded()
 
 
 def stop(payload: Payload) -> None:
