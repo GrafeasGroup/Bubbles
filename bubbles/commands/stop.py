@@ -5,9 +5,7 @@ from utonium import Payload, Plugin
 from utonium.blocks import ContextStepMessage
 
 from bubbles.config import COMMAND_PREFIXES
-from bubbles.service_utils import (
-    SERVICES, get_service_name
-)
+from bubbles.service_utils import SERVICES, get_service_name
 
 logger = logging.getLogger(__name__)
 
