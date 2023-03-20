@@ -118,7 +118,9 @@ def _deploy_service(service: str, payload: Payload) -> None:
             )
 
         if verify_service_up(service):
-            StatusMessage.step_succeeded(end_text=f"Successfully deployed {service}!")
+            # If the service we're deploying IS NOT blossom, this will print.
+            # If it IS blossom, it will get overwritten immediately.
+            StatusMessage.step_succeeded()
         else:
             revert_and_recover()
             raise DeployError(
@@ -173,6 +175,9 @@ def _deploy_service(service: str, payload: Payload) -> None:
         restart_service()
         if service.lower() == "blossom":
             start_all_tor_bots_but_blossom()
+
+        StatusMessage.add_new_context_step(f"Successfully deployed {service}!")
+        StatusMessage.step_is_info()
 
     except (DeployError, subprocess.CalledProcessError) as e:
         print(e)  # make available in logs
