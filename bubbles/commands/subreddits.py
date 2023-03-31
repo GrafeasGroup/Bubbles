@@ -42,7 +42,7 @@ def subreddits(payload: Payload) -> None:
 
     payload.say(
         f"Transcription count by subreddit {time_str}:\n{response_txt}" 
-        f"\n\nTotal subreddit count: {total_subreddits!s}
+        f"\n\nTotal subreddit count: {total_subreddits!s}"
         f"\nTotal transcription count: {total_transcription_count!s}"   
     )
 
