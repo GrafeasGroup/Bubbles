@@ -41,9 +41,9 @@ def subreddits(payload: Payload) -> None:
     total_transcription_count = sum([val for key, val in data.items()])
 
     payload.say(
-        f"Transcription count by subreddit {time_str}:\n{response_txt}" 
+        f"Transcription count by subreddit {time_str}:\n{response_txt}"
         f"\n\nTotal subreddit count: {total_subreddits!s}"
-        f"\nTotal transcription count: {total_transcription_count!s}"   
+        f"\nTotal transcription count: {total_transcription_count!s}"
     )
 
 

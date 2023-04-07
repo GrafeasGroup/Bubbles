@@ -144,11 +144,11 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
 
     def stop_all_tor_bots_but_blossom():
-        for bot in ['tor', 'tor_ocr', 'tor_archivist']:
+        for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _stop_service(bot, message_block=StatusMessage)
 
     def start_all_tor_bots_but_blossom():
-        for bot in ['tor', 'tor_ocr', 'tor_archivist']:
+        for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _start_service(bot, message_block=StatusMessage)
 
     StatusMessage: ContextStepMessage = ContextStepMessage(

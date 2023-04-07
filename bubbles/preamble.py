@@ -16,11 +16,13 @@ current = site_packages.parent
 cache_path = current.parent
 
 
-name, build_id = current.name.split('_')
+name, build_id = current.name.split("_")
 
 if __name__ == "__main__":
     for path in cache_path.iterdir():
         if path.name.startswith(f"{name}_") and not path.name.endswith(build_id):
             shutil.rmtree(path)
-        if path.name.startswith(f".{name}") and not path.name.endswith(f"{build_id}_lock"):
+        if path.name.startswith(f".{name}") and not path.name.endswith(
+            f"{build_id}_lock"
+        ):
             os.remove(path)
