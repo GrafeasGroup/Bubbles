@@ -1,4 +1,5 @@
 import logging
+import random
 import re
 from datetime import datetime, timedelta
 from enum import Enum
@@ -286,6 +287,11 @@ def _get_check_reminder(aggregate: List) -> str:
             reminder += f"- u/{mod}: "
             fragments = [_get_check_fragment(check) for check in claimed]
             reminder += ", ".join(fragments) + "\n"
+    
+    emotes = [':partyblob:', ':catdance:', ':partycat:', ':partywizard:']
+
+    if len(reminder.split("\n")) == 3:
+        reminder = f"*No pending transcription checks!* {random.choice(emotes)}"
 
     return reminder
 
