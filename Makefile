@@ -8,4 +8,4 @@ clean:
 
 shiv:
 	mkdir -p build
-	shiv -c bubbles -o build/bubbles.pyz . --compressed
+	shiv --preamble bubbles/preamble.py -c bubbles -o build/bubbles.pyz . --compressed
