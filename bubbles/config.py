@@ -11,8 +11,6 @@ import praw
 import slack_bolt
 from blossom_wrapper import BlossomAPI  # type: ignore
 from dotenv import load_dotenv
-from etsy2 import Etsy
-from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
 from shiv.bootstrap import current_zipfile
 from slack_bolt import App
@@ -146,20 +144,6 @@ for i in range(0, 24):
     mods_array.append(None)
 
 mpl.rcParams["figure.figsize"] = [20, 10]
-
-try:
-    etsy = Etsy(
-        etsy_oauth_client=EtsyOAuthClient(
-            client_key=os.environ.get("etsy_key"),
-            client_secret=os.environ.get("etsy_secret"),
-            resource_owner_key=os.environ.get("etsy_oauth_token"),
-            resource_owner_secret=os.environ.get("etsy_oauth_token_secret"),
-        )
-    )
-except ValueError:
-    # Like everything Etsy does, this library is half-assed too
-    log.warning("Missing one or more required Etsy secrets. Disabling Etsy.")
-    etsy = MagicMock()
 
 # https://tinydb.readthedocs.io/en/latest/getting-started.html#basic-usage
 db = TinyDB(BASE_DIR / "db.json")

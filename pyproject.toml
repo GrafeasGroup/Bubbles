@@ -17,7 +17,6 @@ praw = "^7.1.0"
 aiohttp = "^3.7.3"
 slack-bolt = "^1.2.1"
 poetry = "^1.1.6"
-etsy2 = {git = "https://github.com/simpassi/etsy-python2"}
 shiv = "^1.0.1"
 pytest = "^7.1.2"
 click = "^8.1.3"

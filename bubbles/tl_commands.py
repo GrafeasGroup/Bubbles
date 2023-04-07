@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 # )
 from bubbles.commands.modmail import modmail_callback
 from bubbles.commands.periodic.banbot_check import banbot_check_callback
-from bubbles.commands.periodic.etsy_sale_check import etsy_recent_sale_callback
 from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
 from bubbles.commands.periodic.rule_monitoring import rule_monitoring_callback
 from bubbles.commands.periodic.transcription_check_ping import (
@@ -34,15 +33,6 @@ from bubbles.tl_utils import TLJob
 #     class Meta:
 #         start_interval = timedelta(seconds=1)
 #         regular_interval = timedelta(seconds=4)
-
-
-class EtsySaleCheck(TLJob):
-    def job(self):
-        etsy_recent_sale_callback()
-
-    class Meta:
-        start_interval = timedelta(seconds=0)  # start now
-        regular_interval = timedelta(seconds=60)
 
 
 class WelcomePing(TLJob):
