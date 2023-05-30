@@ -2,7 +2,8 @@ import re
 import statistics
 import time
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Optional
+import math
 
 from utonium import Payload, Plugin
 
@@ -123,6 +124,11 @@ def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
     return len(submissions_last_24h)
 
 
+def sigmoid(x):
+    # https://stackoverflow.com/a/3985630
+    return 1 / (1 + math.exp(-x))
+
+
 def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
     """
     Create a guess of a filter value based on the votes and a modifier.
@@ -133,13 +139,21 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     inversely change the value. More posts coming from that sub? We need the value
     to be higher. Fewer posts? We can relax the filter.
 
-    Warning: includes a magic number that has no basis in reality, it just seems
-    to work. ¯\_(ツ)_/¯
+    ¯\_(ツ)_/¯
     """
-    return round(
-        (avg(reject_outliers(vote_list)) * 0.3)
-        / balance_queue_modifier(number_of_posts_per_day)
+    # warning: black magic ahead
+    avg_votes = avg(reject_outliers(vote_list))
+    queue_modifier = balance_queue_modifier(number_of_posts_per_day)
+    outlier_point_percentage = avg(reject_outliers(vote_list)) / avg(vote_list)
+    percentage_of_rejected_outliers = (
+        len(vote_list) - len(reject_outliers(vote_list))
+    ) * 0.1
+    outlier_modifier = sigmoid(
+        abs(outlier_point_percentage - percentage_of_rejected_outliers)
     )
+    activity_modifier = (1 - sigmoid(10 / number_of_posts_per_day)) + 1
+
+    return round((avg_votes / queue_modifier) * outlier_modifier * activity_modifier)
 
 
 def suggest_filter(payload: Payload) -> None:
