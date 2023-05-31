@@ -2,7 +2,7 @@ import re
 import statistics
 import time
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List
 import math
 
 from utonium import Payload, Plugin
@@ -141,17 +141,31 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
     ¯\_(ツ)_/¯
     """
-    # warning: black magic ahead
-    avg_votes = avg(reject_outliers(vote_list))
-    queue_modifier = balance_queue_modifier(number_of_posts_per_day)
-    outlier_point_percentage = avg(reject_outliers(vote_list)) / avg(vote_list)
-    percentage_of_rejected_outliers = (
+    # warning: black magic ahead.
+    # Take the ten-post window, calculate the outliers, and remove them from the data,
+    # then average the rest.
+    avg_votes: float = avg(reject_outliers(vote_list))
+    # Reddit limits the queue length to 1000 posts. Create a modifier based on the
+    # total amount of the queue we want any given subreddit to consume based on the
+    # number of submissions in a 24-hour period that subreddit receives.
+    queue_modifier: float = balance_queue_modifier(number_of_posts_per_day)
+    # When we remove the outliers from the 10-submission window, it is useful to know
+    # exactly how much of an outlier those rejected values were. We'll use it later
+    # to create the outlier modifier.
+    outlier_point_percentage: float = avg(reject_outliers(vote_list)) / avg(vote_list)
+    # Out of the ten posts that we pulled for the window, what percent were rejected
+    # as outliers?
+    percentage_of_rejected_outliers: float = (
         len(vote_list) - len(reject_outliers(vote_list))
     ) * 0.1
-    outlier_modifier = sigmoid(
+    # Dynamically create a modifier based on how severe the outliers are using a
+    # https://en.wikipedia.org/wiki/Logistic_function
+    outlier_modifier: float = sigmoid(
         abs(outlier_point_percentage - percentage_of_rejected_outliers)
     )
-    activity_modifier = (1 - sigmoid(10 / number_of_posts_per_day)) + 1
+    # Create a modifier between 1 and 1.5 based on the activity of the subreddit so
+    # more active subreddits have an additional penalty to better handle spikes.
+    activity_modifier: float = (1 - sigmoid(10 / number_of_posts_per_day)) + 1
 
     return round((avg_votes / queue_modifier) * outlier_modifier * activity_modifier)
 
