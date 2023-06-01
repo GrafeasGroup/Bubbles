@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 from unittest.mock import patch
 
@@ -263,7 +263,7 @@ def test_aggregate_checks_by_mod() -> None:
 
 def test_aggregate_checks_by_time() -> None:
     """Test whether the checks are aggregated correctly."""
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
 
     checks: List[CheckData] = [
         {
