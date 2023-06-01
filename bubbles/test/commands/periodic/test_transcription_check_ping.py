@@ -39,7 +39,8 @@ EXAMPLE_NEW_CHECK = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Transcription check for *<https://reddit.com/u/user123?sort=new|u/user123>* (6 Γ):\n"
+                "text": "Transcription check for "
+                "*<https://reddit.com/u/user123?sort=new|u/user123>* (6 Γ):\n"
                 "<https://example.com|ToR Post> | <https://example.com|Partner Post> "
                 "| <https://example.com|Transcription>\n"
                 "Trigger: Automatic (100.0%)\n"

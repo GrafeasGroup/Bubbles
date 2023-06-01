@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from bubbles.config import app, users_list
@@ -39,14 +39,14 @@ MESSAGE = (
 #     )
 
 
-def _get_base_user_data():
+def _get_base_user_data() -> dict:
     return {
-        "last_seen": datetime.now().timestamp(),
+        "last_seen": datetime.now(tz=timezone.utc).timestamp(),
         "already_messaged": False,
     }
 
 
-def presence_update_callback(*args, **kwargs):
+def presence_update_callback(**kwargs: dict) -> None:
     if not os.path.exists(FILENAME):
         Path(FILENAME).touch()
 
@@ -86,14 +86,14 @@ def presence_update_callback(*args, **kwargs):
 #     )
 
 
-def check_in_with_people():
+def check_in_with_people() -> None:
     with open(FILENAME) as file:
         data = json.load(file)
 
         for person_id in data.keys():
-            last_seen = datetime.fromtimestamp(data[person_id]["last_seen"])
+            last_seen = datetime.fromtimestamp(data[person_id]["last_seen"], tz=timezone.utc)
 
-            if last_seen > datetime.now() - timedelta(days=DAYS_TO_WAIT):
+            if last_seen > datetime.now(tz=timezone.utc) - timedelta(days=DAYS_TO_WAIT):
                 continue
 
             if data[person_id]["already_messaged"]:

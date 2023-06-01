@@ -2,7 +2,7 @@ import math
 import re
 import statistics
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from utonium import Payload, Plugin
@@ -78,8 +78,8 @@ def calculate_hours_and_minutes_timedelta_from_diffs(start_diff: int, end_diff: 
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
 
-    earliest_post = datetime.fromtimestamp(current_time - start_diff)
-    latest_post = datetime.fromtimestamp(current_time - end_diff)
+    earliest_post = datetime.fromtimestamp(current_time - start_diff, tz=timezone.utc)
+    latest_post = datetime.fromtimestamp(current_time - end_diff, tz=timezone.utc)
     minutes = (earliest_post - latest_post).total_seconds() / 60
     hours = int(minutes / 60)
     formatted_minutes = round(minutes % 60)
@@ -93,7 +93,7 @@ def get_total_count_of_posts_per_day(post_list: List) -> int:
 
     for post in post_list:
         # count how many submissions we have per day
-        post_time = datetime.fromtimestamp(post.created_utc)
+        post_time = datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
         post_time_key = "{}-{}".format(post_time.month, post_time.day)
         if not submissions_per_day.get(post_time_key):
             submissions_per_day[post_time_key] = 1
@@ -116,7 +116,7 @@ def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
     return len(submissions_last_24h)
 
 
-def sigmoid(x):
+def sigmoid(x: float) -> float:
     # https://stackoverflow.com/a/3985630
     return 1 / (1 + math.exp(-x))
 

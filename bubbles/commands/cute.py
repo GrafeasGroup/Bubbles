@@ -1,4 +1,5 @@
 import random
+from typing import Any, Callable, Optional
 
 import requests
 from utonium import Payload, Plugin
@@ -20,7 +21,7 @@ error_img = (
 )
 
 
-def get_pic(func, extra_args=None):
+def get_pic(func: Callable, extra_args: Any = None) -> tuple[Optional[str], str]:
     try:
         if extra_args:
             return func(extra_args)
@@ -34,36 +35,36 @@ def get_pic(func, extra_args=None):
         )
 
 
-def get_cat():
+def get_cat() -> tuple[str, str]:
     # TODO: add picture bomb functionality
     return "cat", requests.get(cat_api.format(1)).json()[0]["url"]
 
 
-def get_cat_alt():
+def get_cat_alt() -> tuple[str, str]:
     return "lovely cat", requests.get(cat_alt_api).json()["file"]
 
 
-def get_dog():
+def get_dog() -> tuple[str, str]:
     return "dog", requests.get(dog_api).json()["message"]
 
 
-def get_bunny():
+def get_bunny() -> tuple[str, str]:
     return "bunny", requests.get(bunny_api).json()["media"]["gif"]
 
 
-def get_lizard():
+def get_lizard() -> tuple[str, str]:
     return "lizard", requests.get(lizard_api).json()["url"]
 
 
-def get_fox():
+def get_fox() -> tuple[str, str]:
     return "fox", requests.get(fox_api).json()["image"]
 
 
-def get_duck():
+def get_duck() -> tuple[str, str]:
     return "duck", requests.get(duck_url).json()["url"]
 
 
-def get_shibe():
+def get_shibe() -> tuple[str, str]:
     return "shibe", requests.get(shibe_api).json()[0]
 
 

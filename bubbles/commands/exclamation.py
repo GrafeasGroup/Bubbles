@@ -1,7 +1,7 @@
 from utonium import Payload, Plugin
 
 
-def exclamation(payload: Payload):
+def exclamation(payload: Payload) -> None:
     # Ignore messages starting with multiple exclamation marks.
     #
     # Messages such as "!!! I'm so excited !!!" used to trigger the

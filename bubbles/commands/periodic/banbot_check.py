@@ -7,7 +7,8 @@ def banbot_check_callback() -> None:
     # make sure to add names in lowercase
     known_banbots = ["saferbot", "misandrybot", "safestbot"]
 
-    # List of subreddits with banbots that have been "authorized" after discussion with their mod team
+    # List of subreddits with banbots that have been "authorized"
+    # after discussion with their mod team
     subreddit_exceptions = {
         "BAME_UK": ["safestbot"],
         "Feminism": ["safestbot"],

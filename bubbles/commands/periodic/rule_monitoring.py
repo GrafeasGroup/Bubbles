@@ -1,7 +1,7 @@
 import json
 import logging
 import os.path
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from typing import Dict, List, Optional, Tuple, TypedDict
 
@@ -66,7 +66,7 @@ class RuleChanges(TypedDict):
     edited: List[RuleEdited]
 
 
-def _save_all_rules(rules: SubredditRuleMap):
+def _save_all_rules(rules: SubredditRuleMap) -> None:
     """Save all rules to the save file."""
     path = RULE_MONITORING_DATA_PATH
     dir_path = os.path.dirname(path)
@@ -80,14 +80,14 @@ def _save_all_rules(rules: SubredditRuleMap):
         json.dump(rules, file, indent=2)
 
 
-def _save_rules_for_sub(sub_name: str, rules: Optional[List[SubredditRule]]):
+def _save_rules_for_sub(sub_name: str, rules: Optional[List[SubredditRule]]) -> None:
     """Save the rules for the given sub.
 
     The changes are persisted to a file, such that it is available after restart.
     """
     rule_entry: RuleEntry = {
         # It has been updated now
-        "last_updated": datetime.now().isoformat(),
+        "last_updated": datetime.now(tz=timezone.utc).isoformat(),
         "rules": rules or [],
     }
 
@@ -118,7 +118,7 @@ def _load_all_rules() -> SubredditRuleMap:
         return json.loads(content)
 
 
-def _load_rules_for_sub(sub_name) -> Optional[List[SubredditRule]]:
+def _load_rules_for_sub(sub_name: str) -> Optional[List[SubredditRule]]:
     """Load the rules for the given sub."""
     all_rules = _load_all_rules()
 
@@ -148,7 +148,7 @@ def _convert_subreddit_rule(rule: Rule, index: int) -> SubredditRule:
         "index": index,
         "name": name,
         "description": rule.description or "",
-        "created_time": datetime.utcfromtimestamp(rule.created_utc).isoformat(),
+        "created_time": datetime.fromtimestamp(rule.created_utc, tz=timezone.utc).isoformat(),
     }
 
 
@@ -163,7 +163,7 @@ def _get_subreddit_rules(sub_name: str) -> List[SubredditRule]:
     return rules
 
 
-def _initialize_rules(sub_name: str):
+def _initialize_rules(sub_name: str) -> None:
     """Initialize the rules for the given subreddit."""
     rules = _get_subreddit_rules(sub_name)
     _save_rules_for_sub(sub_name, rules)
@@ -198,7 +198,8 @@ def _compare_rules(old_rules: List[SubredditRule], new_rules: List[SubredditRule
 def _check_rule_changes(sub_name: str) -> RuleChanges:
     """Check if the rules of the given sub have been changed.
 
-    This loads the saved rules from the sub and compares them with the newly fetched rules from Reddit.
+    This loads the saved rules from the sub and compares them with the newly
+    fetched rules from Reddit.
     It also saves the new rules back to the file.
     """
     old_rules = _load_rules_for_sub(sub_name)
@@ -211,7 +212,7 @@ def _check_rule_changes(sub_name: str) -> RuleChanges:
     return changes
 
 
-def _initialize_subreddit_stack():
+def _initialize_subreddit_stack() -> None:
     """Initialize the subreddit stack.
 
     The list of subreddits is fetched from the wiki and then compared with
@@ -242,7 +243,8 @@ def _initialize_subreddit_stack():
     _subreddit_stack = [entry[0] for entry in entries]
 
     logging.info(
-        f"Initialized subreddit stack:\nNew subreddits: {_new_subreddits}\nSubreddit stack: {_subreddit_stack}"
+        "Initialized subreddit stack:\n"
+        f"New subreddits: {_new_subreddits}\nSubreddit stack: {_subreddit_stack}"
     )
 
     # Update the global variables
@@ -336,7 +338,7 @@ def get_subreddit_stack() -> Tuple[List[str], List[str]]:
     return new_subreddits, subreddit_stack
 
 
-def rule_monitoring_callback():
+def rule_monitoring_callback() -> None:
     """Check for rule changes for the next subreddit in the list.
 
     If no subs are left to process, the subreddit list is updated again.

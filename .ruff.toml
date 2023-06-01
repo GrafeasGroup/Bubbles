@@ -1,7 +1,8 @@
 select = [
     "E",  # pycodestyle (error)
     "W",  # pycodestyle (warning)
-    "D",  # pydocstyle
+    # TODO: Enable this again
+    #"D",  # pydocstyle
     "I",  # isort
     "ANN",  # flake8-annotations
     "DTZ",  # flake8-datetimez

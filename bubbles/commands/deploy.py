@@ -41,7 +41,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
         return release_data
 
-    def download_new_release(release_data: dict):
+    def download_new_release(release_data: dict) -> None:
         StatusMessage.add_new_context_step("Downloading new release...")
 
         url = release_data["assets"][0]["browser_download_url"]
@@ -63,7 +63,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
         return backup_archive, new_archive
 
-    def send_error_end(exception=None):
+    def send_error_end(exception: RuntimeError = None) -> None:
         message = "Hit an error I couldn't recover from. Check logs for more context."
         if exception:
             if exception.args:
@@ -71,7 +71,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
         StatusMessage.step_failed(end_text=message, error=True)
 
-    def replace_running_service(new_archive):
+    def replace_running_service(new_archive: str) -> None:
         StatusMessage.add_new_context_step(f"Updating {service}...")
 
         # copy the new archive on top of the running one
@@ -89,7 +89,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
             .strip()
         )
 
-    def revert_and_recover():
+    def revert_and_recover() -> None:
         StatusMessage.add_new_context_step(f"Reverting {service}...")
 
         with open(service_path / f"{service}.pyz", "wb") as current, open(
@@ -103,7 +103,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
         StatusMessage.step_succeeded()
 
-    def restart_service():
+    def restart_service() -> None:
         StatusMessage.add_new_context_step(f"Restarting {service}...")
         systemctl_response = _restart_service()
         if systemctl_response != "":
@@ -122,7 +122,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
                 " Reverted to previous release."
             )
 
-    def migrate():
+    def migrate() -> None:
         # Only for Blossom.
         StatusMessage.add_new_context_step(f"Running migrations...")
         try:
@@ -135,11 +135,11 @@ def _deploy_service(service: str, payload: Payload) -> None:
             raise DeployError("Could not perform database migration! Unable to proceed!")
         StatusMessage.step_succeeded()
 
-    def stop_all_tor_bots_but_blossom():
+    def stop_all_tor_bots_but_blossom() -> None:
         for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _stop_service(bot, message_block=StatusMessage)
 
-    def start_all_tor_bots_but_blossom():
+    def start_all_tor_bots_but_blossom() -> None:
         for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _start_service(bot, message_block=StatusMessage)
 

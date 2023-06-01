@@ -1,7 +1,9 @@
 import logging
 import os
 import pathlib
+import re
 import sys
+from typing import Any, Callable
 
 import click
 from click.core import Context
@@ -52,7 +54,7 @@ Full list of available event keys:
 @app.event("reaction_removed")
 @app.event("app_mention")
 @app.event("dnd_updated_user")
-def handle(ack):
+def handle(ack: Callable[[], None]) -> None:
     """Gracefully handle extra events so that slack is okay with it.
 
     Because we listen for direct pings under the `message` event, we don't
@@ -69,25 +71,29 @@ def handle(ack):
 
 
 @app.event("message")
-def handle_message(ack, payload, client, context, say, body: dict):
+def handle_message(
+    ack: Callable[[], None], payload: Any, client: Any, context: Any, say: Callable, body: dict
+) -> None:
     ack()
     plugin_manager.message_received(payload, client, context, body, say)
 
 
 @app.event("reaction_added")
-def reaction_added(ack, payload, client, context, say):
+def reaction_added(
+    ack: Callable[[], None], payload: Any, client: Any, context: Any, say: Callable
+) -> None:
     ack()
     # reaction_added_callback(payload)
     plugin_manager.reaction_received(payload, client, context, say)
 
 
-import re
-
 pattern = re.compile(".*")
 
 
 @app.action(pattern)
-def handle_action(ack, body, client, context, say):
+def handle_action(
+    ack: Callable[[], None], body: Any, client: Any, context: Any, say: Callable
+) -> None:
     ack()
     plugin_manager.action_received(body, client, context, say)
 

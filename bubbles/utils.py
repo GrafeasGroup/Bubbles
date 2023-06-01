@@ -32,6 +32,7 @@ class TimeParseError(RuntimeError):
 
 
 def get_branch_head() -> str:
+    """Get the name of the default head branch."""
     # this returns "origin/main" or "origin/master" - pull out just the last bit
     return (
         subprocess.check_output("git rev-parse --abbrev-ref origin/HEAD".split())

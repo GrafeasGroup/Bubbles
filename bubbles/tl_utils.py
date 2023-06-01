@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 
 import timeloop  # type: ignore
 
@@ -25,12 +26,12 @@ class TLJob:
         tl.job(interval=self.Meta.start_interval)(self._job_wrapper)
         tl.jobs[-1].name = self.name
 
-    def _get_tl_job(self):
+    def _get_tl_job(self) -> Any:
         for job in tl.jobs:
             if job.name == self.name:
                 return job
 
-    def _job_wrapper(self):
+    def _job_wrapper(self) -> Any:
         result = self.job()
         if self.first_run:
             job = self._get_tl_job()
@@ -38,5 +39,5 @@ class TLJob:
             self.first_run = False
         return result
 
-    def job(self):
+    def job(self) -> None:
         raise TLConfigException("No job configured!")

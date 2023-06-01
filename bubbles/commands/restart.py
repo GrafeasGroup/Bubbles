@@ -15,7 +15,7 @@ from bubbles.service_utils import (
 def _restart_service(service: str, say: Callable) -> None:
     say(f"Restarting {service} in production. This may take a moment...")
 
-    def restart_service(loc):
+    def restart_service(loc: str) -> None:
         say(f"Restarting service for {loc}...")
         systemctl_response = subprocess.check_output(
             ["sudo", "systemctl", "restart", get_service_name(loc)]
@@ -35,7 +35,7 @@ def _restart_service(service: str, say: Callable) -> None:
     restart_service(service)
 
 
-def restart(payload: Payload):
+def restart(payload: Payload) -> None:
     """!restart [bot name] - restarts the requested bot."""
     args = payload.get_text().split()
 

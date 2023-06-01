@@ -2,7 +2,7 @@ from bubbles.commands.periodic import NEW_VOLUNTEER_PING_CHANNEL
 from bubbles.config import ENABLE_BLOSSOM, app, blossom
 
 
-def get_in_progress_callback():
+def get_in_progress_callback() -> None:
     # This command may need additional work before fully deploying.
     # Right now there are a lot of posts that match the criteria,
     # so the old data should be cleared out on Blossom's side before

@@ -1,11 +1,11 @@
-import datetime
+from datetime import datetime, timedelta, timezone
 
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.periodic import NEW_VOLUNTEER_CHANNEL, NEW_VOLUNTEER_PING_CHANNEL
 from bubbles.config import app, rooms_list
 
 
-def get_username_and_permalink(message):
+def get_username_and_permalink(message: dict) -> tuple[str, str]:
     username = message["text"].split(" ")[0].split("|")[1][:-1]
     permalink = app.client.chat_getPermalink(
         channel=rooms_list[NEW_VOLUNTEER_CHANNEL], message_ts=message["ts"]
@@ -14,8 +14,8 @@ def get_username_and_permalink(message):
 
 
 def welcome_ping_callback() -> None:
-    timestamp_needed_end_cry = datetime.datetime.now() - datetime.timedelta(days=7)
-    timestamp_needed_start_cry = datetime.datetime.now() - datetime.timedelta(hours=4)
+    timestamp_needed_end_cry = datetime.now(tz=timezone.utc) - timedelta(days=7)
+    timestamp_needed_start_cry = datetime.now(tz=timezone.utc) - timedelta(hours=4)
 
     response = app.client.conversations_history(
         channel=rooms_list[NEW_VOLUNTEER_CHANNEL],
@@ -77,8 +77,8 @@ def welcome_ping_callback() -> None:
 
 
 def periodic_ping_in_progress_callback() -> None:
-    timestamp_needed_end_watchping = datetime.datetime.now() - datetime.timedelta(days=14)
-    timestamp_needed_start_watchping = datetime.datetime.now() - datetime.timedelta(hours=24)
+    timestamp_needed_end_watchping = datetime.now(tz=timezone.utc) - timedelta(days=14)
+    timestamp_needed_start_watchping = datetime.now(tz=timezone.utc) - timedelta(hours=24)
     response_watchping = app.client.conversations_history(
         channel=rooms_list[NEW_VOLUNTEER_CHANNEL],
         oldest=timestamp_needed_end_watchping.timestamp(),

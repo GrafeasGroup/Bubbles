@@ -1,7 +1,7 @@
 import os
 import shlex
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from utonium import Payload, Plugin
@@ -15,7 +15,7 @@ def backup_db(payload: Payload) -> None:
     user = os.environ.get("postgres_user")
     db = os.environ.get("postgres_db")
     host = os.environ.get("postgres_host")
-    filename = f"db_backup_{str(datetime.now().date())}.tar"
+    filename = f"db_backup_{str(datetime.now(tz=timezone.utc).date())}.tar"
 
     payload.say("Starting DB export. This may take a moment.")
 

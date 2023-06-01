@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 from unittest import mock
@@ -142,4 +142,4 @@ mpl.rcParams["figure.figsize"] = [20, 10]
 db = TinyDB(BASE_DIR / "db.json")
 
 
-TIME_STARTED = datetime.now()
+TIME_STARTED = datetime.now(tz=timezone.utc)

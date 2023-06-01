@@ -1,6 +1,6 @@
-import datetime
 import re
 import warnings
+from datetime import MAXYEAR, datetime, timedelta, timezone
 
 import matplotlib.pyplot as plt
 from numpy import cumsum, flip, zeros
@@ -22,11 +22,9 @@ def plot_comments_historywho(payload: Payload) -> None:
 
     `number of posts` must be an integer between 1 and 1000 inclusive.
     """
-    # lastDatetime = datetime.datetime(2018, 5, 30).timestamp() # First post on 30/05/2018
-    # last_datetime = datetime.datetime.now().timestamp()
     count_reactions_all = {}
     count_reactions_people = {}
-    datetime_now = datetime.datetime.now()
+    datetime_now = datetime.now(tz=timezone.utc)
 
     if '"' not in payload.get_text() and payload.get_text() != "!historywho -h":
         payload.say(
@@ -59,7 +57,7 @@ def plot_comments_historywho(payload: Payload) -> None:
     GOOD_REACTIONS = ["watch", "heavy_check_mark", "email", "exclamation_point"]
 
     timestamp = 0  # stop the linter from yelling
-    timestamp_min = datetime.datetime(datetime.MAXYEAR, 1, 1)
+    timestamp_min = datetime(MAXYEAR, 1, 1, tzinfo=timezone.utc)
     for message in response["messages"]:
         # print(message)
         if not re.search(
@@ -67,7 +65,7 @@ def plot_comments_historywho(payload: Payload) -> None:
         ):  # Remove all messages who are not given by the bot
             continue
 
-        timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
+        timestamp = datetime.fromtimestamp(float(message["ts"]), tz=timezone.utc)
         difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
         author = extract_author(message, GOOD_REACTIONS)
@@ -81,7 +79,7 @@ def plot_comments_historywho(payload: Payload) -> None:
             count_reactions_people[author].get(difference_days, 0) + 1
         )
 
-        timestamp = datetime.datetime.fromtimestamp(float(message["ts"]))
+        timestamp = datetime.fromtimestamp(float(message["ts"]), tz=timezone.utc)
         timestamp_min = min(timestamp_min, timestamp)
         difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
@@ -124,7 +122,7 @@ def plot_comments_historywho(payload: Payload) -> None:
             # print("Day "+str(i)+": "+str(number_posts[-1]))
             indice_user = indice_user + 1
     for i in range(maxDay, -1, -1):
-        difference_days = datetime.timedelta(days=i)
+        difference_days = timedelta(days=i)
         new_date = datetime_now - difference_days
         dates.append(new_date)
     i = 0

@@ -1,5 +1,5 @@
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 
 from utonium import Payload, Plugin
 
@@ -29,7 +29,7 @@ def logs(payload: Payload) -> None:
     payload.upload_file(
         content=result.decode().strip(),
         initial_comment=f"Requested logs for {service}:",
-        title=f"{service} logs {str(datetime.now())}",
+        title=f"{service} logs {str(datetime.now(tz=timezone.utc))}",
         filetype="text",
     )
 
