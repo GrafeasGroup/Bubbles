@@ -34,8 +34,7 @@ def plot_comments_historylist(payload: Payload) -> None:
             input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
         payload.say(
-            "ERROR! Too many arguments given as inputs! Syntax: `!historylist [number"
-            " of posts]`"
+            "ERROR! Too many arguments given as inputs! Syntax: `!historylist [number" " of posts]`"
         )
         return
 
@@ -56,9 +55,9 @@ def plot_comments_historylist(payload: Payload) -> None:
         welcomed_username = welcomed_username.split("|")[-1]
         author = extract_author(message, GOOD_REACTIONS)
         count_reactions_people[author] = count_reactions_people.get(author, 0) + 1
-        list_volunteers_per_person[author] = list_volunteers_per_person.get(
-            author, []
-        ) + [welcomed_username]
+        list_volunteers_per_person[author] = list_volunteers_per_person.get(author, []) + [
+            welcomed_username
+        ]
     count_reactions_people = dict(sorted(count_reactions_people.items()))
     payload.say(
         f"{str(len(response['messages']))} messages retrieved."

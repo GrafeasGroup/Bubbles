@@ -86,17 +86,13 @@ def plot_comments_historywho(payload: Payload) -> None:
         timestamp_min = min(timestamp_min, timestamp)
         difference_datetime = datetime_now - timestamp
         difference_days = difference_datetime.days
-        count_reactions_all[difference_days] = (
-            count_reactions_all.get(difference_days, 0) + 1
-        )
+        count_reactions_all[difference_days] = count_reactions_all.get(difference_days, 0) + 1
         # print(str(time_send)+"| "+userWhoSentMessage+" sent: "+textMessage)
         # last_datetime = timestamp.timestamp()
         # print(str(lastDatetime))
         # print(time_send)
 
-    payload.say(
-        f"{str(len(response['messages']))} messages retrieved since {str(timestamp_min)}"
-    )
+    payload.say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp_min)}")
     number_posts = {}
     print(count_reactions_people.keys())
     dates = []
@@ -142,9 +138,7 @@ def plot_comments_historywho(payload: Payload) -> None:
         "Banned",
     ]:
         if name in count_reactions_people.keys():
-            plt.plot(
-                dates, cumsum(flip(posts_hist[:, i])), label=name, color=colours[i]
-            )
+            plt.plot(dates, cumsum(flip(posts_hist[:, i])), label=name, color=colours[i])
             i = i + 1
     # plt.bar(posts_hist, maxDay+1, stacked='True')
     plt.xlabel("Day")

@@ -29,9 +29,7 @@ def verify_service_up(service) -> bool:
     try:
         for attempt in range(PROCESS_CHECK_COUNT):
             time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", get_service_name(service)]
-            )
+            subprocess.check_call(["systemctl", "is-active", "--quiet", get_service_name(service)])
         return True
     except subprocess.CalledProcessError:
         return False

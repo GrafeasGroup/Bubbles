@@ -25,9 +25,7 @@ def update(payload: Payload) -> None:
     )
 
     StatusMessage.add_new_context_step("Preparing update...")
-    response = requests.get(
-        "https://api.github.com/repos/grafeasgroup/bubbles/releases/latest"
-    )
+    response = requests.get("https://api.github.com/repos/grafeasgroup/bubbles/releases/latest")
     if response.status_code != 200:
         logger.error(f"GITHUB RESPONSE CONTENT: {response.content}")
         StatusMessage.step_failed(
@@ -48,9 +46,7 @@ def update(payload: Payload) -> None:
         return
     else:
         StatusMessage.step_succeeded()
-        StatusMessage.add_new_context_step(
-            f"Downloading release {release_data['name']}..."
-        )
+        StatusMessage.add_new_context_step(f"Downloading release {release_data['name']}...")
 
     url = release_data["assets"][0]["browser_download_url"]
     with current_zipfile() as archive:
@@ -94,18 +90,14 @@ def update(payload: Payload) -> None:
         stdout=subprocess.DEVNULL,
     )
     if result.returncode != 0:
-        StatusMessage.step_failed(
-            error=True, end_text="Selfcheck failed! Stopping update."
-        )
+        StatusMessage.step_failed(error=True, end_text="Selfcheck failed! Stopping update.")
         return
     StatusMessage.step_succeeded()
 
     # copy the new archive on top of the running one
     StatusMessage.add_new_context_step("Updating...")
     with current_zipfile() as archive:
-        with open(archive.filename, "wb") as current, open(
-            new_archive, "rb"
-        ) as tempfile:
+        with open(archive.filename, "wb") as current, open(new_archive, "rb") as tempfile:
             current.write(tempfile.read())
 
     StatusMessage.step_succeeded(

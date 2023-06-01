@@ -30,9 +30,7 @@ def subreddits(payload: Payload) -> None:
     )
 
     if not response.ok:
-        payload.say(
-            f"Sorry, but something went wrong. Please try again later.\n{response.text}"
-        )
+        payload.say(f"Sorry, but something went wrong. Please try again later.\n{response.text}")
         return
 
     data = response.json()

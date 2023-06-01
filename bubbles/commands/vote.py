@@ -10,8 +10,7 @@ def vote(payload: Payload) -> None:
 
     if len(text) == 0:
         payload.say(
-            "Sorry, I didn't get a question for your poll!"
-            " Usage: `poll Your Question Here!`"
+            "Sorry, I didn't get a question for your poll!" " Usage: `poll Your Question Here!`"
         )
         return
 

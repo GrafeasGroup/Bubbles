@@ -158,9 +158,7 @@ def _get_subreddit_rules(sub_name: str) -> List[SubredditRule]:
     If no rules have been defined, `None` is returned.
     """
     sub = reddit.subreddit(sub_name)
-    rules = [
-        _convert_subreddit_rule(rule, idx + 1) for idx, rule in enumerate(sub.rules)
-    ]
+    rules = [_convert_subreddit_rule(rule, idx + 1) for idx, rule in enumerate(sub.rules)]
 
     return rules
 
@@ -171,9 +169,7 @@ def _initialize_rules(sub_name: str):
     _save_rules_for_sub(sub_name, rules)
 
 
-def _compare_rules(
-    old_rules: List[SubredditRule], new_rules: List[SubredditRule]
-) -> RuleChanges:
+def _compare_rules(old_rules: List[SubredditRule], new_rules: List[SubredditRule]) -> RuleChanges:
     """Compare the given set of rules and determine all changes.
 
     The rules are identified by their index.
@@ -282,8 +278,7 @@ def _get_rule_added_message(changes: RuleChanges) -> Optional[str]:
         return None
 
     added_rule_text = [
-        f"*## Added Rule {rule['index']}*\n\n{_format_rule(rule)}"
-        for rule in changes["added"]
+        f"*## Added Rule {rule['index']}*\n\n{_format_rule(rule)}" for rule in changes["added"]
     ]
     return "\n\n".join(added_rule_text)
 
@@ -294,8 +289,7 @@ def _get_rule_removed_message(changes: RuleChanges) -> Optional[str]:
         return None
 
     removed_rule_text = [
-        f"*## Removed Rule {rule['index']}*\n\n{_format_rule(rule)}"
-        for rule in changes["removed"]
+        f"*## Removed Rule {rule['index']}*\n\n{_format_rule(rule)}" for rule in changes["removed"]
     ]
     return "\n\n".join(removed_rule_text)
 

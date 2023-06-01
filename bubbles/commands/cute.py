@@ -15,7 +15,9 @@ bunny_api = "https://api.bunnies.io/v2/loop/random/?media=gif"
 duck_url = "https://random-d.uk/api/v1/random?type=png"
 lizard_api = "https://nekos.life/api/v2/img/lizard"
 shibe_api = "http://shibe.online/api/shibes"
-error_img = "https://www.pinclipart.com/picdir/middle/168-1688957_powerpuff-girls-cry-bubbles-clipart.png"
+error_img = (
+    "https://www.pinclipart.com/picdir/middle/168-1688957_powerpuff-girls-cry-bubbles-clipart.png"
+)
 
 
 def get_pic(func, extra_args=None):

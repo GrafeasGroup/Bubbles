@@ -31,9 +31,7 @@ def get_in_progress_callback():
                             "* {}".format(
                                 link["tor_url"]
                                 if link["tor_url"]
-                                else "No link available for submission ID {}".format(
-                                    link["id"]
-                                )
+                                else "No link available for submission ID {}".format(link["id"])
                             )
                             for link in result
                         ]

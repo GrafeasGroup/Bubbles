@@ -39,8 +39,7 @@ def plot_comments_history(payload: Payload) -> None:
             input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
         payload.say(
-            "ERROR! Too many arguments given as inputs!"
-            " Syntax: `!history [number of posts]`"
+            "ERROR! Too many arguments given as inputs!" " Syntax: `!history [number of posts]`"
         )
         return
 
@@ -68,9 +67,7 @@ def plot_comments_history(payload: Payload) -> None:
         # print(str(timeSend)+"| "+userWhoSentMessage+" sent: "+textMessage)
         count_hours[hour_message] = count_hours[hour_message] + 1
     timestamp = timestamp_min
-    payload.say(
-        f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}"
-    )
+    payload.say(f"{str(len(response['messages']))} messages retrieved since {str(timestamp)}")
     number_posts = []
     dates = []
     for i in range(0, max(count_days.keys())):
@@ -108,6 +105,4 @@ def plot_comments_history(payload: Payload) -> None:
     plt.close()
 
 
-PLUGIN = Plugin(
-    func=plot_comments_history, regex=r"^history([0-9 ]+)?", interactive_friendly=False
-)
+PLUGIN = Plugin(func=plot_comments_history, regex=r"^history([0-9 ]+)?", interactive_friendly=False)

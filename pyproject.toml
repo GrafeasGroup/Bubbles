@@ -33,6 +33,9 @@ black = "^22.6.0"
 poetry = "^1.1.14"
 poetry2setup = "^1.0.0"
 
+[tool.black]
+line-length = 100
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"

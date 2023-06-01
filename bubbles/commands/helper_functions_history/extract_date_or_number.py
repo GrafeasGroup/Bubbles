@@ -9,9 +9,7 @@ def extract_date_or_number(arg: str) -> int:
     """
     try:
         date_found = datetime.date.fromisoformat(arg)
-        date_found = datetime.datetime(
-            date_found.year, date_found.month, date_found.day
-        )
+        date_found = datetime.datetime(date_found.year, date_found.month, date_found.day)
         output_value = int(date_found.timestamp())
     except ValueError:
         output_value = max(1, min(1000, int(arg)))

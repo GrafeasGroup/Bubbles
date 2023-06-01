@@ -29,9 +29,7 @@ class MockClient:
                         "ts": "1661965345.288219",
                         "team": "GFEDCBA",
                         "blocks": [...],
-                        "reactions": [
-                            {"name": "upvote", "users": ["console"], "count": 1}
-                        ],
+                        "reactions": [{"name": "upvote", "users": ["console"], "count": 1}],
                         "permalink": "https://...",
                     },
                 }

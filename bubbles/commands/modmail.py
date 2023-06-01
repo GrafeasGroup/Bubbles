@@ -87,9 +87,7 @@ def build_and_send_message(
         recipient = f"r/{recipient.display_name}"
 
     extra = (
-        " :banhammer_fancy:"
-        if convo.subject.startswith("You've been permanently banned")
-        else ""
+        " :banhammer_fancy:" if convo.subject.startswith("You've been permanently banned") else ""
     )
 
     message_body = message.body_markdown
@@ -196,6 +194,4 @@ def handle_expansion_actions(payload: Payload) -> None:
     )
 
 
-PLUGIN = Plugin(
-    block_kit_action_func=handle_expansion_actions, block_kit_action_regex=r"^modmail_"
-)
+PLUGIN = Plugin(block_kit_action_func=handle_expansion_actions, block_kit_action_regex=r"^modmail_")

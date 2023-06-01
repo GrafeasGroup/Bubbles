@@ -112,18 +112,12 @@ users = app.client.users_list()
 for user in users["members"]:
     if not user["deleted"]:
         # Extract the display name if available
-        name = (
-            user.get("profile", {}).get("display_name")
-            or user.get("real_name")
-            or user["id"]
-        )
+        name = user.get("profile", {}).get("display_name") or user.get("real_name") or user["id"]
         users_list[user["id"]] = name
         users_list[name] = user["id"]
         users_list["ids_only"].append(user["id"])
 
-users_list[
-    "bubbles_console"
-] = "bubbles_console"  # support for running commands through CLI
+users_list["bubbles_console"] = "bubbles_console"  # support for running commands through CLI
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}

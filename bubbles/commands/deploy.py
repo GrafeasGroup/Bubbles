@@ -24,9 +24,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
     def check_for_new_version() -> dict:
         StatusMessage.add_new_context_step("Checking for new release...")
 
-        output = subprocess.check_output(
-            shlex.split(f"{PYTHON_VERSION} {service}.pyz --version")
-        )
+        output = subprocess.check_output(shlex.split(f"{PYTHON_VERSION} {service}.pyz --version"))
         # starting from something like b'BubblesV2, version ?????\n'
         current_version = output.decode().strip().split(", ")[-1].split()[-1]
         github_response = requests.get(
@@ -86,9 +84,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
     def _restart_service() -> str:
         return (
-            subprocess.check_output(
-                ["sudo", "systemctl", "restart", get_service_name(service)]
-            )
+            subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(service)])
             .decode()
             .strip()
         )
@@ -113,9 +109,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         if systemctl_response != "":
             StatusMessage.step_failed()
             revert_and_recover()
-            raise DeployError(
-                "Could not deploy due to system error. Reverted to previous release."
-            )
+            raise DeployError("Could not deploy due to system error. Reverted to previous release.")
 
         if verify_service_up(service):
             # If the service we're deploying IS NOT blossom, this will print.
@@ -138,9 +132,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         except subprocess.CalledProcessError:
             StatusMessage.step_failed()
             revert_and_recover()
-            raise DeployError(
-                "Could not perform database migration! Unable to proceed!"
-            )
+            raise DeployError("Could not perform database migration! Unable to proceed!")
         StatusMessage.step_succeeded()
 
     def stop_all_tor_bots_but_blossom():

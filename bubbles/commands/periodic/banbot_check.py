@@ -2,11 +2,7 @@ from bubbles.config import app, reddit, rooms_list
 
 
 def banbot_check_callback() -> None:
-    subreddits = (
-        reddit.subreddit("TranscribersOfReddit")
-        .wiki["subreddits"]
-        .content_md.splitlines()
-    )
+    subreddits = reddit.subreddit("TranscribersOfReddit").wiki["subreddits"].content_md.splitlines()
 
     # make sure to add names in lowercase
     known_banbots = ["saferbot", "misandrybot", "safestbot"]

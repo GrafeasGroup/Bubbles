@@ -42,11 +42,7 @@ def reject_outliers(upvote_list: List) -> List:
     multiplier = 0.7
     avg = sum(upvote_list) / len(upvote_list)
     s_dev = statistics.stdev(upvote_list)
-    return [
-        n
-        for n in upvote_list
-        if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)
-    ]
+    return [n for n in upvote_list if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)]
 
 
 def get_new_posts_from_sub(subreddit: str) -> [List, List]:
@@ -80,9 +76,7 @@ def get_time_diffs(post_list: List) -> [int, int]:
     return min(time_diffs), max(time_diffs)
 
 
-def calculate_hours_and_minutes_timedelta_from_diffs(
-    start_diff: int, end_diff: int
-) -> [int, int]:
+def calculate_hours_and_minutes_timedelta_from_diffs(start_diff: int, end_diff: int) -> [int, int]:
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
 
@@ -201,12 +195,8 @@ def suggest_filter(payload: Payload) -> None:
     posts_per_day_count = get_total_count_of_posts_per_day(all_posts)
     posts_per_last_24h_count = get_total_count_of_posts_in_24_hours(all_posts)
 
-    suggested_value_window = estimate_filter_value(
-        upvote_list_window, posts_per_day_count
-    )
-    suggested_value_all = estimate_filter_value(
-        upvote_list_all_posts, posts_per_day_count
-    )
+    suggested_value_window = estimate_filter_value(upvote_list_window, posts_per_day_count)
+    suggested_value_all = estimate_filter_value(upvote_list_all_posts, posts_per_day_count)
 
     payload.say(
         f"Stats for r/{sub_name} over the last 10 submissions:\n"

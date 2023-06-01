@@ -20,9 +20,7 @@ class TLJob:
                 raise TLConfigException(f"Missing {attr} for {self.name}!")
 
             if not isinstance(getattr(self.Meta, attr), timedelta):
-                raise TLConfigException(
-                    f"{self.name} - {attr} must be a timedelta object!"
-                )
+                raise TLConfigException(f"{self.name} - {attr} must be a timedelta object!")
 
         tl.job(interval=self.Meta.start_interval)(self._job_wrapper)
         tl.jobs[-1].name = self.name

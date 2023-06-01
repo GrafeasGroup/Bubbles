@@ -7,9 +7,7 @@ import re
 # First an amount and then a unit
 import pytz as pytz
 
-relative_time_regex = re.compile(
-    r"^(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>\w*)\s*(?:ago\s*)?$"
-)
+relative_time_regex = re.compile(r"^(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>\w*)\s*(?:ago\s*)?$")
 # The different time units
 unit_regexes: dict[str, re.Pattern] = {
     "seconds": re.compile(r"^s(?:ec(?:ond)?s?)?$"),
