@@ -28,9 +28,10 @@ pytz = "^2022.7.1"
 [tool.poetry.plugins."console_scripts"]
 "bubbles" = "bubbles.main:main"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^22.6.0"
-poetry2setup = { git = "https://github.com/abersheeran/poetry2setup", branch = "master" }
+poetry = "^1.1.14"
+poetry2setup = "^1.0.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
