@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def update(payload: Payload) -> None:
-    """!update - pull changes from github and restart!"""
+    """!update - pull changes from github and restart!."""
     StatusMessage: ContextStepMessage = ContextStepMessage(
         payload,
         title="Updating!",

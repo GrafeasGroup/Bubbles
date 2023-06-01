@@ -14,8 +14,7 @@ def build_and_send_message(
     expand_message: bool = False,
     update_message_data: dict = None,
 ) -> None:
-    """
-    Starting from a conversation id and a message ID, build the notification message.
+    """Starting from a conversation id and a message ID, build the notification message.
 
     No message_id means start from the latest message.
     """

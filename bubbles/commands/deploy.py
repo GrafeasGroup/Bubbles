@@ -181,9 +181,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
 
 def deploy(payload: Payload) -> None:
-    """
-    !deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!
-    """
+    """!deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!."""
     args = payload.get_text().split()
 
     if len(args) > 1:

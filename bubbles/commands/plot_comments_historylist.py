@@ -14,8 +14,7 @@ warnings.filterwarnings("ignore")
 
 
 def plot_comments_historylist(payload: Payload) -> None:
-    """
-    !historylist [number of posts] - plot new volunteers by who welcomed them.
+    """!historylist [number of posts] - plot new volunteers by who welcomed them.
 
     `number of posts` must be an integer between 1 and 1000 inclusive.
     """

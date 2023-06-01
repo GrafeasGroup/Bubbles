@@ -16,8 +16,7 @@ warnings.filterwarnings("ignore")
 
 
 def plot_comments_history(payload: Payload) -> None:
-    """
-    !history [number of posts] - plot new volunteer join rate.
+    """!history [number of posts] - plot new volunteer join rate.
 
     `number of posts` must be an integer between 1 and 1000 inclusive.
     """

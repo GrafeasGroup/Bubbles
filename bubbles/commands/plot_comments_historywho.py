@@ -18,8 +18,7 @@ warnings.filterwarnings("ignore")
 
 
 def plot_comments_historywho(payload: Payload) -> None:
-    """
-    !historywho [number of posts] "person" - plot welcomed people by specific mod.
+    """!historywho [number of posts] "person" - plot welcomed people by specific mod.
 
     `number of posts` must be an integer between 1 and 1000 inclusive.
     """

@@ -5,11 +5,7 @@ from bubbles.config import rooms_list
 
 
 def fetch_messages(payload: Payload, input_value: int, channel_name: str) -> SlackResponse:
-    """
-    Function that fetches the number of messages required by the input argument.
-
-
-    """
+    """Function that fetches the number of messages required by the input argument."""
     channel = rooms_list[channel_name]
     if input_value > 1000:
         messages = payload.client.conversations_history(

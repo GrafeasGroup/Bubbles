@@ -1,9 +1,9 @@
+import math
 import re
 import statistics
 import time
 from datetime import datetime, timedelta
 from typing import List
-import math
 
 from utonium import Payload, Plugin
 
@@ -17,8 +17,7 @@ def avg(mylist: List) -> int:
 
 
 def balance_queue_modifier(count_per_day: float) -> float:
-    """
-    Create a modifier to use when setting filter values.
+    """Create a modifier to use when setting filter values.
 
     Because our queue is only ever 1k posts long (reddit limitation), then
     we never want any given sub to take up any more than 1/100th of the queue
@@ -64,8 +63,7 @@ def get_min_max_karma(post_list: List) -> [int, int]:
 
 
 def get_time_diffs(post_list: List) -> [int, int]:
-    """
-    Return time differences in post time from now from a list of Reddit posts.
+    """Return time differences in post time from now from a list of Reddit posts.
 
     Starting from now, what is the time difference between the soonest post and
     the latest post?
@@ -124,8 +122,7 @@ def sigmoid(x):
 
 
 def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
-    """
-    Create a guess of a filter value based on the votes and a modifier.
+    """Create a guess of a filter value based on the votes and a modifier.
 
     We start with a list of votes from a given window of any size, then cut out
     the outliers. After that, the list is averaged and a preliminary guess is
@@ -133,7 +130,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     inversely change the value. More posts coming from that sub? We need the value
     to be higher. Fewer posts? We can relax the filter.
 
-    ¯\_(ツ)_/¯
+    ¯\\_(ツ)_/¯
     """
     # warning: black magic ahead.
     # Take the ten-post window, calculate the outliers, and remove them from the data,
@@ -165,8 +162,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
 
 def suggest_filter(payload: Payload) -> None:
-    """
-    !suggest filter {subreddit} - create a guess for a post filter value.
+    """!suggest filter {subreddit} - create a guess for a post filter value.
 
     Usage: @bubbles suggest filter r/thathappened
     """

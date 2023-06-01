@@ -2,8 +2,7 @@ import datetime
 
 
 def extract_date_or_number(arg: str) -> int:
-    """
-    Function that extracts either the date or the number of posts required by the
+    """Function that extracts either the date or the number of posts required by the
     input arg.
 
     """

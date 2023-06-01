@@ -1,5 +1,5 @@
-import subprocess
 import logging
+import subprocess
 
 from utonium import Payload, Plugin
 from utonium.specialty_blocks import ContextStepMessage

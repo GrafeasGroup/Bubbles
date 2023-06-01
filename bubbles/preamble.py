@@ -2,7 +2,6 @@
 # https://shiv.readthedocs.io/en/latest/#preamble
 import os
 import shutil
-
 from pathlib import Path
 
 # These variables are injected by shiv.bootstrap

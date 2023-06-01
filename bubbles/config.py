@@ -16,7 +16,6 @@ from shiv.bootstrap import current_zipfile
 from slack_bolt import App
 from tinydb import TinyDB
 
-
 log = logging.getLogger(__name__)
 
 # Build paths inside the project like this: BASE_DIR / "myfolder"

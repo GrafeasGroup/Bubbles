@@ -79,9 +79,7 @@ animals = {
 
 
 def cute(payload: Payload) -> None:
-    """
-    !cute [cat/dog/bunny/lizard/fox/duck/shibe], or just !cute to get a random picture
-    """
+    """!cute [cat/dog/bunny/lizard/fox/duck/shibe], or just !cute to get a random picture."""
     args = payload.get_text().split()
 
     if args[0] in COMMAND_PREFIXES:

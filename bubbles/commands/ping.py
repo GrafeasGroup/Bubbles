@@ -2,7 +2,7 @@ from utonium import Payload, Plugin
 
 
 def ping(payload: Payload) -> None:
-    """!ping - PONG"""
+    """!ping - PONG."""
     payload.say("PONG!")
 
 

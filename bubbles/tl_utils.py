@@ -10,7 +10,7 @@ class TLConfigException(Exception):
 
 
 class TLJob:
-    def __init__(self):
+    def __init__(self) -> None:
         self.first_run = True
         # assumes one-word class name
         self.name = [z.strip(" <") for z in self.__str__().split(" ")][0].split(".")[-1]

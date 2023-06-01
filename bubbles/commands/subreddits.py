@@ -1,13 +1,12 @@
 from utonium import Payload, Plugin
 
 from bubbles.config import blossom
-from bubbles.utils import parse_time_constraints, TimeParseError
+from bubbles.utils import TimeParseError, parse_time_constraints
 
 
 def subreddits(payload: Payload) -> None:
-    """
-    !subreddits [start time] [end time] - Get transcription counts by subreddit
-    Usage: `!subreddits` or `!subreddits 2023-02-20 2023-02-27
+    """!subreddits [start time] [end time] - Get transcription counts by subreddit
+    Usage: `!subreddits` or `!subreddits 2023-02-20 2023-02-27.
     """
     parts = payload.get_text().split()
 

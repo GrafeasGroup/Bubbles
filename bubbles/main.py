@@ -53,8 +53,7 @@ Full list of available event keys:
 @app.event("app_mention")
 @app.event("dnd_updated_user")
 def handle(ack):
-    """
-    Gracefully handle extra events so that slack is okay with it.
+    """Gracefully handle extra events so that slack is okay with it.
 
     Because we listen for direct pings under the `message` event, we don't
     need to have a handler for `app_mention` events. Unfortunately, if we
@@ -164,8 +163,7 @@ def main(ctx: Context, command: str, interactive: bool) -> None:
     help="Show Pytest output instead of running quietly.",
 )
 def selfcheck(verbose: bool) -> None:
-    """
-    Verify the binary passes all tests internally.
+    """Verify the binary passes all tests internally.
 
     Add any other self-check related code here.
     """

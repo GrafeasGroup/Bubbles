@@ -156,7 +156,6 @@ def _get_check_time(message: Dict) -> datetime:
 
 def _get_check_data(message: Dict) -> CheckData:
     """Extract the data from a given check message."""
-
     user = _get_check_username(message)
     status, mod = _get_check_status(message)
     link = _get_check_link(message)

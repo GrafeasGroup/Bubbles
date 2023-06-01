@@ -4,14 +4,13 @@ from bubbles.config import users_list
 
 
 def extract_author(message: Dict, good_reactions: List[str]) -> str:
-    """
-    Function that determines the user that has reacted to a new user message. The
+    """Function that determines the user that has reacted to a new user message. The
     reaction list is stored in message_data["reactions"]
     Example of the retrieved reaction list:
         [{'name': 'think-rotate', 'users': ['U4QEPLK6D', 'UE3VDJ002', 'U7T7G5GT0',
         'UK98SNKCK', 'U01AL41499D'], 'count': 5}, {'name': 'discord', 'users':
         ['UE3VDJ002'], 'count': 1}, {'name': 'heavy_check_mark', 'users':
-        ['UEEMDNC0K'], 'count': 1}]
+        ['UEEMDNC0K'], 'count': 1}].
 
     good_reactions is a list containing the names of the reactions to test.
 

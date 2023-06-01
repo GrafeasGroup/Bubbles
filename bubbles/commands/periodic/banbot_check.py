@@ -24,7 +24,7 @@ def banbot_check_callback() -> None:
     for sub in subreddits:
         mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
         for banbot in known_banbots:
-            if banbot in mods and not banbot in subreddit_exceptions.get(sub, []):
+            if banbot in mods and banbot not in subreddit_exceptions.get(sub, []):
                 sublists[banbot].append(sub)
 
     message = (

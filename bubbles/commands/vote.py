@@ -2,9 +2,8 @@ from utonium import Payload, Plugin
 
 
 def vote(payload: Payload) -> None:
-    """
-    !vote [your question] - create a vote.
-    Usage: `!vote Is this cool or what?`
+    """!vote [your question] - create a vote.
+    Usage: `!vote Is this cool or what?`.
     """
     text = " ".join(payload.get_text().split()[1:])
 

@@ -1,11 +1,11 @@
+import re
 import subprocess
 from datetime import datetime, timedelta
-from dateutil import parser
 from typing import List, Optional
-import re
 
 # First an amount and then a unit
 import pytz as pytz
+from dateutil import parser
 
 relative_time_regex = re.compile(r"^(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>\w*)\s*(?:ago\s*)?$")
 # The different time units
@@ -42,8 +42,7 @@ def get_branch_head() -> str:
 
 
 def break_large_message(text: str, break_at: int = 4000) -> List:
-    """
-    Slack messages must be less than 4000 characters.
+    """Slack messages must be less than 4000 characters.
 
     This breaks large strings into a list of sections that are each
     less than 4000 characters.
