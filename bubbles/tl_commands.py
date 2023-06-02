@@ -4,6 +4,10 @@ import sys
 import traceback
 from datetime import datetime, timedelta, timezone
 
+# from bubbles.commands.periodic.activity_checkin import (
+#     check_in_with_people,
+#     force_presence_update,
+# )
 from bubbles.commands.modmail import modmail_callback
 from bubbles.commands.periodic.banbot_check import banbot_check_callback
 from bubbles.commands.periodic.get_in_progress_posts import get_in_progress_callback
@@ -21,6 +25,14 @@ from bubbles.time_constants import (
     TRIGGER_YESTERDAY,
 )
 from bubbles.tl_utils import TLJob
+
+# class PeriodicCheck(TLJob):
+#     def job(self):
+#         test_periodic_callback()
+#
+#     class Meta:
+#         start_interval = timedelta(seconds=1)
+#         regular_interval = timedelta(seconds=4)
 
 
 class WelcomePing(TLJob):
