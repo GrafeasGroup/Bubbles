@@ -31,7 +31,7 @@ pytz = "^2022.7.1"
 [tool.poetry.group.dev.dependencies]
 black = "^22.6.0"
 poetry = "^1.1.14"
-poetry2setup = "^1.0.0"
+poetry2setup = "^1.1.0"
 ruff = "^0.0.270"
 pre-commit = "^3.3.2"
 coveralls = "^3.3.1"
