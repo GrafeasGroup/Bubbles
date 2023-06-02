@@ -6,7 +6,7 @@ from bubbles.utils import TimeParseError, parse_time_constraints
 
 def subreddits(payload: Payload) -> None:
     """!subreddits [start time] [end time] - Get transcription counts by subreddit
-    Usage: `!subreddits` or `!subreddits 2023-02-20 2023-02-27.
+    Usage: `!subreddits` or `!subreddits 2023-02-20 2023-02-27
     """
     parts = payload.get_text().split()
 

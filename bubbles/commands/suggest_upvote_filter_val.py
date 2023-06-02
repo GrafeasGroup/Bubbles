@@ -122,7 +122,7 @@ def sigmoid(x: float) -> float:
 
 
 def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
-    """Create a guess of a filter value based on the votes and a modifier.
+    r"""Create a guess of a filter value based on the votes and a modifier.
 
     We start with a list of votes from a given window of any size, then cut out
     the outliers. After that, the list is averaged and a preliminary guess is
@@ -130,7 +130,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     inversely change the value. More posts coming from that sub? We need the value
     to be higher. Fewer posts? We can relax the filter.
 
-    ¯\\_(ツ)_/¯
+    ¯\_(ツ)_/¯
     """
     # warning: black magic ahead.
     # Take the ten-post window, calculate the outliers, and remove them from the data,
@@ -162,7 +162,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
 
 def suggest_filter(payload: Payload) -> None:
-    """!suggest filter {subreddit} - create a guess for a post filter value.
+    """!suggest filter {subreddit} - create a guess for a post filter value
 
     Usage: @bubbles suggest filter r/thathappened
     """
