@@ -6,16 +6,16 @@ from utonium import PluginManager
 
 
 class MockClient:
-    def chat_postMessage(self, **kwargs: str) -> None:
+    def chat_postMessage(self, *args: Any, **kwargs: str) -> None:
         print(kwargs.get("text"))
 
-    def reactions_add(self, **kwargs: str) -> None:
+    def reactions_add(self, *args: Any, **kwargs: str) -> None:
         print(f"Reacting with {kwargs.get('name')}")
 
-    def files_upload(self, **kwargs: str) -> None:
+    def files_upload(self, *args: Any, **kwargs: str) -> None:
         print(f"Uploading a file called {kwargs.get('title')}")
 
-    def reactions_list(self) -> dict:
+    def reactions_list(self, *args: Any, **kwargs: Any) -> dict:
         """Triggers short circuit condition in Payload.get_reaction_message()."""
         return {
             "items": [
@@ -49,7 +49,7 @@ class InteractiveSession:
         self.message = plugin_manager.message_received
         self.reaction = plugin_manager.reaction_received
 
-    def say(self, message: str) -> dict:
+    def say(self, message: str, *args: Any, **kwargs: Any) -> dict:
         click.echo(message)
         return self.build_message_payload(message)
 
