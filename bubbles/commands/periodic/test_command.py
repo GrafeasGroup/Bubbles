@@ -2,7 +2,7 @@
 from bubbles.config import DEFAULT_CHANNEL, app
 
 
-def test_periodic_callback():
+def test_periodic_callback() -> None:
     app.client.chat_postMessage(
         text="Ay, it's a test command!",
         channel=DEFAULT_CHANNEL,

@@ -17,9 +17,7 @@ def _start_service(service: str, message_block: ContextStepMessage) -> None:
         ["sudo", "systemctl", "start", get_service_name(service)]
     )
     if systemctl_response.decode().strip() != "":
-        message_block.step_failed(
-            "Something went wrong and could not stop. Check logs for error."
-        )
+        message_block.step_failed("Something went wrong and could not stop. Check logs for error.")
         logging.error(systemctl_response)
     else:
         if verify_service_up(service):

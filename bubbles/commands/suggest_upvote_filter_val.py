@@ -1,9 +1,9 @@
+import math
 import re
 import statistics
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
-import math
 
 from utonium import Payload, Plugin
 
@@ -17,8 +17,7 @@ def avg(mylist: List) -> int:
 
 
 def balance_queue_modifier(count_per_day: float) -> float:
-    """
-    Create a modifier to use when setting filter values.
+    """Create a modifier to use when setting filter values.
 
     Because our queue is only ever 1k posts long (reddit limitation), then
     we never want any given sub to take up any more than 1/100th of the queue
@@ -42,11 +41,7 @@ def reject_outliers(upvote_list: List) -> List:
     multiplier = 0.7
     avg = sum(upvote_list) / len(upvote_list)
     s_dev = statistics.stdev(upvote_list)
-    return [
-        n
-        for n in upvote_list
-        if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)
-    ]
+    return [n for n in upvote_list if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)]
 
 
 def get_new_posts_from_sub(subreddit: str) -> [List, List]:
@@ -68,8 +63,7 @@ def get_min_max_karma(post_list: List) -> [int, int]:
 
 
 def get_time_diffs(post_list: List) -> [int, int]:
-    """
-    Return time differences in post time from now from a list of Reddit posts.
+    """Return time differences in post time from now from a list of Reddit posts.
 
     Starting from now, what is the time difference between the soonest post and
     the latest post?
@@ -80,14 +74,12 @@ def get_time_diffs(post_list: List) -> [int, int]:
     return min(time_diffs), max(time_diffs)
 
 
-def calculate_hours_and_minutes_timedelta_from_diffs(
-    start_diff: int, end_diff: int
-) -> [int, int]:
+def calculate_hours_and_minutes_timedelta_from_diffs(start_diff: int, end_diff: int) -> [int, int]:
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
 
-    earliest_post = datetime.fromtimestamp(current_time - start_diff)
-    latest_post = datetime.fromtimestamp(current_time - end_diff)
+    earliest_post = datetime.fromtimestamp(current_time - start_diff, tz=timezone.utc)
+    latest_post = datetime.fromtimestamp(current_time - end_diff, tz=timezone.utc)
     minutes = (earliest_post - latest_post).total_seconds() / 60
     hours = int(minutes / 60)
     formatted_minutes = round(minutes % 60)
@@ -101,7 +93,7 @@ def get_total_count_of_posts_per_day(post_list: List) -> int:
 
     for post in post_list:
         # count how many submissions we have per day
-        post_time = datetime.fromtimestamp(post.created_utc)
+        post_time = datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
         post_time_key = "{}-{}".format(post_time.month, post_time.day)
         if not submissions_per_day.get(post_time_key):
             submissions_per_day[post_time_key] = 1
@@ -124,14 +116,13 @@ def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
     return len(submissions_last_24h)
 
 
-def sigmoid(x):
+def sigmoid(x: float) -> float:
     # https://stackoverflow.com/a/3985630
     return 1 / (1 + math.exp(-x))
 
 
 def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
-    """
-    Create a guess of a filter value based on the votes and a modifier.
+    r"""Create a guess of a filter value based on the votes and a modifier.
 
     We start with a list of votes from a given window of any size, then cut out
     the outliers. After that, the list is averaged and a preliminary guess is
@@ -171,8 +162,7 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
 
 
 def suggest_filter(payload: Payload) -> None:
-    """
-    !suggest filter {subreddit} - create a guess for a post filter value.
+    """!suggest filter {subreddit} - create a guess for a post filter value
 
     Usage: @bubbles suggest filter r/thathappened
     """
@@ -201,12 +191,8 @@ def suggest_filter(payload: Payload) -> None:
     posts_per_day_count = get_total_count_of_posts_per_day(all_posts)
     posts_per_last_24h_count = get_total_count_of_posts_in_24_hours(all_posts)
 
-    suggested_value_window = estimate_filter_value(
-        upvote_list_window, posts_per_day_count
-    )
-    suggested_value_all = estimate_filter_value(
-        upvote_list_all_posts, posts_per_day_count
-    )
+    suggested_value_window = estimate_filter_value(upvote_list_window, posts_per_day_count)
+    suggested_value_all = estimate_filter_value(upvote_list_all_posts, posts_per_day_count)
 
     payload.say(
         f"Stats for r/{sub_name} over the last 10 submissions:\n"

@@ -1,12 +1,11 @@
 from utonium import Payload, Plugin
 
 from bubbles.config import blossom
-from bubbles.utils import parse_time_constraints, TimeParseError
+from bubbles.utils import TimeParseError, parse_time_constraints
 
 
 def subreddits(payload: Payload) -> None:
-    """
-    !subreddits [start time] [end time] - Get transcription counts by subreddit
+    """!subreddits [start time] [end time] - Get transcription counts by subreddit
     Usage: `!subreddits` or `!subreddits 2023-02-20 2023-02-27
     """
     parts = payload.get_text().split()
@@ -30,9 +29,7 @@ def subreddits(payload: Payload) -> None:
     )
 
     if not response.ok:
-        payload.say(
-            f"Sorry, but something went wrong. Please try again later.\n{response.text}"
-        )
+        payload.say(f"Sorry, but something went wrong. Please try again later.\n{response.text}")
         return
 
     data = response.json()

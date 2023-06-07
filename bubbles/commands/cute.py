@@ -1,4 +1,5 @@
 import random
+from typing import Any, Callable, Optional
 
 import requests
 from utonium import Payload, Plugin
@@ -15,10 +16,12 @@ bunny_api = "https://api.bunnies.io/v2/loop/random/?media=gif"
 duck_url = "https://random-d.uk/api/v1/random?type=png"
 lizard_api = "https://nekos.life/api/v2/img/lizard"
 shibe_api = "http://shibe.online/api/shibes"
-error_img = "https://www.pinclipart.com/picdir/middle/168-1688957_powerpuff-girls-cry-bubbles-clipart.png"
+error_img = (
+    "https://www.pinclipart.com/picdir/middle/168-1688957_powerpuff-girls-cry-bubbles-clipart.png"
+)
 
 
-def get_pic(func, extra_args=None):
+def get_pic(func: Callable, extra_args: Any = None) -> tuple[Optional[str], str]:
     try:
         if extra_args:
             return func(extra_args)
@@ -32,36 +35,36 @@ def get_pic(func, extra_args=None):
         )
 
 
-def get_cat():
+def get_cat() -> tuple[str, str]:
     # TODO: add picture bomb functionality
     return "cat", requests.get(cat_api.format(1)).json()[0]["url"]
 
 
-def get_cat_alt():
+def get_cat_alt() -> tuple[str, str]:
     return "lovely cat", requests.get(cat_alt_api).json()["file"]
 
 
-def get_dog():
+def get_dog() -> tuple[str, str]:
     return "dog", requests.get(dog_api).json()["message"]
 
 
-def get_bunny():
+def get_bunny() -> tuple[str, str]:
     return "bunny", requests.get(bunny_api).json()["media"]["gif"]
 
 
-def get_lizard():
+def get_lizard() -> tuple[str, str]:
     return "lizard", requests.get(lizard_api).json()["url"]
 
 
-def get_fox():
+def get_fox() -> tuple[str, str]:
     return "fox", requests.get(fox_api).json()["image"]
 
 
-def get_duck():
+def get_duck() -> tuple[str, str]:
     return "duck", requests.get(duck_url).json()["url"]
 
 
-def get_shibe():
+def get_shibe() -> tuple[str, str]:
     return "shibe", requests.get(shibe_api).json()[0]
 
 
@@ -77,9 +80,7 @@ animals = {
 
 
 def cute(payload: Payload) -> None:
-    """
-    !cute [cat/dog/bunny/lizard/fox/duck/shibe], or just !cute to get a random picture
-    """
+    """!cute [cat/dog/bunny/lizard/fox/duck/shibe], or just !cute to get a random picture."""
     args = payload.get_text().split()
 
     if args[0] in COMMAND_PREFIXES:

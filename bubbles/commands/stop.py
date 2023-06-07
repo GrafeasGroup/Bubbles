@@ -1,5 +1,5 @@
-import subprocess
 import logging
+import subprocess
 
 from utonium import Payload, Plugin
 from utonium.specialty_blocks import ContextStepMessage
@@ -17,9 +17,7 @@ def _stop_service(service: str, message_block: ContextStepMessage) -> None:
         ["sudo", "systemctl", "stop", get_service_name(service)]
     )
     if systemctl_response.decode().strip() != "":
-        message_block.step_failed(
-            "Something went wrong and could not stop. Check logs for error."
-        )
+        message_block.step_failed("Something went wrong and could not stop. Check logs for error.")
         logging.error(systemctl_response)
 
     message_block.step_succeeded()

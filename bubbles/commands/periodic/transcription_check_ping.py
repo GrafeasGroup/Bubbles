@@ -1,7 +1,7 @@
 import logging
 import random
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, TypedDict
 
@@ -151,12 +151,11 @@ def _get_check_link(message: Dict) -> Optional[str]:
 
 def _get_check_time(message: Dict) -> datetime:
     """Get the time of the check."""
-    return datetime.fromtimestamp(float(message["ts"]))
+    return datetime.fromtimestamp(float(message["ts"]), tz=timezone.utc)
 
 
 def _get_check_data(message: Dict) -> CheckData:
     """Extract the data from a given check message."""
-
     user = _get_check_username(message)
     status, mod = _get_check_status(message)
     link = _get_check_link(message)
@@ -219,7 +218,7 @@ def _aggregate_checks_by_mod(checks: List[CheckData]) -> Dict:
 
 def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
     """Aggregate the given checks by the elapsed time."""
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
     # Sort the checks by their time
     checks.sort(key=lambda x: x["time"], reverse=True)
 
@@ -297,7 +296,7 @@ def _get_check_reminder(aggregate: List) -> str:
 
 
 def transcription_check_ping_callback() -> None:
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
 
     start_time = now - CHECK_SEARCH_START_DELTA
     end_time = now - CHECK_SEARCH_END_DELTA

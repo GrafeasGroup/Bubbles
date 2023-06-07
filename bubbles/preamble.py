@@ -2,7 +2,6 @@
 # https://shiv.readthedocs.io/en/latest/#preamble
 import os
 import shutil
-
 from pathlib import Path
 
 # These variables are injected by shiv.bootstrap
@@ -22,7 +21,5 @@ if __name__ == "__main__":
     for path in cache_path.iterdir():
         if path.name.startswith(f"{name}_") and not path.name.endswith(build_id):
             shutil.rmtree(path)
-        if path.name.startswith(f".{name}") and not path.name.endswith(
-            f"{build_id}_lock"
-        ):
+        if path.name.startswith(f".{name}") and not path.name.endswith(f"{build_id}_lock"):
             os.remove(path)

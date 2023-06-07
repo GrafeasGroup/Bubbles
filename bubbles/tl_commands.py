@@ -2,7 +2,7 @@ import inspect
 import logging
 import sys
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # from bubbles.commands.periodic.activity_checkin import (
 #     check_in_with_people,
@@ -36,52 +36,52 @@ from bubbles.tl_utils import TLJob
 
 
 class WelcomePing(TLJob):
-    def job(self):
+    def job(self) -> None:
         welcome_ping_callback()
 
     class Meta:
-        start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
+        start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
         regular_interval = timedelta(hours=4)
 
 
 class GetInProgressPosts(TLJob):
-    def job(self):
+    def job(self) -> None:
         get_in_progress_callback()
 
     class Meta:
-        start_interval = TRIGGER_4_HOURS_AGO - datetime.now()
+        start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
         regular_interval = timedelta(hours=4)
 
 
 class CheckForBanbots(TLJob):
-    def job(self):
+    def job(self) -> None:
         banbot_check_callback()
 
     class Meta:
-        start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
+        start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
         regular_interval = timedelta(hours=12)
 
 
 class WelcomeVolunteersInProgress(TLJob):
-    def job(self):
+    def job(self) -> None:
         periodic_ping_in_progress_callback()
 
     class Meta:
-        start_interval = TRIGGER_YESTERDAY - datetime.now()
+        start_interval = TRIGGER_YESTERDAY - datetime.now(tz=timezone.utc)
         regular_interval = timedelta(days=1)
 
 
 class TranscriptionCheckPing(TLJob):
-    def job(self):
+    def job(self) -> None:
         transcription_check_ping_callback()
 
     class Meta:
-        start_interval = TRIGGER_12_HOURS_AGO - datetime.now()
+        start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
         regular_interval = timedelta(hours=12)
 
 
 class CheckModmail(TLJob):
-    def job(self):
+    def job(self) -> None:
         try:
             modmail_callback()
         except Exception as e:
@@ -94,7 +94,7 @@ class CheckModmail(TLJob):
 
 
 class RuleMonitoring(TLJob):
-    def job(self):
+    def job(self) -> None:
         try:
             rule_monitoring_callback()
         except Exception as e:

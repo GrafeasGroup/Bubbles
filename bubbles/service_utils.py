@@ -1,5 +1,6 @@
 import subprocess
 import time
+from typing import Callable
 
 SERVICES = ["tor", "tor_ocr", "tor_archivist", "blossom", "all", "buttercup"]
 # special cases
@@ -16,12 +17,12 @@ def get_service_name(service: str) -> str:
     return service
 
 
-def say_code(say, message: bytes) -> None:
+def say_code(say: Callable[[str], None], message: bytes) -> None:
     """Format a byte message as code and send it."""
     say(f"```{message.decode().strip()}```")
 
 
-def verify_service_up(service) -> bool:
+def verify_service_up(service: str) -> bool:
     """Periodically check that the given system is still up.
 
     :returns: True, if the service is still up, else False.
@@ -29,9 +30,7 @@ def verify_service_up(service) -> bool:
     try:
         for attempt in range(PROCESS_CHECK_COUNT):
             time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", get_service_name(service)]
-            )
+            subprocess.check_call(["systemctl", "is-active", "--quiet", get_service_name(service)])
         return True
     except subprocess.CalledProcessError:
         return False

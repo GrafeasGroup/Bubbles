@@ -2,16 +2,13 @@ from bubbles.config import app, reddit, rooms_list
 
 
 def banbot_check_callback() -> None:
-    subreddits = (
-        reddit.subreddit("TranscribersOfReddit")
-        .wiki["subreddits"]
-        .content_md.splitlines()
-    )
+    subreddits = reddit.subreddit("TranscribersOfReddit").wiki["subreddits"].content_md.splitlines()
 
     # make sure to add names in lowercase
     known_banbots = ["saferbot", "misandrybot", "safestbot"]
 
-    # List of subreddits with banbots that have been "authorized" after discussion with their mod team
+    # List of subreddits with banbots that have been "authorized"
+    # after discussion with their mod team
     subreddit_exceptions = {
         "BAME_UK": ["safestbot"],
         "Feminism": ["safestbot"],
@@ -28,7 +25,7 @@ def banbot_check_callback() -> None:
     for sub in subreddits:
         mods = [mod.name.lower() for mod in reddit.subreddit(sub).moderator()]
         for banbot in known_banbots:
-            if banbot in mods and not banbot in subreddit_exceptions.get(sub, []):
+            if banbot in mods and banbot not in subreddit_exceptions.get(sub, []):
                 sublists[banbot].append(sub)
 
     message = (

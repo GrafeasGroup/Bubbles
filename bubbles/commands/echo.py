@@ -9,7 +9,7 @@ SLACK_TEXT_EXTRACTOR = re.compile(
 )
 
 
-def clean_links(text):
+def clean_links(text: str) -> str:
     results = [_ for _ in re.finditer(SLACK_TEXT_EXTRACTOR, text)]
     # we'll replace things going backwards so that we don't mess up indexing
     results.reverse()
@@ -19,7 +19,7 @@ def clean_links(text):
     return text
 
 
-def echo(payload: Payload):
+def echo(payload: Payload) -> None:
     """Repeats back whatever you pass in. Mostly for debugging."""
     text = clean_links(payload.cleaned_text)
     payload.say(f"```{' '.join(text.split()[1:])}```")

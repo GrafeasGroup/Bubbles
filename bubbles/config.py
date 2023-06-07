@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 from unittest import mock
@@ -15,7 +15,6 @@ from praw import Reddit  # type: ignore
 from shiv.bootstrap import current_zipfile
 from slack_bolt import App
 from tinydb import TinyDB
-
 
 log = logging.getLogger(__name__)
 
@@ -112,18 +111,12 @@ users = app.client.users_list()
 for user in users["members"]:
     if not user["deleted"]:
         # Extract the display name if available
-        name = (
-            user.get("profile", {}).get("display_name")
-            or user.get("real_name")
-            or user["id"]
-        )
+        name = user.get("profile", {}).get("display_name") or user.get("real_name") or user["id"]
         users_list[user["id"]] = name
         users_list[name] = user["id"]
         users_list["ids_only"].append(user["id"])
 
-users_list[
-    "bubbles_console"
-] = "bubbles_console"  # support for running commands through CLI
+users_list["bubbles_console"] = "bubbles_console"  # support for running commands through CLI
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}
@@ -149,4 +142,4 @@ mpl.rcParams["figure.figsize"] = [20, 10]
 db = TinyDB(BASE_DIR / "db.json")
 
 
-TIME_STARTED = datetime.now()
+TIME_STARTED = datetime.now(tz=timezone.utc)

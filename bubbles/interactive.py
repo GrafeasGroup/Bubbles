@@ -1,20 +1,21 @@
 import random
+from typing import Any
 
 import click
 from utonium import PluginManager
 
 
 class MockClient:
-    def chat_postMessage(self, *args, **kwargs) -> None:
+    def chat_postMessage(self, *args: Any, **kwargs: str) -> None:
         print(kwargs.get("text"))
 
-    def reactions_add(self, *args, **kwargs) -> None:
+    def reactions_add(self, *args: Any, **kwargs: str) -> None:
         print(f"Reacting with {kwargs.get('name')}")
 
-    def files_upload(self, *args, **kwargs) -> None:
+    def files_upload(self, *args: Any, **kwargs: str) -> None:
         print(f"Uploading a file called {kwargs.get('title')}")
 
-    def reactions_list(self, *args, **kwargs) -> dict:
+    def reactions_list(self, *args: Any, **kwargs: Any) -> dict:
         """Triggers short circuit condition in Payload.get_reaction_message()."""
         return {
             "items": [
@@ -29,9 +30,7 @@ class MockClient:
                         "ts": "1661965345.288219",
                         "team": "GFEDCBA",
                         "blocks": [...],
-                        "reactions": [
-                            {"name": "upvote", "users": ["console"], "count": 1}
-                        ],
+                        "reactions": [{"name": "upvote", "users": ["console"], "count": 1}],
                         "permalink": "https://...",
                     },
                 }
@@ -50,7 +49,7 @@ class InteractiveSession:
         self.message = plugin_manager.message_received
         self.reaction = plugin_manager.reaction_received
 
-    def say(self, message, *args, **kwargs):
+    def say(self, message: str, *args: Any, **kwargs: Any) -> dict:
         click.echo(message)
         return self.build_message_payload(message)
 
@@ -61,12 +60,12 @@ class InteractiveSession:
             "ts": str(random.randint(0, 9999) + random.random()),
         }
 
-    def build_message_payload(self, text) -> dict:
+    def build_message_payload(self, text: str) -> dict:
         resp = self._base_payload()
         resp |= {"type": "message", "text": text, "item_user": "console"}
         return resp
 
-    def build_fake_slack_response(self, payload: dict, context=None) -> dict:
+    def build_fake_slack_response(self, payload: dict, context: Any = None) -> dict:
         context = context or {}
         return {
             "payload": payload,

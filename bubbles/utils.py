@@ -1,15 +1,13 @@
+import re
 import subprocess
 from datetime import datetime, timedelta
-from dateutil import parser
 from typing import List, Optional
-import re
 
 # First an amount and then a unit
 import pytz as pytz
+from dateutil import parser
 
-relative_time_regex = re.compile(
-    r"^(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>\w*)\s*(?:ago\s*)?$"
-)
+relative_time_regex = re.compile(r"^(?P<amount>\d+(?:\.\d+)?)\s*(?P<unit>\w*)\s*(?:ago\s*)?$")
 # The different time units
 unit_regexes: dict[str, re.Pattern] = {
     "seconds": re.compile(r"^s(?:ec(?:ond)?s?)?$"),
@@ -34,6 +32,7 @@ class TimeParseError(RuntimeError):
 
 
 def get_branch_head() -> str:
+    """Get the name of the default head branch."""
     # this returns "origin/main" or "origin/master" - pull out just the last bit
     return (
         subprocess.check_output("git rev-parse --abbrev-ref origin/HEAD".split())
@@ -44,8 +43,7 @@ def get_branch_head() -> str:
 
 
 def break_large_message(text: str, break_at: int = 4000) -> List:
-    """
-    Slack messages must be less than 4000 characters.
+    """Slack messages must be less than 4000 characters.
 
     This breaks large strings into a list of sections that are each
     less than 4000 characters.

@@ -24,9 +24,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
     def check_for_new_version() -> dict:
         StatusMessage.add_new_context_step("Checking for new release...")
 
-        output = subprocess.check_output(
-            shlex.split(f"{PYTHON_VERSION} {service}.pyz --version")
-        )
+        output = subprocess.check_output(shlex.split(f"{PYTHON_VERSION} {service}.pyz --version"))
         # starting from something like b'BubblesV2, version ?????\n'
         current_version = output.decode().strip().split(", ")[-1].split()[-1]
         github_response = requests.get(
@@ -43,7 +41,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
         return release_data
 
-    def download_new_release(release_data: dict):
+    def download_new_release(release_data: dict) -> None:
         StatusMessage.add_new_context_step("Downloading new release...")
 
         url = release_data["assets"][0]["browser_download_url"]
@@ -65,7 +63,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
         StatusMessage.step_succeeded()
         return backup_archive, new_archive
 
-    def send_error_end(exception=None):
+    def send_error_end(exception: RuntimeError = None) -> None:
         message = "Hit an error I couldn't recover from. Check logs for more context."
         if exception:
             if exception.args:
@@ -73,7 +71,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
         StatusMessage.step_failed(end_text=message, error=True)
 
-    def replace_running_service(new_archive):
+    def replace_running_service(new_archive: str) -> None:
         StatusMessage.add_new_context_step(f"Updating {service}...")
 
         # copy the new archive on top of the running one
@@ -86,14 +84,12 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
     def _restart_service() -> str:
         return (
-            subprocess.check_output(
-                ["sudo", "systemctl", "restart", get_service_name(service)]
-            )
+            subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(service)])
             .decode()
             .strip()
         )
 
-    def revert_and_recover():
+    def revert_and_recover() -> None:
         StatusMessage.add_new_context_step(f"Reverting {service}...")
 
         with open(service_path / f"{service}.pyz", "wb") as current, open(
@@ -107,15 +103,13 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
         StatusMessage.step_succeeded()
 
-    def restart_service():
+    def restart_service() -> None:
         StatusMessage.add_new_context_step(f"Restarting {service}...")
         systemctl_response = _restart_service()
         if systemctl_response != "":
             StatusMessage.step_failed()
             revert_and_recover()
-            raise DeployError(
-                "Could not deploy due to system error. Reverted to previous release."
-            )
+            raise DeployError("Could not deploy due to system error. Reverted to previous release.")
 
         if verify_service_up(service):
             # If the service we're deploying IS NOT blossom, this will print.
@@ -128,7 +122,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
                 " Reverted to previous release."
             )
 
-    def migrate():
+    def migrate() -> None:
         # Only for Blossom.
         StatusMessage.add_new_context_step(f"Running migrations...")
         try:
@@ -138,16 +132,14 @@ def _deploy_service(service: str, payload: Payload) -> None:
         except subprocess.CalledProcessError:
             StatusMessage.step_failed()
             revert_and_recover()
-            raise DeployError(
-                "Could not perform database migration! Unable to proceed!"
-            )
+            raise DeployError("Could not perform database migration! Unable to proceed!")
         StatusMessage.step_succeeded()
 
-    def stop_all_tor_bots_but_blossom():
+    def stop_all_tor_bots_but_blossom() -> None:
         for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _stop_service(bot, message_block=StatusMessage)
 
-    def start_all_tor_bots_but_blossom():
+    def start_all_tor_bots_but_blossom() -> None:
         for bot in ["tor", "tor_ocr", "tor_archivist"]:
             _start_service(bot, message_block=StatusMessage)
 
@@ -189,9 +181,7 @@ def _deploy_service(service: str, payload: Payload) -> None:
 
 
 def deploy(payload: Payload) -> None:
-    """
-    !deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!
-    """
+    """!deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!."""
     args = payload.get_text().split()
 
     if len(args) > 1:

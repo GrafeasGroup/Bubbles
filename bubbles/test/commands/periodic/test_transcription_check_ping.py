@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 from unittest.mock import patch
 
@@ -39,7 +39,8 @@ EXAMPLE_NEW_CHECK = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "Transcription check for *<https://reddit.com/u/user123?sort=new|u/user123>* (6 Γ):\n"
+                "text": "Transcription check for "
+                "*<https://reddit.com/u/user123?sort=new|u/user123>* (6 Γ):\n"
                 "<https://example.com|ToR Post> | <https://example.com|Partner Post> "
                 "| <https://example.com|Transcription>\n"
                 "Trigger: Automatic (100.0%)\n"
@@ -262,7 +263,7 @@ def test_aggregate_checks_by_mod() -> None:
 
 def test_aggregate_checks_by_time() -> None:
     """Test whether the checks are aggregated correctly."""
-    now = datetime.now()
+    now = datetime.now(tz=timezone.utc)
 
     checks: List[CheckData] = [
         {
