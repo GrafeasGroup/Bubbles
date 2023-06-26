@@ -4,8 +4,10 @@ from bubbles.commands.periodic.transcription_check_ping import transcription_che
 
 
 def check_ping(payload: Payload) -> None:
-    """!check_ping - Manually trigger a transcription check ping."""
-    transcription_check_ping(payload.get_channel())
+    """!check_ping [user] - Manually trigger a transcription check ping."""
+    tokens = payload.cleaned_text.split()
+
+    transcription_check_ping(payload.get_channel(), user_filter=tokens.get(1))
 
 
 PLUGIN = Plugin(func=check_ping, regex=r"^checkping")

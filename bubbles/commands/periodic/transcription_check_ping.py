@@ -297,10 +297,13 @@ def _get_check_reminder(aggregate: List) -> str:
     return reminder
 
 
-def transcription_check_ping(channel: str) -> Optional[SlackResponse]:
+def transcription_check_ping(
+    channel: str, user_filter: Optional[str] = None
+) -> Optional[SlackResponse]:
     """Send a reminder about open transcription checks.
 
     :param channel: The channel to send the reminder into.
+    :param user_filter: Only include checks of the given user (case-insensitive).
     :returns: The Slack response of sending the message, or None if something went wrong.
     """
     now = datetime.now(tz=timezone.utc)
@@ -321,6 +324,16 @@ def transcription_check_ping(channel: str) -> Optional[SlackResponse]:
     # Get the reminder for the checks
     messages = messages_response["messages"]
     checks = _extract_open_checks(messages)
+
+    # Only consider checks for the given user, if specified
+    if user_filter is not None:
+
+        def matches_filter(check: CheckData) -> bool:
+            check_user = check["user"]
+            return check_user and user_filter.lower() == check_user.lower()
+
+        checks = [check for check in checks if matches_filter(check)]
+
     aggregate = _aggregate_checks_by_time(checks)
     reminder = _get_check_reminder(aggregate)
 
