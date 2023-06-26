@@ -269,9 +269,12 @@ def _get_check_fragment(check: CheckData) -> str:
     return f"<{link}|u/{user}>" if link else f"{user} (LINK NOT FOUND)"
 
 
-def _get_check_reminder(aggregate: List) -> str:
+def _get_check_reminder(aggregate: List, user_filter: Optional[str] = None) -> str:
     """Get the reminder text for the checks."""
-    reminder = "*Pending Transcription Checks:*\n\n"
+    if user_filter is not None:
+        reminder = f"*Pending Transcription Checks for u/{user_filter}:*\n\n"
+    else:
+        reminder = "*Pending Transcription Checks:*\n\n"
 
     for time_str, mod_aggregate in aggregate:
         reminder += f"*{time_str}*:\n"
@@ -339,7 +342,7 @@ def transcription_check_ping(
         checks = [check for check in checks if matches_filter(check)]
 
     aggregate = _aggregate_checks_by_time(checks)
-    reminder = _get_check_reminder(aggregate)
+    reminder = _get_check_reminder(aggregate, user_filter=user_filter)
 
     # Post the reminder in Slack
     reminder_response = app.client.chat_postMessage(
