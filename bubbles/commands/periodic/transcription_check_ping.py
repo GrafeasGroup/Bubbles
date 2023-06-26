@@ -272,7 +272,10 @@ def _get_check_fragment(check: CheckData) -> str:
 def _get_check_reminder(aggregate: List, user_filter: Optional[str] = None) -> str:
     """Get the reminder text for the checks."""
     if user_filter is not None:
-        reminder = f"*Pending Transcription Checks for u/{user_filter}:*\n\n"
+        reminder = (
+            f"*Pending Transcription Checks for "
+            f"*<https://reddit.com/u/{user_filter}|u/{user_filter}>:*\n\n"
+        )
     else:
         reminder = "*Pending Transcription Checks:*\n\n"
 
