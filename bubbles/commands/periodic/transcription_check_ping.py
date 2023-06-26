@@ -5,6 +5,8 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, TypedDict
 
+from slack_sdk.web import SlackResponse
+
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.periodic import (
     TRANSCRIPTION_CHECK_CHANNEL,
@@ -267,9 +269,15 @@ def _get_check_fragment(check: CheckData) -> str:
     return f"<{link}|u/{user}>" if link else f"{user} (LINK NOT FOUND)"
 
 
-def _get_check_reminder(aggregate: List) -> str:
+def _get_check_reminder(aggregate: List, user_filter: Optional[str] = None) -> str:
     """Get the reminder text for the checks."""
-    reminder = "*Pending Transcription Checks:*\n\n"
+    if user_filter is not None:
+        reminder = (
+            f"*Pending Transcription Checks for "
+            f"*<https://reddit.com/u/{user_filter}|u/{user_filter}>:*\n\n"
+        )
+    else:
+        reminder = "*Pending Transcription Checks:*\n\n"
 
     for time_str, mod_aggregate in aggregate:
         reminder += f"*{time_str}*:\n"
@@ -295,10 +303,22 @@ def _get_check_reminder(aggregate: List) -> str:
     return reminder
 
 
-def transcription_check_ping_callback() -> None:
+def transcription_check_ping(
+    channel: str,
+    user_filter: Optional[str] = None,
+    start_now: bool = False,
+) -> Optional[SlackResponse]:
+    """Send a reminder about open transcription checks.
+
+    :param channel: The channel to send the reminder into.
+    :param user_filter: Only include checks of the given user (case-insensitive).
+    :param start_now: If set to true, checks will be included in the reminders immediately.
+    Otherwise, they are only included after a delay.
+    :returns: The Slack response of sending the message, or None if something went wrong.
+    """
     now = datetime.now(tz=timezone.utc)
 
-    start_time = now - CHECK_SEARCH_START_DELTA
+    start_time = now if start_now else now - CHECK_SEARCH_START_DELTA
     end_time = now - CHECK_SEARCH_END_DELTA
 
     messages_response = app.client.conversations_history(
@@ -309,17 +329,27 @@ def transcription_check_ping_callback() -> None:
     )
     if not messages_response.get("ok"):
         logging.error(f"Failed to get check messages!\n{messages_response}")
-        return
+        return None
 
     # Get the reminder for the checks
     messages = messages_response["messages"]
     checks = _extract_open_checks(messages)
+
+    # Only consider checks for the given user, if specified
+    if user_filter is not None:
+
+        def matches_filter(check: CheckData) -> bool:
+            check_user = check["user"]
+            return check_user and user_filter.lower() == check_user.lower()
+
+        checks = [check for check in checks if matches_filter(check)]
+
     aggregate = _aggregate_checks_by_time(checks)
-    reminder = _get_check_reminder(aggregate)
+    reminder = _get_check_reminder(aggregate, user_filter=user_filter)
 
     # Post the reminder in Slack
     reminder_response = app.client.chat_postMessage(
-        channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
+        channel=channel,
         link_names=1,
         text=reminder,
         unfurl_links=False,
@@ -328,3 +358,9 @@ def transcription_check_ping_callback() -> None:
     )
     if not reminder_response.get("ok"):
         logging.error(f"Failed to send reminder message!\n{reminder_response}")
+
+    return reminder_response
+
+
+def transcription_check_ping_callback() -> None:
+    transcription_check_ping(channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL])
