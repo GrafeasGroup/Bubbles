@@ -218,7 +218,7 @@ def _aggregate_checks_by_mod(checks: List[CheckData]) -> Dict:
     return aggregate
 
 
-def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
+def _aggregate_checks_by_time(checks: List[CheckData], start_now: bool = False) -> List:
     """Aggregate the given checks by the elapsed time."""
     now = datetime.now(tz=timezone.utc)
     # Sort the checks by their time
@@ -228,8 +228,10 @@ def _aggregate_checks_by_time(checks: List[CheckData]) -> List:
 
     index = 0
 
+    check_times = [(timedelta(hours=12), "0-12 hours"), *CHECK_TIMES] if start_now else CHECK_TIMES
+
     # Aggregate the checks by their time
-    for delta, time_str in CHECK_TIMES:
+    for delta, time_str in check_times:
         time_checks = []
 
         if index >= len(checks):
@@ -274,7 +276,7 @@ def _get_check_reminder(aggregate: List, user_filter: Optional[str] = None) -> s
     if user_filter is not None:
         reminder = (
             f"*Pending Transcription Checks for "
-            f"*<https://reddit.com/u/{user_filter}|u/{user_filter}>:*\n\n"
+            f"<https://reddit.com/u/{user_filter}|u/{user_filter}>:*\n\n"
         )
     else:
         reminder = "*Pending Transcription Checks:*\n\n"
@@ -344,7 +346,7 @@ def transcription_check_ping(
 
         checks = [check for check in checks if matches_filter(check)]
 
-    aggregate = _aggregate_checks_by_time(checks)
+    aggregate = _aggregate_checks_by_time(checks, start_now=start_now)
     reminder = _get_check_reminder(aggregate, user_filter=user_filter)
 
     # Post the reminder in Slack
