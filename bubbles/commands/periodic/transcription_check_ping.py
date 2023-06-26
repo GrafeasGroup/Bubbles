@@ -5,6 +5,8 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple, TypedDict
 
+from slack_sdk.web import SlackResponse
+
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.periodic import (
     TRANSCRIPTION_CHECK_CHANNEL,
@@ -295,7 +297,12 @@ def _get_check_reminder(aggregate: List) -> str:
     return reminder
 
 
-def transcription_check_ping_callback() -> None:
+def transcription_check_ping(channel: str) -> Optional[SlackResponse]:
+    """Send a reminder about open transcription checks.
+
+    :param channel: The channel to send the reminder into.
+    :returns: The Slack response of sending the message, or None if something went wrong.
+    """
     now = datetime.now(tz=timezone.utc)
 
     start_time = now - CHECK_SEARCH_START_DELTA
@@ -309,7 +316,7 @@ def transcription_check_ping_callback() -> None:
     )
     if not messages_response.get("ok"):
         logging.error(f"Failed to get check messages!\n{messages_response}")
-        return
+        return None
 
     # Get the reminder for the checks
     messages = messages_response["messages"]
@@ -319,7 +326,7 @@ def transcription_check_ping_callback() -> None:
 
     # Post the reminder in Slack
     reminder_response = app.client.chat_postMessage(
-        channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL],
+        channel=channel,
         link_names=1,
         text=reminder,
         unfurl_links=False,
@@ -328,3 +335,9 @@ def transcription_check_ping_callback() -> None:
     )
     if not reminder_response.get("ok"):
         logging.error(f"Failed to send reminder message!\n{reminder_response}")
+
+    return reminder_response
+
+
+def transcription_check_ping_callback() -> None:
+    transcription_check_ping(channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL])
