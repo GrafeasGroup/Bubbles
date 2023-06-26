@@ -1,7 +1,7 @@
 import re
 import subprocess
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Match
 
 # First an amount and then a unit
 import pytz as pytz
@@ -19,6 +19,18 @@ unit_regexes: dict[str, re.Pattern] = {
     "months": re.compile(r"^m(?:onths?)?$"),
     "years": re.compile(r"^y(?:ears?)?$"),
 }
+
+# find a link in the slack format, then strip out the text at the end.
+# they're formatted like this: <https://example.com|Text!>
+SLACK_TEXT_EXTRACTOR = re.compile(
+    # Allow long lines for the regex
+    # flake8: noqa: E501
+    r"<(?P<url>(?:https?://)?[\w-]+(?:\.[\w-]+)+\.?(?::\d+)?(?:/[^\s|]*)?)(?:\|(?P<text>[^>]+))?>"
+)
+
+BOLD_REGEX = re.compile(r"\*(?P<content>[^*]+)\*")
+
+USERNAME_REGEX = re.compile(r"(?:/?u/)?(?P<username>\S+)")
 
 
 class TimeParseError(RuntimeError):
@@ -163,3 +175,53 @@ def parse_time_constraints(
     time_str = f"from {after_time_str} until {before_time_str}"
 
     return after_time, before_time, time_str
+
+
+def extract_text_from_link(text: str) -> str:
+    """Strip link out of auto-generated slack fancy URLS and return the text only."""
+    results = [_ for _ in re.finditer(SLACK_TEXT_EXTRACTOR, text)]
+    # we'll replace things going backwards so that we don't mess up indexing
+    results.reverse()
+
+    def extract_text(mx: Match) -> str:
+        return mx["text"] or mx["url"]
+
+    for match in results:
+        text = text[: match.start()] + extract_text(match) + text[match.end() :]
+    return text
+
+
+def extract_url_from_link(text: str) -> str:
+    """Strip link out of auto-generated slack fancy URLS and return the link only."""
+    results = [_ for _ in re.finditer(SLACK_TEXT_EXTRACTOR, text)]
+    # we'll replace things going backwards so that we don't mess up indexing
+    results.reverse()
+
+    def extract_link(m: Match) -> str:
+        return m["url"]
+
+    for match in results:
+        text = text[: match.start()] + extract_link(match) + text[match.end() :]
+    return text
+
+
+def parse_user(text: str) -> Optional[str]:
+    """Parse a username argument of a Slack command to a user object.
+
+    This takes care of link formatting, bold formatting and the u/ prefix.
+    Returns `None` if the user couldn't be found.
+    """
+    # Remove link formatting
+    username = extract_text_from_link(text)
+
+    # Remove bold formatting
+    bold_match = BOLD_REGEX.match(username)
+    if bold_match:
+        username = bold_match.group("content")
+
+    # Remove u/ prefix
+    prefix_match = USERNAME_REGEX.match(username)
+    if prefix_match:
+        username = prefix_match.group("username")
+
+    return username
