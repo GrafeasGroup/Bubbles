@@ -365,4 +365,4 @@ def transcription_check_ping(
 
 
 def transcription_check_ping_callback() -> None:
-    transcription_check_ping(channel=rooms_list[TRANSCRIPTION_CHECK_CHANNEL])
+    transcription_check_ping(channel=rooms_list[TRANSCRIPTION_CHECK_PING_CHANNEL])
