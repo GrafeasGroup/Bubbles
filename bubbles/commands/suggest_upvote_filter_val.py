@@ -109,7 +109,6 @@ def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
     current_time = time.time()
 
     for post in post_list:
-
         if timedelta(seconds=current_time - post.created_utc) < timedelta(days=1):
             submissions_last_24h.append(post)
 

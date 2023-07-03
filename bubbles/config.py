@@ -92,6 +92,7 @@ if ENABLE_BLOSSOM:
     )
     print("blossom loaded!")
 else:
+    logging.warning("Blossom is disabled, set ENABLE_BLOSSOM env variable to true")
     blossom = mock.MagicMock()
 
 # There is an overloaded __get__ in the underlying Bolt app, so this type

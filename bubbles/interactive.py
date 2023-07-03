@@ -1,7 +1,8 @@
 import random
-from typing import Any
+from typing import Any, Optional
 
 import click
+import matplotlib.pyplot as plt
 from utonium import PluginManager
 
 
@@ -53,8 +54,32 @@ class InteractiveSession:
         click.echo(message)
         return self.build_message_payload(message)
 
-    def _base_payload(self) -> dict:
+    def say(self, message: str, figures: Optional[list[plt.Figure]] = None) -> None:
+        print_msg = message
+
+        if figures and len(figures) > 0:
+            # Save the figures and add them to the message
+            attachments = []
+            for fig in figures:
+                # Save the figure to a file in the temp folder
+                file = NamedTemporaryFile(delete=False, suffix=".png")
+                fig.savefig(file, format="png")
+                attachments.append(file)
+                plt.close(fig)
+                file.close()
+
+            # Generate (in most cases) clickable links to the files
+            attachment_links = ", ".join(
+                [f"file://{attachment.name}" for attachment in attachments]
+            )
+            print_msg += f"\n[{len(attachments)} Attachment(s): {attachment_links}]"
+
+        print(print_msg)
+        return self.build_payload(message)
+
+    def build_payload(self, text: str) -> dict:
         return {
+            "text": text,
             "user": "console",
             "channel": "console",
             "ts": str(random.randint(0, 9999) + random.random()),
