@@ -1,19 +1,15 @@
-from typing import Dict
+from slack_sdk.web import SlackResponse
+from utonium import Payload
 
 from bubbles.config import rooms_list
 
 
-def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
-    """
-    Function that fetches the number of messages required by the input argument.
-    
-    
-    """
-    client = payload["extras"]["client"]
+def fetch_messages(payload: Payload, input_value: int, channel_name: str) -> SlackResponse:
+    """Function that fetches the number of messages required by the input argument."""
     channel = rooms_list[channel_name]
     if input_value > 1000:
-        messages = client.conversations_history(
-            channel=channel, oldest=input_value, inclusive=True
+        messages = payload.client.conversations_history(
+            channel=channel, oldest=str(input_value), inclusive=True
         )
         print("Has this message more data?" + str(messages["has_more"]))
         is_there_other_data = messages["has_more"]
@@ -24,7 +20,7 @@ def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
         print(last_message)
         input_value = last_message["ts"]
         while is_there_other_data:
-            newMessages = client.conversations_history(
+            newMessages = payload.client.conversations_history(
                 channel=channel, oldest=input_value, inclusive=True
             )
             # print("---" + str(type(messages["messages"])))
@@ -44,5 +40,5 @@ def fetch_messages(payload: Dict, input_value: int, channel_name: str) -> Dict:
                 input_value = last_message["ts"]
             # print("Has this new message more data?" + str(is_there_other_data))
     else:
-        messages = client.conversations_history(channel=channel, limit=input_value)
+        messages = payload.client.conversations_history(channel=channel, limit=input_value)
     return messages

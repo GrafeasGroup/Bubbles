@@ -1,27 +1,29 @@
-import warnings
 import re
-from typing import Dict
+import warnings
+
+from utonium import Payload, Plugin
 
 from bubbles.commands.helper_functions_history.extract_author import extract_author
 from bubbles.commands.helper_functions_history.extract_date_or_number import (
     extract_date_or_number,
 )
 from bubbles.commands.helper_functions_history.fetch_messages import fetch_messages
-from bubbles.config import PluginManager
 
 # get rid of matplotlib's complaining
 warnings.filterwarnings("ignore")
 
 
-def plot_comments_historylist(payload: Dict) -> None:
-    # Syntax: !historylist [number of posts]
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
-    # client = payload['extras']['client']
+def plot_comments_historylist(payload: Payload) -> None:
+    """!historylist [number of posts] - plot new volunteers by who welcomed them.
+
+    `number of posts` must be an integer between 1 and 1000 inclusive.
+    """
+    args = payload.get_text().split()
+    # client = payload.client
     print(args)
     if len(args) == 2:
         if args[1] in ["-h", "--help", "-H", "help"]:
-            say(
+            payload.say(
                 "`!historylist [number of posts]` shows the number of new comments"
                 " in #new-volunteers in function of the mod having welcomed them."
                 " `number of posts` must be an integer between 1 and 1000 inclusive."
@@ -30,9 +32,8 @@ def plot_comments_historylist(payload: Dict) -> None:
         else:
             input_value = extract_date_or_number(args[1])
     elif len(args) > 3:
-        say(
-            "ERROR! Too many arguments given as inputs! Syntax: `!historylist [number"
-            " of posts]`"
+        payload.say(
+            "ERROR! Too many arguments given as inputs! Syntax: `!historylist [number" " of posts]`"
         )
         return
 
@@ -53,26 +54,18 @@ def plot_comments_historylist(payload: Dict) -> None:
         welcomed_username = welcomed_username.split("|")[-1]
         author = extract_author(message, GOOD_REACTIONS)
         count_reactions_people[author] = count_reactions_people.get(author, 0) + 1
-        list_volunteers_per_person[author] = list_volunteers_per_person.get(
-            author, []
-        ) + [welcomed_username]
+        list_volunteers_per_person[author] = list_volunteers_per_person.get(author, []) + [
+            welcomed_username
+        ]
     count_reactions_people = dict(sorted(count_reactions_people.items()))
-    say(
+    payload.say(
         f"{str(len(response['messages']))} messages retrieved."
         f" Numerical data: {count_reactions_people}"
     )
 
     keys_dict = list(sorted(list_volunteers_per_person.keys()))
     for key in keys_dict:
-        say(f"Volunteers welcomed by {key}: {list_volunteers_per_person[key]}")
+        payload.say(f"Volunteers welcomed by {key}: {list_volunteers_per_person[key]}")
 
 
-PluginManager.register_plugin(
-    plot_comments_historylist,
-    r"(?!.*who)listmodsTEST ([0-9 ]+)?",
-    help=(
-        "!historylist [number of posts] - shows the number of new comments in"
-        " #new-volunteers in function of the mod having welcomed them. `number"
-        "of posts` must be an integer between 1 and 1000 inclusive."
-    ),
-)
+PLUGIN = Plugin(func=plot_comments_historylist, regex=r"^listmodsTEST ([0-9 ]+)?")

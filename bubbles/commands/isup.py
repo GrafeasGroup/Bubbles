@@ -1,29 +1,28 @@
 import subprocess
 
-from bubbles.commands import SERVICES, get_service_name
-from bubbles.config import PluginManager
+from utonium import Payload, Plugin
+
+from bubbles.service_utils import SERVICES, get_service_name
 
 
-def isup(payload):
-    say = payload["extras"]["say"]
-    text = payload.get("cleaned_text").split()
+def isup(payload: Payload) -> None:
+    """!isup [service_name] - is the service currently running?"""
+    text = payload.cleaned_text.split()
     if len(text) == 1:
-        say("What service should I be checking on?")
-        say("Valid choices: {}".format(", ".join(SERVICES)))
+        payload.say("What service should I be checking on?")
+        payload.say("Valid choices: {}".format(", ".join(SERVICES)))
         return
 
-    def _check(name):
+    def _check(name: str) -> None:
         try:
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", get_service_name(name)]
-            )
-            say(f"Yep, {name} is up!")
+            subprocess.check_call(["systemctl", "is-active", "--quiet", get_service_name(name)])
+            payload.say(f"Yep, {name} is up!")
         except subprocess.CalledProcessError:
-            say(f"...something might be wrong; {name} doesn't look like it's up.")
+            payload.say(f"...something might be wrong; {name} doesn't look like it's up.")
 
     service = text[1]
     if service not in SERVICES:
-        say("That's not a service I recognize, sorry :slightly_frowning_face:")
+        payload.say("That's not a service I recognize, sorry :slightly_frowning_face:")
         return
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
@@ -32,6 +31,4 @@ def isup(payload):
         _check(service)
 
 
-PluginManager.register_plugin(
-    isup, r"isup([ a-zA-Z]+)?", help="!isup [service_name]", interactive_friendly=False
-)
+PLUGIN = Plugin(func=isup, regex=r"^isup([ a-zA-Z]+)?", interactive_friendly=False)

@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from bubbles.config import app, users_list
@@ -21,7 +21,7 @@ MESSAGE = (
     "Don't respond to me because, well, I'm a bot. I haven't told anyone else that I've"
     " sent this message, though -- it's just between you and me. If you want to look for"
     " yourself, you can see the code for this message"
-    " <https://github.com/GrafeasGroup/Bubbles-V2/blob/master/bubbles/commands/periodic"
+    " <https://github.com/GrafeasGroup/Bubbles/blob/master/bubbles/commands/periodic"
     "/activity_checkin.py|right here>.\n\n"
     "We always want to support you as best we can; if there's any way we can help, let"
     " us know. You're a valued member of our crew!\n\n"
@@ -39,14 +39,14 @@ MESSAGE = (
 #     )
 
 
-def _get_base_user_data():
+def _get_base_user_data() -> dict:
     return {
-        "last_seen": datetime.now().timestamp(),
+        "last_seen": datetime.now(tz=timezone.utc).timestamp(),
         "already_messaged": False,
     }
 
 
-def presence_update_callback(*args, **kwargs):
+def presence_update_callback(**kwargs: dict) -> None:
     if not os.path.exists(FILENAME):
         Path(FILENAME).touch()
 
@@ -80,20 +80,20 @@ def presence_update_callback(*args, **kwargs):
 #     # with slack to get the timing right) we just schedule the force update as its
 #     # own thing and carry on.
 #     # This function is only responsible for triggering the request; the result is
-#     # returned via a RTM event captured in bubblesRTM.py.
+#     # returned via a RTM event captured in main.py.
 #     rtm_client.send_over_websocket(
 #         payload={"type": "presence_query", "ids": USER_IDS,}
 #     )
 
 
-def check_in_with_people():
+def check_in_with_people() -> None:
     with open(FILENAME) as file:
         data = json.load(file)
 
         for person_id in data.keys():
-            last_seen = datetime.fromtimestamp(data[person_id]["last_seen"])
+            last_seen = datetime.fromtimestamp(data[person_id]["last_seen"], tz=timezone.utc)
 
-            if last_seen > datetime.now() - timedelta(days=DAYS_TO_WAIT):
+            if last_seen > datetime.now(tz=timezone.utc) - timedelta(days=DAYS_TO_WAIT):
                 continue
 
             if data[person_id]["already_messaged"]:

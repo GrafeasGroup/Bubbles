@@ -1,9 +1,9 @@
-import argparse
+import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List
 from unittest import mock
-import logging
 from unittest.mock import MagicMock
 
 import matplotlib as mpl  # type: ignore
@@ -11,21 +11,24 @@ import praw
 import slack_bolt
 from blossom_wrapper import BlossomAPI  # type: ignore
 from dotenv import load_dotenv
-from etsy2 import Etsy
-from etsy2.oauth import EtsyOAuthClient
 from praw import Reddit  # type: ignore
+from shiv.bootstrap import current_zipfile
 from slack_bolt import App
-
-from bubbles.plugins import PluginManager as PM
-
-parser = argparse.ArgumentParser(description="BubblesV2! The very chatty chatbot.")
-parser.add_argument("--startup-check", action="store_true")
-parser.add_argument("--interactive", action="store_true")
-CHECK_MODE = parser.parse_args().startup_check
-INTERACTIVE_MODE = parser.parse_args().interactive
+from tinydb import TinyDB
 
 log = logging.getLogger(__name__)
-load_dotenv()
+
+# Build paths inside the project like this: BASE_DIR / "myfolder"
+with current_zipfile() as archive:
+    if archive:
+        # if archive is none, we're not in the zipfile and are probably
+        # in development mode right now.
+        BASE_DIR = Path(archive.filename).resolve(strict=True).parent
+        dotenv_path = str(BASE_DIR / ".env")
+    else:
+        BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
+        dotenv_path = None
+load_dotenv(dotenv_path=dotenv_path)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -101,17 +104,20 @@ ME: str = app.client.auth_test().data["user_id"]  # type: ignore
 # per workspace, so it can't be hardcoded.
 COMMAND_PREFIXES = ("!", USERNAME, f"@{USERNAME}", ME, f"<@{ME}>")
 
-# Define the list of users (conversion ID <-> name)
+# Define the list of users (conversion ID <-> username)
 # 'Any' here is either a list or a str; mypy can't handle that.
 # See https://stackoverflow.com/a/62862029
 users_list: Dict[str, Any] = {"ids_only": []}
 users = app.client.users_list()
 for user in users["members"]:
     if not user["deleted"]:
-        if "real_name" in user.keys():
-            users_list[user["id"]] = user["real_name"]
-            users_list[user["real_name"]] = user["id"]
-            users_list["ids_only"].append(user["id"])
+        # Extract the display name if available
+        name = user.get("profile", {}).get("display_name") or user.get("real_name") or user["id"]
+        users_list[user["id"]] = name
+        users_list[name] = user["id"]
+        users_list["ids_only"].append(user["id"])
+
+users_list["bubbles_console"] = "bubbles_console"  # support for running commands through CLI
 
 # Define the list of rooms (useful to retrieve the ID of the rooms, knowing their name)
 rooms_list = {}
@@ -131,24 +137,10 @@ mods_array: List = []
 for i in range(0, 24):
     mods_array.append(None)
 
-# Import PluginManager from here
-PluginManager = PM(COMMAND_PREFIXES, INTERACTIVE_MODE)
-
 mpl.rcParams["figure.figsize"] = [20, 10]
 
-try:
-    etsy = Etsy(
-        etsy_oauth_client=EtsyOAuthClient(
-            client_key=os.environ.get("etsy_key"),
-            client_secret=os.environ.get("etsy_secret"),
-            resource_owner_key=os.environ.get("etsy_oauth_token"),
-            resource_owner_secret=os.environ.get("etsy_oauth_token_secret"),
-        )
-    )
-except ValueError:
-    # Like everything Etsy does, this library is half-assed too
-    log.warning("Missing one or more required Etsy secrets. Disabling Etsy.")
-    etsy = MagicMock()
+# https://tinydb.readthedocs.io/en/latest/getting-started.html#basic-usage
+db = TinyDB(BASE_DIR / "db.json")
 
 
-TIME_STARTED = datetime.now()
+TIME_STARTED = datetime.now(tz=timezone.utc)

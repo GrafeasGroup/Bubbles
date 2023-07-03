@@ -1,12 +1,15 @@
+import math
 import re
 import statistics
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List
 
-from bubbles.config import PluginManager, reddit
+from utonium import Payload, Plugin
 
-SUGGEST_FILTER_RE = r"suggest filter (r\/|\/r\/)?([a-z_-]+)$"
+from bubbles.config import reddit
+
+SUGGEST_FILTER_RE = r"^suggest filter (?:r\/|\/r\/)?(?P<sub_name>\S+)$"
 
 
 def avg(mylist: List) -> int:
@@ -14,8 +17,7 @@ def avg(mylist: List) -> int:
 
 
 def balance_queue_modifier(count_per_day: float) -> float:
-    """
-    Create a modifier to use when setting filter values.
+    """Create a modifier to use when setting filter values.
 
     Because our queue is only ever 1k posts long (reddit limitation), then
     we never want any given sub to take up any more than 1/100th of the queue
@@ -39,11 +41,7 @@ def reject_outliers(upvote_list: List) -> List:
     multiplier = 0.7
     avg = sum(upvote_list) / len(upvote_list)
     s_dev = statistics.stdev(upvote_list)
-    return [
-        n
-        for n in upvote_list
-        if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)
-    ]
+    return [n for n in upvote_list if (avg - multiplier * s_dev < n < avg + multiplier * s_dev)]
 
 
 def get_new_posts_from_sub(subreddit: str) -> [List, List]:
@@ -65,8 +63,7 @@ def get_min_max_karma(post_list: List) -> [int, int]:
 
 
 def get_time_diffs(post_list: List) -> [int, int]:
-    """
-    Return time differences in post time from now from a list of Reddit posts.
+    """Return time differences in post time from now from a list of Reddit posts.
 
     Starting from now, what is the time difference between the soonest post and
     the latest post?
@@ -77,14 +74,12 @@ def get_time_diffs(post_list: List) -> [int, int]:
     return min(time_diffs), max(time_diffs)
 
 
-def calculate_hours_and_minutes_timedelta_from_diffs(
-    start_diff: int, end_diff: int
-) -> [int, int]:
+def calculate_hours_and_minutes_timedelta_from_diffs(start_diff: int, end_diff: int) -> [int, int]:
     """Take the output from get_time_diffs and convert to an X hours Y minutes format."""
     current_time = time.time()
 
-    earliest_post = datetime.fromtimestamp(current_time - start_diff)
-    latest_post = datetime.fromtimestamp(current_time - end_diff)
+    earliest_post = datetime.fromtimestamp(current_time - start_diff, tz=timezone.utc)
+    latest_post = datetime.fromtimestamp(current_time - end_diff, tz=timezone.utc)
     minutes = (earliest_post - latest_post).total_seconds() / 60
     hours = int(minutes / 60)
     formatted_minutes = round(minutes % 60)
@@ -98,7 +93,7 @@ def get_total_count_of_posts_per_day(post_list: List) -> int:
 
     for post in post_list:
         # count how many submissions we have per day
-        post_time = datetime.fromtimestamp(post.created_utc)
+        post_time = datetime.fromtimestamp(post.created_utc, tz=timezone.utc)
         post_time_key = "{}-{}".format(post_time.month, post_time.day)
         if not submissions_per_day.get(post_time_key):
             submissions_per_day[post_time_key] = 1
@@ -121,9 +116,13 @@ def get_total_count_of_posts_in_24_hours(post_list: List) -> int:
     return len(submissions_last_24h)
 
 
+def sigmoid(x: float) -> float:
+    # https://stackoverflow.com/a/3985630
+    return 1 / (1 + math.exp(-x))
+
+
 def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) -> int:
-    """
-    Create a guess of a filter value based on the votes and a modifier.
+    r"""Create a guess of a filter value based on the votes and a modifier.
 
     We start with a list of votes from a given window of any size, then cut out
     the outliers. After that, the list is averaged and a preliminary guess is
@@ -131,21 +130,56 @@ def estimate_filter_value(vote_list: List[int], number_of_posts_per_day: int) ->
     inversely change the value. More posts coming from that sub? We need the value
     to be higher. Fewer posts? We can relax the filter.
 
-    Warning: includes a magic number that has no basis in reality, it just seems
-    to work. ¯\_(ツ)_/¯
+    ¯\_(ツ)_/¯
     """
-    return round(
-        (avg(reject_outliers(vote_list)) * 0.3)
-        / balance_queue_modifier(number_of_posts_per_day)
+    # warning: black magic ahead.
+    # Take the ten-post window, calculate the outliers, and remove them from the data,
+    # then average the rest.
+    avg_votes: float = avg(reject_outliers(vote_list))
+    # Reddit limits the queue length to 1000 posts. Create a modifier based on the
+    # total amount of the queue we want any given subreddit to consume based on the
+    # number of submissions in a 24-hour period that subreddit receives.
+    queue_modifier: float = balance_queue_modifier(number_of_posts_per_day)
+    # When we remove the outliers from the 10-submission window, it is useful to know
+    # exactly how much of an outlier those rejected values were. We'll use it later
+    # to create the outlier modifier.
+    outlier_point_percentage: float = avg(reject_outliers(vote_list)) / avg(vote_list)
+    # Out of the ten posts that we pulled for the window, what percent were rejected
+    # as outliers?
+    percentage_of_rejected_outliers: float = (
+        len(vote_list) - len(reject_outliers(vote_list))
+    ) * 0.1
+    # Dynamically create a modifier based on how severe the outliers are using a
+    # https://en.wikipedia.org/wiki/Logistic_function
+    outlier_modifier: float = sigmoid(
+        abs(outlier_point_percentage - percentage_of_rejected_outliers)
     )
+    # Create a modifier between 1 and 1.5 based on the activity of the subreddit so
+    # more active subreddits have an additional penalty to better handle spikes.
+    activity_modifier: float = (1 - sigmoid(10 / number_of_posts_per_day)) + 1
+
+    return round((avg_votes / queue_modifier) * outlier_modifier * activity_modifier)
 
 
-def suggest_filter(payload) -> None:
-    sub = re.search(SUGGEST_FILTER_RE, payload["text"]).groups()[1]
-    say = payload["extras"]["say"]
-    say(f"Processing data for r/{sub}. This may take a moment...")
+def suggest_filter(payload: Payload) -> None:
+    """!suggest filter {subreddit} - create a guess for a post filter value
 
-    ten_post_window, all_posts = get_new_posts_from_sub(sub)
+    Usage: @bubbles suggest filter r/thathappened
+    """
+    text = payload.cleaned_text
+    match = re.search(SUGGEST_FILTER_RE, text)
+
+    if match is None:
+        payload.say(
+            f"Sorry, looks like `{text}` is in the wrong format. "
+            "Did you enter the sub name correctly?"
+        )
+        return
+
+    sub_name = match.group("sub_name")
+    payload.say(f"Processing data for r/{sub_name}. This may take a moment...")
+
+    ten_post_window, all_posts = get_new_posts_from_sub(sub_name)
     upvote_list_window = get_upvotes_from_list(ten_post_window)
     upvote_list_all_posts = get_upvotes_from_list(all_posts)
 
@@ -157,15 +191,11 @@ def suggest_filter(payload) -> None:
     posts_per_day_count = get_total_count_of_posts_per_day(all_posts)
     posts_per_last_24h_count = get_total_count_of_posts_in_24_hours(all_posts)
 
-    suggested_value_window = estimate_filter_value(
-        upvote_list_window, posts_per_day_count
-    )
-    suggested_value_all = estimate_filter_value(
-        upvote_list_all_posts, posts_per_day_count
-    )
+    suggested_value_window = estimate_filter_value(upvote_list_window, posts_per_day_count)
+    suggested_value_all = estimate_filter_value(upvote_list_all_posts, posts_per_day_count)
 
-    say(
-        f"Stats for r/{sub} over the last 10 submissions:\n"
+    payload.say(
+        f"Stats for r/{sub_name} over the last 10 submissions:\n"
         f"\n"
         f"* karma distribution: {min_karma} | {max_karma}\n"
         f"* time spread: {hours}h {minutes}m\n"
@@ -178,11 +208,4 @@ def suggest_filter(payload) -> None:
     )
 
 
-PluginManager.register_plugin(
-    suggest_filter,
-    SUGGEST_FILTER_RE,
-    help=(
-        "!suggest filter {subreddit} - have me guess at an appropriate filter value"
-        " for a given subreddit. Usage: @bubbles suggest filter r/thathappened"
-    ),
-)
+PLUGIN = Plugin(func=suggest_filter, regex=SUGGEST_FILTER_RE)

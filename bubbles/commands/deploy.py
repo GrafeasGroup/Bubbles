@@ -1,119 +1,195 @@
 import os
+import shlex
 import subprocess
-import time
-from typing import Callable
+from pathlib import Path
 
-from bubbles.commands import (
-    PROCESS_CHECK_COUNT,
-    PROCESS_CHECK_SLEEP_TIME,
-    SERVICES,
-    get_service_name,
-)
-from bubbles.config import PluginManager, COMMAND_PREFIXES
-from bubbles.utils import get_branch_head
+import requests
+from utonium import Payload, Plugin
+from utonium.specialty_blocks import ContextStepMessage
+
+from bubbles.commands.start import _start_service
+from bubbles.commands.stop import _stop_service
+from bubbles.config import COMMAND_PREFIXES
+from bubbles.service_utils import SERVICES, get_service_name, verify_service_up
+
+# the actual command that you run on the server to get the right version
+PYTHON_VERSION = "python3.10"
 
 
-def _deploy_service(service: str, say: Callable) -> None:
-    say(f"Deploying {service} to production. This may take a moment...")
-    os.chdir(f"/data/{service}")
+class DeployError(Exception):
+    pass
 
-    def saycode(command):
-        say(f"```{command.decode().strip()}```")
 
-    def migrate():
-        say("Migrating models...")
-        saycode(subprocess.check_output([PYTHON, "manage.py", "migrate"]))
+def _deploy_service(service: str, payload: Payload) -> None:
+    def check_for_new_version() -> dict:
+        StatusMessage.add_new_context_step("Checking for new release...")
 
-    def pull_from_git():
-        say("Pulling latest code...")
-        saycode(subprocess.check_output(f"git pull origin {get_branch_head()}".split()))
-
-    def install_deps():
-        say("Installing dependencies...")
-        saycode(subprocess.check_output(["poetry", "install", "--no-dev"]))
-
-    def bootstrap_site():
-        say("Verifying that initial data is present...")
-        subprocess.check_output([PYTHON, "manage.py", "bootstrap_site"])
-
-    def collect_static():
-        say("Gathering staticfiles...")
-        result = subprocess.check_output(
-            [PYTHON, "manage.py", "collectstatic", "--noinput", "-v", "0"]
+        output = subprocess.check_output(shlex.split(f"{PYTHON_VERSION} {service}.pyz --version"))
+        # starting from something like b'BubblesV2, version ?????\n'
+        current_version = output.decode().strip().split(", ")[-1].split()[-1]
+        github_response = requests.get(
+            f"https://api.github.com/repos/grafeasgroup/{service}/releases/latest"
         )
-        if result:
-            saycode(result)
+        if github_response.status_code != 200:
+            print(f"GITHUB RESPONSE CONTENT: {github_response.content}")
+            raise DeployError("Cannot reach GitHub releases!")
 
-    def revert_and_recover(loc):
-        git_response = (
-            subprocess.check_output(
-                ["git", "reset", "--hard", f"{get_branch_head()}@{{'30 seconds ago'}}"]
-            )
+        release_data = github_response.json()
+        if release_data["name"] == current_version:
+            raise DeployError("We are running the most recent release already.")
+
+        StatusMessage.step_succeeded()
+        return release_data
+
+    def download_new_release(release_data: dict) -> None:
+        StatusMessage.add_new_context_step("Downloading new release...")
+
+        url = release_data["assets"][0]["browser_download_url"]
+        backup_archive = service_path / "backup.pyz"
+        with open(backup_archive, "wb") as backup, open(
+            service_path / f"{service}.pyz", "rb"
+        ) as original:
+            backup.write(original.read())
+
+        subprocess.check_output(shlex.split(f"chmod +x {str(backup_archive)}"))
+        # write the new archive to disk
+        resp = requests.get(url, stream=True)
+        new_archive = service_path / "temp.pyz"
+        with open(new_archive, "wb") as new:
+            for chunk in resp.iter_content(chunk_size=8192):
+                new.write(chunk)
+
+        subprocess.check_output(shlex.split(f"chmod +x {str(new_archive)}"))
+        StatusMessage.step_succeeded()
+        return backup_archive, new_archive
+
+    def send_error_end(exception: RuntimeError = None) -> None:
+        message = "Hit an error I couldn't recover from. Check logs for more context."
+        if exception:
+            if exception.args:
+                message = exception.args[0]
+
+        StatusMessage.step_failed(end_text=message, error=True)
+
+    def replace_running_service(new_archive: str) -> None:
+        StatusMessage.add_new_context_step(f"Updating {service}...")
+
+        # copy the new archive on top of the running one
+        with open(service_path / f"{service}.pyz", "wb") as current, open(
+            new_archive, "rb"
+        ) as tempfile:
+            current.write(tempfile.read())
+
+        StatusMessage.step_succeeded()
+
+    def _restart_service() -> str:
+        return (
+            subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(service)])
             .decode()
             .strip()
         )
-        say(f"Rolling back to previous state:\n```\n{git_response}```")
-        subprocess.check_output(["sudo", "systemctl", "restart", get_service_name(loc)])
 
-    def verify_service_up(loc):
-        say(
-            f"Pausing for {PROCESS_CHECK_SLEEP_TIME}s to verify that {loc} restarted"
-            f" correctly..."
-        )
-        try:
-            for attempt in range(PROCESS_CHECK_COUNT):
-                time.sleep(PROCESS_CHECK_SLEEP_TIME / PROCESS_CHECK_COUNT)
-                subprocess.check_call(
-                    ["systemctl", "is-active", "--quiet", get_service_name(loc)]
-                )
-                say(f"Check {attempt + 1}/{PROCESS_CHECK_COUNT} complete!")
-            say("Restarted successfully!")
-        except subprocess.CalledProcessError:
-            revert_and_recover(loc)
+    def revert_and_recover() -> None:
+        StatusMessage.add_new_context_step(f"Reverting {service}...")
 
-    def restart_service(loc):
-        say(f"Restarting service for {loc}...")
-        systemctl_response = subprocess.check_output(
-            ["sudo", "systemctl", "restart", get_service_name(loc)]
-        )
-        if systemctl_response.decode().strip() != "":
-            say("Something went wrong and could not restart.")
-            saycode(systemctl_response)
+        with open(service_path / f"{service}.pyz", "wb") as current, open(
+            backup_archive, "rb"
+        ) as tempfile:
+            current.write(tempfile.read())
+
+        systemctl_response = _restart_service()
+        if systemctl_response != "":
+            raise DeployError
+
+        StatusMessage.step_succeeded()
+
+    def restart_service() -> None:
+        StatusMessage.add_new_context_step(f"Restarting {service}...")
+        systemctl_response = _restart_service()
+        if systemctl_response != "":
+            StatusMessage.step_failed()
+            revert_and_recover()
+            raise DeployError("Could not deploy due to system error. Reverted to previous release.")
+
+        if verify_service_up(service):
+            # If the service we're deploying IS NOT blossom, this will print.
+            # If it IS blossom, it will get overwritten immediately.
+            StatusMessage.step_succeeded()
         else:
-            verify_service_up(loc)
+            revert_and_recover()
+            raise DeployError(
+                "Could not deploy due to service failure after launch."
+                " Reverted to previous release."
+            )
 
-    pull_from_git()
+    def migrate() -> None:
+        # Only for Blossom.
+        StatusMessage.add_new_context_step(f"Running migrations...")
+        try:
+            subprocess.check_call(
+                shlex.split(f"sh -c '{PYTHON_VERSION} {str(service)}.pyz -c migrate'")
+            )
+        except subprocess.CalledProcessError:
+            StatusMessage.step_failed()
+            revert_and_recover()
+            raise DeployError("Could not perform database migration! Unable to proceed!")
+        StatusMessage.step_succeeded()
+
+    def stop_all_tor_bots_but_blossom() -> None:
+        for bot in ["tor", "tor_ocr", "tor_archivist"]:
+            _stop_service(bot, message_block=StatusMessage)
+
+    def start_all_tor_bots_but_blossom() -> None:
+        for bot in ["tor", "tor_ocr", "tor_archivist"]:
+            _start_service(bot, message_block=StatusMessage)
+
+    StatusMessage: ContextStepMessage = ContextStepMessage(
+        payload,
+        title=f"Deploying {service}",
+        start_message="This may take a minute. Please be patient.",
+        error_message="Update stopped; see below.",
+    )
+
+    service_path = Path(f"/data/{service}")
+    os.chdir(service_path)
+
     try:
-        install_deps()
+        release_data = check_for_new_version()
+        backup_archive, new_archive = download_new_release(release_data)
+        replace_running_service(new_archive)
 
-        PYTHON = f"/data/{service}/.venv/bin/python"
-
-        if service == "blossom":
-            say("Running commands specific to Blossom.\n")
+        if service.lower() == "blossom":
+            # As the blossom deploys take longer, let's try stopping everyone else,
+            # deploying blossom, and then starting everyone again.
+            stop_all_tor_bots_but_blossom()
             migrate()
-            bootstrap_site()
-            collect_static()
-    except Exception as e:
-        say(f"Something went wrong! {e}")
-        revert_and_recover(service)
-        return
 
-    restart_service(service)
+        restart_service()
+        if service.lower() == "blossom":
+            start_all_tor_bots_but_blossom()
+
+        StatusMessage.add_new_context_step(f"Successfully deployed {service}!")
+        StatusMessage.step_is_info()
+
+    except (DeployError, subprocess.CalledProcessError) as e:
+        print(e)  # make available in logs
+        send_error_end(e)
+        return
 
     # reset back to our primary directory
     os.chdir("/data/bubbles")
 
 
-def deploy(payload):
-    args = payload.get("text").split()
-    say = payload["extras"]["say"]
+def deploy(payload: Payload) -> None:
+    """!deploy [tor/tor_ocr/tor_archivist/blossom/bubbles/buttercup] - update and deploy!."""
+    args = payload.get_text().split()
 
     if len(args) > 1:
         if args[0] in COMMAND_PREFIXES:
             args.pop(0)
 
     if len(args) == 1:
-        say(
+        payload.say(
             "Need a service to deploy to production. Usage: @bubbles deploy [service]"
             " -- example: `@bubbles deploy tor`"
         )
@@ -121,7 +197,7 @@ def deploy(payload):
 
     service = args[1].lower().strip()
     if service not in SERVICES:
-        say(
+        payload.say(
             f"Received a request to deploy {args[1]}, but I'm not sure what that is.\n\n"
             f"Available options: {', '.join(SERVICES)}"
         )
@@ -129,17 +205,9 @@ def deploy(payload):
 
     if service == "all":
         for system in [_ for _ in SERVICES if _ != "all"]:
-            _deploy_service(system, say)
+            _deploy_service(system, payload)
     else:
-        _deploy_service(service, say)
+        _deploy_service(service, payload)
 
 
-PluginManager.register_plugin(
-    deploy,
-    r"deploy ?(.+)",
-    help=(
-        f"!deploy [{', '.join(SERVICES)}] - deploys the code currently on github to"
-        f" production."
-    ),
-    interactive_friendly=False,
-)
+PLUGIN = Plugin(func=deploy, regex=r"^deploy ?(.+)", interactive_friendly=False)

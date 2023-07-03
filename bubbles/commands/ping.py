@@ -1,8 +1,9 @@
-from bubbles.config import PluginManager
+from utonium import Payload, Plugin
 
 
-def ping(payload):
-    payload["extras"]["say"]("PONG!")
+def ping(payload: Payload) -> None:
+    """!ping - PONG"""
+    payload.say("PONG!")
 
 
-PluginManager.register_plugin(ping, r"ping$", help="!ping - PONG")
+PLUGIN = Plugin(func=ping, regex=r"^ping$")

@@ -1,6 +1,6 @@
-def BubblesException(Exception):
+class BubblesException(Exception):
     pass
 
 
-def BubblesConfigException(Exception):
+class BubblesConfigException(Exception):
     pass

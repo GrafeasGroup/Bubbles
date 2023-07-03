@@ -1,25 +1,23 @@
-from datetime import datetime
-import subprocess
 import os
 import shlex
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
-from bubbles.config import PluginManager
+from utonium import Payload, Plugin
 
 
-def backup_db(payload):
-    say = payload["extras"]["say"]
-    utils = payload["extras"]["utils"]
-
+def backup_db(payload: Payload) -> None:
+    """!backup - creates and uploads a full backup of our postgres db."""
     # the db info is injected into the bot environment, so we'll grab it
     # and regurgitate it for the command
     password = os.environ.get("postgres_password")
     user = os.environ.get("postgres_user")
     db = os.environ.get("postgres_db")
     host = os.environ.get("postgres_host")
-    filename = f"db_backup_{str(datetime.now().date())}.tar"
+    filename = f"db_backup_{str(datetime.now(tz=timezone.utc).date())}.tar"
 
-    say("Starting DB export. This may take a moment.")
+    payload.say("Starting DB export. This may take a moment.")
 
     with open(filename, "w") as outfile:
         subprocess.Popen(
@@ -28,8 +26,8 @@ def backup_db(payload):
             stdout=outfile,
         ).wait()
 
-    say("DB export complete. Uploading...")
-    utils.upload_file(file=filename, title=filename)
+    payload.say("DB export complete. Uploading...")
+    payload.upload_file(file=filename, title=filename)
 
     p = Path(".")
     previous_backups = list(p.glob("db_backup_*.tar"))
@@ -39,8 +37,4 @@ def backup_db(payload):
         os.remove(previous_backups[0])
 
 
-PluginManager.register_plugin(
-    backup_db,
-    r"backup",
-    help="!backup - creates and uploads a full backup of our postgres db.",
-)
+PLUGIN = Plugin(func=backup_db, regex=r"^backup", interactive_friendly=False)
