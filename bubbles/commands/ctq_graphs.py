@@ -1,24 +1,24 @@
 """Generation of graphs for the !ctqstats command."""
 import re
 from datetime import datetime
-from typing import Dict, List, Any, Tuple, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from matplotlib import pyplot as plt
 
 from bubbles.commands.ctq_utils import (
-    MAX_GRAPH_ENTRIES,
-    _convert_blossom_date,
-    _reformat_figure,
-    UNCLAIMED_COLOR,
     CLAIMED_COLOR,
     COMPLETED_COLOR,
-    PRIMARY_COLOR,
-    SECONDARY_COLOR,
-    _get_rank,
-    TEXT_COLOR,
-    _format_hour_duration,
     FIGURE_DPI,
+    MAX_GRAPH_ENTRIES,
+    PRIMARY_COLOR,
     QUEUE_POST_TIMEOUT,
+    SECONDARY_COLOR,
+    TEXT_COLOR,
+    UNCLAIMED_COLOR,
+    _convert_blossom_date,
+    _format_hour_duration,
+    _get_rank,
+    _reformat_figure,
 )
 
 header_regex = re.compile(
@@ -151,9 +151,7 @@ def _get_event_stream(submissions: List[Dict]) -> List[Tuple[str, datetime]]:
             events.append(("claimed", _convert_blossom_date(post["claim_time"])))
 
             if post["complete_time"]:
-                events.append(
-                    ("completed", _convert_blossom_date(post["complete_time"]))
-                )
+                events.append(("completed", _convert_blossom_date(post["complete_time"])))
         else:
             # Expired (dropped off the queue)
             events.append(
@@ -171,12 +169,12 @@ def _get_event_stream(submissions: List[Dict]) -> List[Tuple[str, datetime]]:
 def _generate_aggregated_bar_chart(
     *,  # Don't allow positional arguments
     posts: List[Dict],
-    get_key,
-    get_value,
+    get_key: Callable,
+    get_value: Callable,
     default_value: Any = 0,
-    update_value=lambda a, b: a + b,
-    final_update_value=lambda value: value,
-    aggregate_rest=sum,
+    update_value: Callable = lambda a, b: a + b,
+    final_update_value: Callable = lambda value: value,
+    aggregate_rest: Callable = sum,
     title: str,
     x_label: str,
     y_label: str,
@@ -215,9 +213,7 @@ def _generate_aggregated_bar_chart(
     has_other_entry = rest_label is not None and len(count_list) > MAX_GRAPH_ENTRIES
     if has_other_entry:
         # Aggregate the rest of the entries
-        other_count = aggregate_rest(
-            [entry[1] for entry in count_list[MAX_GRAPH_ENTRIES:]]
-        )
+        other_count = aggregate_rest([entry[1] for entry in count_list[MAX_GRAPH_ENTRIES:]])
         plot_entries.append((rest_label, other_count))
         colors.append(SECONDARY_COLOR)
 
@@ -257,9 +253,7 @@ def _generate_aggregated_bar_chart(
         ]
         other = plot_entries[-1]
         entries.append(
-            BAR_CHART_SPECIAL_ENTRY.format(
-                label=other[0], value=other[1], secondary_color="violet"
-            )
+            BAR_CHART_SPECIAL_ENTRY.format(label=other[0], value=other[1], secondary_color="violet")
         )
     else:
         entries = [
@@ -300,9 +294,7 @@ def user_video_transcription_count(
 ) -> Tuple[plt.Figure, str]:
     """Generate stats for transcriptions per user."""
     video_posts = [
-        post
-        for post in completed_posts
-        if _get_post_format_and_type(post)[0].lower() == "video"
+        post for post in completed_posts if _get_post_format_and_type(post)[0].lower() == "video"
     ]
 
     return _generate_aggregated_bar_chart(
@@ -422,7 +414,8 @@ def user_transcription_length_vs_count(
     for post in completed_posts:
         username = _get_username(post)
         cur_value = user_dir.get(
-            username, {"gamma": post["user"]["gamma"], "count": 0, "length": 0},
+            username,
+            {"gamma": post["user"]["gamma"], "count": 0, "length": 0},
         )
         user_dir[username] = {
             "gamma": cur_value["gamma"],
@@ -464,7 +457,10 @@ def sub_transcription_length_vs_count(
     # Aggregate the values for each subreddit
     for post in completed_posts:
         sub = _get_subreddit_name(post)
-        cur_value = sub_dir.get(sub, {"count": 0, "length": 0},)
+        cur_value = sub_dir.get(
+            sub,
+            {"count": 0, "length": 0},
+        )
         sub_dir[sub] = {
             "count": cur_value["count"] + 1,
             "length": cur_value["length"] + _get_transcription_characters(post),
@@ -520,7 +516,7 @@ def post_timeline(
     ax.set_xlabel("Time")
     ax.set_title(title)
 
-    for (event, time) in events:
+    for event, time in events:
         if start_time <= time <= end_time:
             # Add an entry before the change
             dates.append(time)
@@ -630,7 +626,7 @@ def general_stats(
     all_completed_time = None
 
     # Determine when the queue has been cleared
-    for (event, time) in events:
+    for event, time in events:
         # Process the change
         if event == "created":
             unclaimed_count += 1
@@ -719,9 +715,7 @@ def general_stats(
         color = PRIMARY_COLOR if i % 2 == 0 else SECONDARY_COLOR
 
         # Add thousand separators
-        formatted_stat = (
-            "{:,}".format(stats[key]) if isinstance(stats[key], int) else stats[key]
-        )
+        formatted_stat = "{:,}".format(stats[key]) if isinstance(stats[key], int) else stats[key]
 
         # The number part of the stat
         fig.text(
@@ -755,9 +749,7 @@ def generate_ctq_graphs(
     submissions: List[Dict], start_time: datetime, end_time: datetime
 ) -> Tuple[List[plt.Figure], str]:
     """Generate the graphs for the CtQ event and their transcriptions."""
-    completed_posts = [
-        post for post in submissions if post["transcription"] and post["user"]
-    ]
+    completed_posts = [post for post in submissions if post["transcription"] and post["user"]]
 
     # We got a list of tuples, we make it a tuple of lists
     # https://stackoverflow.com/a/13635074

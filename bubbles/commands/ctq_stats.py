@@ -1,26 +1,24 @@
 import logging
 import tempfile
 from datetime import datetime, timezone
-from typing import List, Dict
+from typing import Any, Callable, Dict, List
 
 import requests.exceptions
 
 from bubbles.commands.ctq_graphs import generate_ctq_graphs
 from bubbles.commands.ctq_utils import (
-    QUEUE_POST_TIMEOUT,
-    DEFAULT_CTQ_START,
     DEFAULT_CTQ_DURATION,
-    _get_list_chunks,
-    _get_elapsed,
-    _extract_blossom_id,
+    DEFAULT_CTQ_START,
+    QUEUE_POST_TIMEOUT,
     _convert_blossom_date,
+    _extract_blossom_id,
+    _get_elapsed,
+    _get_list_chunks,
 )
 from bubbles.config import PluginManager, blossom
 
 
-def _is_submission_in_queue(
-    submission: Dict, start_date: datetime, end_date: datetime
-) -> bool:
+def _is_submission_in_queue(submission: Dict, start_date: datetime, end_date: datetime) -> bool:
     """Determine if the given submission was in the queue during the given time frame."""
     create_time = _convert_blossom_date(submission["create_time"])
 
@@ -35,9 +33,7 @@ def _is_submission_in_queue(
         return False
 
     claim_time = (
-        _convert_blossom_date(submission["claim_time"])
-        if submission["claim_time"]
-        else None
+        _convert_blossom_date(submission["claim_time"]) if submission["claim_time"] else None
     )
 
     if claim_time and claim_time < start_date:
@@ -47,9 +43,9 @@ def _is_submission_in_queue(
     return True
 
 
-def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[Dict]:
+def get_ctq_submissions(start_date: datetime, end_date: datetime, say: Callable) -> List[Dict]:
     """Get the submissions during the CtQ time."""
-    start = datetime.now()
+    start = datetime.now(tz=timezone.utc)
     say("Fetching the queue submissions from Blossom... (0%)")
 
     # Posts remain in the queue for a given time
@@ -72,9 +68,7 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
             },
         )
         if not response.ok:
-            say(
-                f"Error while fetching the submissions: {response.status_code}\n{response.content}"
-            )
+            say(f"Error while fetching the submissions: {response.status_code}\n{response.content}")
             return []
 
         try:
@@ -103,16 +97,14 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
         if _is_submission_in_queue(submission, start_date, end_date)
     ]
 
-    say(
-        f"Fetched {len(submissions)} queue submissions from Blossom ({_get_elapsed(start)})"
-    )
+    say(f"Fetched {len(submissions)} queue submissions from Blossom ({_get_elapsed(start)})")
 
     return submissions
 
 
-def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
+def attach_transcriptions(submissions: List[Dict], say: Callable) -> List[Dict]:
     """For each submission, attach the corresponding transcription (if available)."""
-    start = datetime.now()
+    start = datetime.now(tz=timezone.utc)
     say("Fetching the transcriptions from Blossom... (0%)")
 
     updated_submissions = []
@@ -145,7 +137,8 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
             )
             if not response.ok:
                 say(
-                    f"Error while fetching the transcriptions: {response.status_code}\n{response.content}"
+                    "Error while fetching the transcriptions: "
+                    f"{response.status_code}\n{response.content}"
                 )
                 return []
 
@@ -167,9 +160,9 @@ def attach_transcriptions(submissions: List[Dict], say) -> List[Dict]:
     return updated_submissions
 
 
-def attach_users(submissions: List[Dict], say) -> List[Dict]:
+def attach_users(submissions: List[Dict], say: Callable) -> List[Dict]:
     """For each submission, attach the corresponding user (if available)."""
-    start = datetime.now()
+    start = datetime.now(tz=timezone.utc)
     say("Fetching the users from Blossom... (0%)")
 
     updated_submissions = []
@@ -198,12 +191,11 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
 
             # Try to get the user from Blossom
             response = blossom.get(
-                "volunteer", params={"page_size": 1, "page": 1, "id": user_id},
+                "volunteer",
+                params={"page_size": 1, "page": 1, "id": user_id},
             )
             if not response.ok:
-                say(
-                    f"Error while fetching the users: {response.status_code}\n{response.content}"
-                )
+                say(f"Error while fetching the users: {response.status_code}\n{response.content}")
                 return []
 
             results = response.json()["results"]
@@ -225,9 +217,9 @@ def attach_users(submissions: List[Dict], say) -> List[Dict]:
     return updated_submissions
 
 
-def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
+def generate_ctq_stats(start_date: datetime, end_date: datetime, say: Callable) -> None:
     """Generate the stats for the CtQ event."""
-    start = datetime.now()
+    start = datetime.now(tz=timezone.utc)
     say(f"start: {start_date}, end: {end_date}")
 
     submissions = get_ctq_submissions(start_date, end_date, say)
@@ -236,16 +228,14 @@ def generate_ctq_stats(start_date: datetime, end_date: datetime, say):
 
     figures, transcription = generate_ctq_graphs(submissions, start_date, end_date)
 
-    with tempfile.NamedTemporaryFile(
-        delete=False, mode="w", encoding="utf-8", suffix=".txt"
-    ) as fp:
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", encoding="utf-8", suffix=".txt") as fp:
         fp.write(transcription)
         say(f"Transcription: file://{fp.name}")
 
     say(f"Here are the CtQ stats! ({_get_elapsed(start)})", figures=figures)
 
 
-def ctq_stats(payload):
+def ctq_stats(payload: Any) -> None:
     """Process the !ctqstats command."""
     say = payload["extras"]["say"]
     args = payload.get("text").split()
@@ -253,9 +243,7 @@ def ctq_stats(payload):
     if len(args) < 2:
         # No start time provided
         if not DEFAULT_CTQ_START:
-            say(
-                f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00"
-            )
+            say(f"Please provide the start time of the CtQ event, e.g. 2021-01-30T12:00")
             return
         else:
             start_date_str = DEFAULT_CTQ_START
@@ -267,18 +255,14 @@ def ctq_stats(payload):
         start_date = datetime.fromisoformat(start_date_str)
         start_date = start_date.replace(tzinfo=start_date.tzinfo or timezone.utc)
     except ValueError:
-        say(
-            f"'{start_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
-        )
+        say(f"'{start_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00.")
         return
 
     if len(args) >= 3:
         # An end time was provided
         if len(args) > 3:
             # Too many arguments
-            say(
-                f"You provided too many arguments, I need a start time and an optional end time."
-            )
+            say(f"You provided too many arguments, I need a start time and an optional end time.")
             return
 
         # Parse the end time
@@ -287,9 +271,7 @@ def ctq_stats(payload):
             end_date = datetime.fromisoformat(end_date_str)
             end_date = end_date.replace(tzinfo=end_date.tzinfo or timezone.utc)
         except ValueError:
-            say(
-                f"'{end_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
-            )
+            say(f"'{end_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00.")
             return
     else:
         # No end time provided, use the default CTQ duration

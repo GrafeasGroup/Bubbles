@@ -1,7 +1,8 @@
 import random
-from typing import Any
+from typing import Any, Optional
 
 import click
+import matplotlib.pyplot as plt
 from utonium import PluginManager
 
 
@@ -53,7 +54,7 @@ class InteractiveSession:
         click.echo(message)
         return self.build_message_payload(message)
 
-    def say(self, message: str, figures: Optional[List[plt.Figure]] = None):
+    def say(self, message: str, figures: Optional[list[plt.Figure]] = None) -> None:
         print_msg = message
 
         if figures and len(figures) > 0:
@@ -76,7 +77,7 @@ class InteractiveSession:
         print(print_msg)
         return self.build_payload(message)
 
-    def build_payload(self, text) -> dict:
+    def build_payload(self, text: str) -> dict:
         return {
             "text": text,
             "user": "console",

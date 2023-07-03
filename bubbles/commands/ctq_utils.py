@@ -1,9 +1,8 @@
 import os
-
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta, timezone
 
 # The time for which posts remain in the queue until they are removed
-from typing import TypeVar, List, Optional, Dict
+from typing import Dict, List, Optional, TypeVar
 
 from matplotlib import pyplot as plt
 
@@ -69,15 +68,12 @@ def _get_list_chunks(original_list: List[T], chunk_size: int) -> List[List[T]]:
     but send a progress update to Slack in-between.
     """
     # See https://favtutor.com/blogs/partition-list-python
-    return [
-        original_list[i : i + chunk_size]
-        for i in range(0, len(original_list), chunk_size)
-    ]
+    return [original_list[i : i + chunk_size] for i in range(0, len(original_list), chunk_size)]
 
 
 def _get_elapsed(start: datetime) -> str:
     """Get a string representing the elapsed time."""
-    duration = datetime.now() - start
+    duration = datetime.now(tz=timezone.utc) - start
     return f"{duration.total_seconds():.3f} s"
 
 
@@ -98,7 +94,7 @@ def _convert_blossom_date(blossom_date: Optional[str]) -> Optional[datetime]:
 
 def _reformat_figure(
     fig: plt.Figure, width: float = FIGURE_WIDTH, height: float = FIGURE_HEIGHT
-):
+) -> None:
     """Reformat the given figure to the default size."""
     fig.set_size_inches(width, height)
     fig.tight_layout()
