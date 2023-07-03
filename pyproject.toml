@@ -18,7 +18,6 @@ aiohttp = "^3.7.3"
 slack-bolt = "^1.2.1"
 poetry = "^1.1.6"
 etsy2 = {git = "https://github.com/simpassi/etsy-python2"}
-pytz = "^2022.1"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

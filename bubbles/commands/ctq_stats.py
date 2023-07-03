@@ -1,8 +1,9 @@
+import logging
 import tempfile
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict
 
-import pytz
+import requests.exceptions
 
 from bubbles.commands.ctq_graphs import generate_ctq_graphs
 from bubbles.commands.ctq_utils import (
@@ -76,7 +77,13 @@ def get_ctq_submissions(start_date: datetime, end_date: datetime, say) -> List[D
             )
             return []
 
-        data = response.json()
+        try:
+            data = response.json()
+        except requests.exceptions.JSONDecodeError as e:
+            logging.exception(e, exc_info=True)
+            logging.error(response.text)
+            return []
+
         submissions += data["results"]
 
         percentage = len(submissions) / data["count"] if data["count"] > 0 else 1
@@ -258,7 +265,7 @@ def ctq_stats(payload):
     # Parse the start time
     try:
         start_date = datetime.fromisoformat(start_date_str)
-        start_date = start_date.replace(tzinfo=start_date.tzinfo or pytz.utc)
+        start_date = start_date.replace(tzinfo=start_date.tzinfo or timezone.utc)
     except ValueError:
         say(
             f"'{start_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
@@ -278,7 +285,7 @@ def ctq_stats(payload):
         end_date_str = args[2]
         try:
             end_date = datetime.fromisoformat(end_date_str)
-            end_date = end_date.replace(tzinfo=end_date.tzinfo or pytz.utc)
+            end_date = end_date.replace(tzinfo=end_date.tzinfo or timezone.utc)
         except ValueError:
             say(
                 f"'{end_date_str}' is not a valid date/time. Try something like 2021-01-30T12:00."
