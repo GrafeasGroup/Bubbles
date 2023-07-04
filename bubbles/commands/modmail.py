@@ -6,6 +6,7 @@ from bubbles.config import app, reddit, rooms_list
 
 sub = reddit.subreddit("transcribersofreddit")
 MESSAGE_CUTOFF_LENGTH = 250
+SLACK_MESSAGE_CUTOFF_LENGTH = 2950  # really 3k but we want to be safe
 
 
 def build_and_send_message(
@@ -91,11 +92,15 @@ def build_and_send_message(
 
     message_body = message.body_markdown
     show_expando_button = False
+    if len(message_body) > SLACK_MESSAGE_CUTOFF_LENGTH:
+        # whoa buddy that's a big'un
+        message_body = message_body[:SLACK_MESSAGE_CUTOFF_LENGTH] + "..."
+
     if len(message_body) > MESSAGE_CUTOFF_LENGTH:
         # A long message means we need to both show the button AND maybe change the
         # length of the text.
         if not expand_message:
-            message_body = message_body[:250] + "..."
+            message_body = message_body[:MESSAGE_CUTOFF_LENGTH] + "..."
         show_expando_button = True
 
     msg_blocks = [
