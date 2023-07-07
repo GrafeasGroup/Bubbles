@@ -35,49 +35,49 @@ from bubbles.tl_utils import TLJob
 #         regular_interval = timedelta(seconds=4)
 
 
-class WelcomePing(TLJob):
-    def job(self) -> None:
-        welcome_ping_callback()
-
-    class Meta:
-        start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
-        regular_interval = timedelta(hours=4)
-
-
-class GetInProgressPosts(TLJob):
-    def job(self) -> None:
-        get_in_progress_callback()
-
-    class Meta:
-        start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
-        regular_interval = timedelta(hours=4)
+# class WelcomePing(TLJob):
+#     def job(self) -> None:
+#         welcome_ping_callback()
+#
+#     class Meta:
+#         start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
+#         regular_interval = timedelta(hours=4)
 
 
-class CheckForBanbots(TLJob):
-    def job(self) -> None:
-        banbot_check_callback()
-
-    class Meta:
-        start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
-        regular_interval = timedelta(hours=12)
-
-
-class WelcomeVolunteersInProgress(TLJob):
-    def job(self) -> None:
-        periodic_ping_in_progress_callback()
-
-    class Meta:
-        start_interval = TRIGGER_YESTERDAY - datetime.now(tz=timezone.utc)
-        regular_interval = timedelta(days=1)
+# class GetInProgressPosts(TLJob):
+#     def job(self) -> None:
+#         get_in_progress_callback()
+#
+#     class Meta:
+#         start_interval = TRIGGER_4_HOURS_AGO - datetime.now(tz=timezone.utc)
+#         regular_interval = timedelta(hours=4)
 
 
-class TranscriptionCheckPing(TLJob):
-    def job(self) -> None:
-        transcription_check_ping_callback()
+# class CheckForBanbots(TLJob):
+#     def job(self) -> None:
+#         banbot_check_callback()
+#
+#     class Meta:
+#         start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
+#         regular_interval = timedelta(hours=12)
 
-    class Meta:
-        start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
-        regular_interval = timedelta(hours=12)
+
+# class WelcomeVolunteersInProgress(TLJob):
+#     def job(self) -> None:
+#         periodic_ping_in_progress_callback()
+#
+#     class Meta:
+#         start_interval = TRIGGER_YESTERDAY - datetime.now(tz=timezone.utc)
+#         regular_interval = timedelta(days=1)
+
+
+# class TranscriptionCheckPing(TLJob):
+#     def job(self) -> None:
+#         transcription_check_ping_callback()
+#
+#     class Meta:
+#         start_interval = TRIGGER_12_HOURS_AGO - datetime.now(tz=timezone.utc)
+#         regular_interval = timedelta(hours=12)
 
 
 class CheckModmail(TLJob):
@@ -86,7 +86,7 @@ class CheckModmail(TLJob):
             modmail_callback()
         except Exception as e:
             tb_str = "".join(traceback.format_exception(None, e, e.__traceback__))
-            logging.error(f"Failed to check for rule changes: {e}\n{tb_str}")
+            logging.error(f"Failed to check for modmail: {e}\n{tb_str}")
 
     class Meta:
         start_interval = timedelta(seconds=0)  # start now
