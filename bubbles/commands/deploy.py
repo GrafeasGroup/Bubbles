@@ -161,12 +161,12 @@ def _deploy_service(service: str, payload: Payload) -> None:
         if service.lower() == "blossom":
             # As the blossom deploys take longer, let's try stopping everyone else,
             # deploying blossom, and then starting everyone again.
-            stop_all_tor_bots_but_blossom()
+            # stop_all_tor_bots_but_blossom()
             migrate()
 
         restart_service()
-        if service.lower() == "blossom":
-            start_all_tor_bots_but_blossom()
+        # if service.lower() == "blossom":
+        #     start_all_tor_bots_but_blossom()
 
         StatusMessage.add_new_context_step(f"Successfully deployed {service}!")
         StatusMessage.step_is_info()
